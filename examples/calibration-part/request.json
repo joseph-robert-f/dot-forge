@@ -1,0 +1,27 @@
+{
+  "schema_version": "1",
+  "generator_id": "calibration-block",
+  "generator_version": "1",
+  "backend": "blender",
+  "units": "mm",
+  "parameters": {
+    "width_mm": 20,
+    "depth_mm": 20,
+    "height_mm": 10
+  },
+  "dimensions_mm": [
+    20,
+    20,
+    10
+  ],
+  "tolerance_mm": 0.05,
+  "allowed_components": 1,
+  "part_count": 1,
+  "export_formats": [
+    "stl",
+    "blend"
+  ],
+  "render_profile": "five-view",
+  "validation_profile": "solid-single-part",
+  "printer_profile": null
+}

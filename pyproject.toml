@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools==84.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dot-forge"
+version = "0.1.0"
+description = "Source-only, evidence-first bounded 3D printing model starter"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "GPL-3.0-or-later"}
+dependencies = []
+
+[project.scripts]
+printkit = "printkit.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

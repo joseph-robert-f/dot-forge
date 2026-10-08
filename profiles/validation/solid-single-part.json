@@ -1,0 +1,1 @@
+{"schema_version":"1","name":"solid-single-part","allowed_components":1,"required_geometry_checks":"All implemented export, dimensions, topology, orientation and intersection checks must pass. Unknown blocks.","print_assessment":"separate; manual visual comparison, walls, clearance, supports, slicing and physical print remain unresolved"}

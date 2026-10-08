@@ -1,0 +1,14 @@
+/build/
+/.venv/
+/.runtime/
+/.upstream/
+__pycache__/
+*.py[cod]
+*.egg-info/
+/dist/
+*.blend
+*.stl
+*.glb
+*.zip
+
+/vendor/

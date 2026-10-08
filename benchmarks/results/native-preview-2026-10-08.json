@@ -1,0 +1,697 @@
+{
+  "environment": {
+    "architecture": "x86_64",
+    "available_cores": 9,
+    "available_memory_bytes": null,
+    "shared_hardware_contention": "uncontrolled",
+    "system": "Linux"
+  },
+  "methodology": {
+    "assistant_development_seconds": null,
+    "cache": "OS filesystem caches not cleared; first repetition is not guaranteed cold",
+    "cold_setup_download_seconds": null,
+    "engine_startup": "fresh Blender processes per stage; included in generation/render stage times",
+    "excluded_work": "Setup/download, development and human review are unavailable, not zero. No cost claim.",
+    "human_iteration_seconds": null,
+    "model_provider_usage": null,
+    "peak_rss_bytes": null,
+    "process_scope": "see each stage CPU metric; not aggregate tree memory",
+    "warm_engine_execution": "not measured; no persistent engine"
+  },
+  "repetitions": 3,
+  "runs": [
+    {
+      "case": "calibration-part",
+      "geometry_state": "geometry_validated",
+      "mesh_metrics": {
+        "bounds_mm": [
+          [
+            -10.0,
+            -10.0,
+            0.0
+          ],
+          [
+            10.0,
+            10.0,
+            10.0
+          ]
+        ],
+        "byte_size": 684,
+        "component_count": 1,
+        "dimensions_mm": [
+          20.0,
+          20.0,
+          10.0
+        ],
+        "encoding": "binary",
+        "intersection_candidates": 62,
+        "intersection_pair_tests": 54,
+        "sha256": "0f96d1f7fd870a95a2a680fb417a149a7d3beb645ef4bc17092cfd80d1d104f0",
+        "signed_volume_signs": [
+          1
+        ],
+        "signed_volumes_mm3": [
+          4000.0
+        ],
+        "triangle_count": 12,
+        "validation_seconds": 0.034443909011315554,
+        "volume_underflow_exact_mm3": {}
+      },
+      "metrics": {
+        "assistant_development_seconds": null,
+        "cache": "native engine launched fresh; OS caches uncontrolled",
+        "generation_wall_seconds": 6.419319562002784,
+        "hardware": {
+          "architecture": "x86_64",
+          "system": "Linux"
+        },
+        "human_iteration_seconds": null,
+        "model_provider_usage": null,
+        "native_stage_metrics": {
+          "blender_version": "4.3.2",
+          "dimensions_mm": [
+            20.0,
+            20.0,
+            10.0
+          ],
+          "generator": "calibration-block@1",
+          "mesh_objects": 1,
+          "model_construction_seconds": 0.25237671499780845,
+          "native_save_and_stl_export_seconds": 0.0008247850055340677,
+          "python_version": "3.13.5",
+          "status": "pass",
+          "unit_scale_metres": 0.001
+        },
+        "render_wall_seconds": 9.488473557998077,
+        "runtime_metrics": {
+          "generation": {
+            "controls": {
+              "aggregate_process_tree_memory_limit": false,
+              "filesystem_isolation": false,
+              "network_isolation": false,
+              "per_process_address_space_limit": 4294967296,
+              "process_count_limit": false,
+              "process_group_timeout": true,
+              "sanitized_environment": true,
+              "thread_environment_limit": 2
+            },
+            "cpu_scope": "waited-for child processes; descendant accounting is OS-dependent",
+            "cpu_seconds": 2.409621,
+            "exit_code": 0,
+            "peak_rss_bytes": null,
+            "peak_rss_scope": "unavailable: cumulative child high-water mark cannot isolate this run",
+            "wall_seconds": 2.484521299993503
+          },
+          "native_reopen": {
+            "controls": {
+              "aggregate_process_tree_memory_limit": false,
+              "filesystem_isolation": false,
+              "network_isolation": false,
+              "per_process_address_space_limit": 4294967296,
+              "process_count_limit": false,
+              "process_group_timeout": true,
+              "sanitized_environment": true,
+              "thread_environment_limit": 2
+            },
+            "cpu_scope": "waited-for child processes; descendant accounting is OS-dependent",
+            "cpu_seconds": 3.0999430000000006,
+            "exit_code": 0,
+            "peak_rss_bytes": null,
+            "peak_rss_scope": "unavailable: cumulative child high-water mark cannot isolate this run",
+            "wall_seconds": 3.1649030900007347
+          }
+        },
+        "schema_version": "1",
+        "setup_download_seconds": null,
+        "validation_wall_seconds": 0.05252337000274565
+      },
+      "repetition": 1,
+      "wall_seconds": 20.33135020500049
+    },
+    {
+      "case": "calibration-part",
+      "geometry_state": "geometry_validated",
+      "mesh_metrics": {
+        "bounds_mm": [
+          [
+            -10.0,
+            -10.0,
+            0.0
+          ],
+          [
+            10.0,
+            10.0,
+            10.0
+          ]
+        ],
+        "byte_size": 684,
+        "component_count": 1,
+        "dimensions_mm": [
+          20.0,
+          20.0,
+          10.0
+        ],
+        "encoding": "binary",
+        "intersection_candidates": 62,
+        "intersection_pair_tests": 54,
+        "sha256": "0f96d1f7fd870a95a2a680fb417a149a7d3beb645ef4bc17092cfd80d1d104f0",
+        "signed_volume_signs": [
+          1
+        ],
+        "signed_volumes_mm3": [
+          4000.0
+        ],
+        "triangle_count": 12,
+        "validation_seconds": 0.028783968999050558,
+        "volume_underflow_exact_mm3": {}
+      },
+      "metrics": {
+        "assistant_development_seconds": null,
+        "cache": "native engine launched fresh; OS caches uncontrolled",
+        "generation_wall_seconds": 5.226627783005824,
+        "hardware": {
+          "architecture": "x86_64",
+          "system": "Linux"
+        },
+        "human_iteration_seconds": null,
+        "model_provider_usage": null,
+        "native_stage_metrics": {
+          "blender_version": "4.3.2",
+          "dimensions_mm": [
+            20.0,
+            20.0,
+            10.0
+          ],
+          "generator": "calibration-block@1",
+          "mesh_objects": 1,
+          "model_construction_seconds": 0.15181538500473835,
+          "native_save_and_stl_export_seconds": 0.0009622150100767612,
+          "python_version": "3.13.5",
+          "status": "pass",
+          "unit_scale_metres": 0.001
+        },
+        "render_wall_seconds": 8.551092867011903,
+        "runtime_metrics": {
+          "generation": {
+            "controls": {
+              "aggregate_process_tree_memory_limit": false,
+              "filesystem_isolation": false,
+              "network_isolation": false,
+              "per_process_address_space_limit": 4294967296,
+              "process_count_limit": false,
+              "process_group_timeout": true,
+              "sanitized_environment": true,
+              "thread_environment_limit": 2
+            },
+            "cpu_scope": "waited-for child processes; descendant accounting is OS-dependent",
+            "cpu_seconds": 1.8484839999999956,
+            "exit_code": 0,
+            "peak_rss_bytes": null,
+            "peak_rss_scope": "unavailable: cumulative child high-water mark cannot isolate this run",
+            "wall_seconds": 1.8524215700017521
+          },
+          "native_reopen": {
+            "controls": {
+              "aggregate_process_tree_memory_limit": false,
+              "filesystem_isolation": false,
+              "network_isolation": false,
+              "per_process_address_space_limit": 4294967296,
+              "process_count_limit": false,
+              "process_group_timeout": true,
+              "sanitized_environment": true,
+              "thread_environment_limit": 2
+            },
+            "cpu_scope": "waited-for child processes; descendant accounting is OS-dependent",
+            "cpu_seconds": 2.5648310000000016,
+            "exit_code": 0,
+            "peak_rss_bytes": null,
+            "peak_rss_scope": "unavailable: cumulative child high-water mark cannot isolate this run",
+            "wall_seconds": 2.6227782839996507
+          }
+        },
+        "schema_version": "1",
+        "setup_download_seconds": null,
+        "validation_wall_seconds": 0.037286029997630976
+      },
+      "repetition": 2,
+      "wall_seconds": 17.702763598994352
+    },
+    {
+      "case": "calibration-part",
+      "geometry_state": "geometry_validated",
+      "mesh_metrics": {
+        "bounds_mm": [
+          [
+            -10.0,
+            -10.0,
+            0.0
+          ],
+          [
+            10.0,
+            10.0,
+            10.0
+          ]
+        ],
+        "byte_size": 684,
+        "component_count": 1,
+        "dimensions_mm": [
+          20.0,
+          20.0,
+          10.0
+        ],
+        "encoding": "binary",
+        "intersection_candidates": 62,
+        "intersection_pair_tests": 54,
+        "sha256": "0f96d1f7fd870a95a2a680fb417a149a7d3beb645ef4bc17092cfd80d1d104f0",
+        "signed_volume_signs": [
+          1
+        ],
+        "signed_volumes_mm3": [
+          4000.0
+        ],
+        "triangle_count": 12,
+        "validation_seconds": 0.023067890986567363,
+        "volume_underflow_exact_mm3": {}
+      },
+      "metrics": {
+        "assistant_development_seconds": null,
+        "cache": "native engine launched fresh; OS caches uncontrolled",
+        "generation_wall_seconds": 4.6095554339990485,
+        "hardware": {
+          "architecture": "x86_64",
+          "system": "Linux"
+        },
+        "human_iteration_seconds": null,
+        "model_provider_usage": null,
+        "native_stage_metrics": {
+          "blender_version": "4.3.2",
+          "dimensions_mm": [
+            20.0,
+            20.0,
+            10.0
+          ],
+          "generator": "calibration-block@1",
+          "mesh_objects": 1,
+          "model_construction_seconds": 0.1643283640005393,
+          "native_save_and_stl_export_seconds": 0.0008366569963982329,
+          "python_version": "3.13.5",
+          "status": "pass",
+          "unit_scale_metres": 0.001
+        },
+        "render_wall_seconds": 8.530064941995079,
+        "runtime_metrics": {
+          "generation": {
+            "controls": {
+              "aggregate_process_tree_memory_limit": false,
+              "filesystem_isolation": false,
+              "network_isolation": false,
+              "per_process_address_space_limit": 4294967296,
+              "process_count_limit": false,
+              "process_group_timeout": true,
+              "sanitized_environment": true,
+              "thread_environment_limit": 2
+            },
+            "cpu_scope": "waited-for child processes; descendant accounting is OS-dependent",
+            "cpu_seconds": 1.8687659999999937,
+            "exit_code": 0,
+            "peak_rss_bytes": null,
+            "peak_rss_scope": "unavailable: cumulative child high-water mark cannot isolate this run",
+            "wall_seconds": 1.9619313190050889
+          },
+          "native_reopen": {
+            "controls": {
+              "aggregate_process_tree_memory_limit": false,
+              "filesystem_isolation": false,
+              "network_isolation": false,
+              "per_process_address_space_limit": 4294967296,
+              "process_count_limit": false,
+              "process_group_timeout": true,
+              "sanitized_environment": true,
+              "thread_environment_limit": 2
+            },
+            "cpu_scope": "waited-for child processes; descendant accounting is OS-dependent",
+            "cpu_seconds": 1.868930000000006,
+            "exit_code": 0,
+            "peak_rss_bytes": null,
+            "peak_rss_scope": "unavailable: cumulative child high-water mark cannot isolate this run",
+            "wall_seconds": 1.961146955989534
+          }
+        },
+        "schema_version": "1",
+        "setup_download_seconds": null,
+        "validation_wall_seconds": 0.028952487002243288
+      },
+      "repetition": 3,
+      "wall_seconds": 16.796780755990767
+    },
+    {
+      "case": "geometric-mascot",
+      "geometry_state": "geometry_validated",
+      "mesh_metrics": {
+        "bounds_mm": [
+          [
+            -20.0,
+            -6.0,
+            0.0
+          ],
+          [
+            20.0,
+            6.0,
+            60.0
+          ]
+        ],
+        "byte_size": 3884,
+        "component_count": 1,
+        "dimensions_mm": [
+          40.0,
+          12.0,
+          60.0
+        ],
+        "encoding": "binary",
+        "intersection_candidates": 1559,
+        "intersection_pair_tests": 643,
+        "sha256": "ff0269168165cd2dd0d2e27d5ade48775257cdbb55ccf888a01e55d914f1e60c",
+        "signed_volume_signs": [
+          1
+        ],
+        "signed_volumes_mm3": [
+          18593.280108947743
+        ],
+        "triangle_count": 76,
+        "validation_seconds": 0.28164469299372286,
+        "volume_underflow_exact_mm3": {}
+      },
+      "metrics": {
+        "assistant_development_seconds": null,
+        "cache": "native engine launched fresh; OS caches uncontrolled",
+        "generation_wall_seconds": 5.38473767900723,
+        "hardware": {
+          "architecture": "x86_64",
+          "system": "Linux"
+        },
+        "human_iteration_seconds": null,
+        "model_provider_usage": null,
+        "native_stage_metrics": {
+          "blender_version": "4.3.2",
+          "dimensions_mm": [
+            40.0,
+            12.0,
+            60.0
+          ],
+          "generator": "geometric-mascot@1",
+          "mesh_objects": 1,
+          "model_construction_seconds": 0.24207029900571797,
+          "native_save_and_stl_export_seconds": 0.003000201002578251,
+          "python_version": "3.13.5",
+          "status": "pass",
+          "unit_scale_metres": 0.001
+        },
+        "render_wall_seconds": 9.027396289995522,
+        "runtime_metrics": {
+          "generation": {
+            "controls": {
+              "aggregate_process_tree_memory_limit": false,
+              "filesystem_isolation": false,
+              "network_isolation": false,
+              "per_process_address_space_limit": 4294967296,
+              "process_count_limit": false,
+              "process_group_timeout": true,
+              "sanitized_environment": true,
+              "thread_environment_limit": 2
+            },
+            "cpu_scope": "waited-for child processes; descendant accounting is OS-dependent",
+            "cpu_seconds": 2.350653000000001,
+            "exit_code": 0,
+            "peak_rss_bytes": null,
+            "peak_rss_scope": "unavailable: cumulative child high-water mark cannot isolate this run",
+            "wall_seconds": 2.4072143619996496
+          },
+          "native_reopen": {
+            "controls": {
+              "aggregate_process_tree_memory_limit": false,
+              "filesystem_isolation": false,
+              "network_isolation": false,
+              "per_process_address_space_limit": 4294967296,
+              "process_count_limit": false,
+              "process_group_timeout": true,
+              "sanitized_environment": true,
+              "thread_environment_limit": 2
+            },
+            "cpu_scope": "waited-for child processes; descendant accounting is OS-dependent",
+            "cpu_seconds": 2.0943129999999996,
+            "exit_code": 0,
+            "peak_rss_bytes": null,
+            "peak_rss_scope": "unavailable: cumulative child high-water mark cannot isolate this run",
+            "wall_seconds": 2.1211988069990184
+          }
+        },
+        "schema_version": "1",
+        "setup_download_seconds": null,
+        "validation_wall_seconds": 0.29446079400076997
+      },
+      "repetition": 1,
+      "wall_seconds": 18.509096800989937
+    },
+    {
+      "case": "geometric-mascot",
+      "geometry_state": "geometry_validated",
+      "mesh_metrics": {
+        "bounds_mm": [
+          [
+            -20.0,
+            -6.0,
+            0.0
+          ],
+          [
+            20.0,
+            6.0,
+            60.0
+          ]
+        ],
+        "byte_size": 3884,
+        "component_count": 1,
+        "dimensions_mm": [
+          40.0,
+          12.0,
+          60.0
+        ],
+        "encoding": "binary",
+        "intersection_candidates": 1559,
+        "intersection_pair_tests": 643,
+        "sha256": "ff0269168165cd2dd0d2e27d5ade48775257cdbb55ccf888a01e55d914f1e60c",
+        "signed_volume_signs": [
+          1
+        ],
+        "signed_volumes_mm3": [
+          18593.280108947743
+        ],
+        "triangle_count": 76,
+        "validation_seconds": 0.2376828299893532,
+        "volume_underflow_exact_mm3": {}
+      },
+      "metrics": {
+        "assistant_development_seconds": null,
+        "cache": "native engine launched fresh; OS caches uncontrolled",
+        "generation_wall_seconds": 5.726704264001455,
+        "hardware": {
+          "architecture": "x86_64",
+          "system": "Linux"
+        },
+        "human_iteration_seconds": null,
+        "model_provider_usage": null,
+        "native_stage_metrics": {
+          "blender_version": "4.3.2",
+          "dimensions_mm": [
+            40.0,
+            12.0,
+            60.0
+          ],
+          "generator": "geometric-mascot@1",
+          "mesh_objects": 1,
+          "model_construction_seconds": 0.475108882994391,
+          "native_save_and_stl_export_seconds": 0.0010258879920002073,
+          "python_version": "3.13.5",
+          "status": "pass",
+          "unit_scale_metres": 0.001
+        },
+        "render_wall_seconds": 7.687835977005307,
+        "runtime_metrics": {
+          "generation": {
+            "controls": {
+              "aggregate_process_tree_memory_limit": false,
+              "filesystem_isolation": false,
+              "network_isolation": false,
+              "per_process_address_space_limit": 4294967296,
+              "process_count_limit": false,
+              "process_group_timeout": true,
+              "sanitized_environment": true,
+              "thread_environment_limit": 2
+            },
+            "cpu_scope": "waited-for child processes; descendant accounting is OS-dependent",
+            "cpu_seconds": 2.6642080000000163,
+            "exit_code": 0,
+            "peak_rss_bytes": null,
+            "peak_rss_scope": "unavailable: cumulative child high-water mark cannot isolate this run",
+            "wall_seconds": 2.7417485499900067
+          },
+          "native_reopen": {
+            "controls": {
+              "aggregate_process_tree_memory_limit": false,
+              "filesystem_isolation": false,
+              "network_isolation": false,
+              "per_process_address_space_limit": 4294967296,
+              "process_count_limit": false,
+              "process_group_timeout": true,
+              "sanitized_environment": true,
+              "thread_environment_limit": 2
+            },
+            "cpu_scope": "waited-for child processes; descendant accounting is OS-dependent",
+            "cpu_seconds": 2.1775109999999955,
+            "exit_code": 0,
+            "peak_rss_bytes": null,
+            "peak_rss_scope": "unavailable: cumulative child high-water mark cannot isolate this run",
+            "wall_seconds": 2.263915843999712
+          }
+        },
+        "schema_version": "1",
+        "setup_download_seconds": null,
+        "validation_wall_seconds": 0.2479389229993103
+      },
+      "repetition": 2,
+      "wall_seconds": 18.046079858992016
+    },
+    {
+      "case": "geometric-mascot",
+      "geometry_state": "geometry_validated",
+      "mesh_metrics": {
+        "bounds_mm": [
+          [
+            -20.0,
+            -6.0,
+            0.0
+          ],
+          [
+            20.0,
+            6.0,
+            60.0
+          ]
+        ],
+        "byte_size": 3884,
+        "component_count": 1,
+        "dimensions_mm": [
+          40.0,
+          12.0,
+          60.0
+        ],
+        "encoding": "binary",
+        "intersection_candidates": 1559,
+        "intersection_pair_tests": 643,
+        "sha256": "ff0269168165cd2dd0d2e27d5ade48775257cdbb55ccf888a01e55d914f1e60c",
+        "signed_volume_signs": [
+          1
+        ],
+        "signed_volumes_mm3": [
+          18593.280108947743
+        ],
+        "triangle_count": 76,
+        "validation_seconds": 0.2555188339902088,
+        "volume_underflow_exact_mm3": {}
+      },
+      "metrics": {
+        "assistant_development_seconds": null,
+        "cache": "native engine launched fresh; OS caches uncontrolled",
+        "generation_wall_seconds": 6.66049367999949,
+        "hardware": {
+          "architecture": "x86_64",
+          "system": "Linux"
+        },
+        "human_iteration_seconds": null,
+        "model_provider_usage": null,
+        "native_stage_metrics": {
+          "blender_version": "4.3.2",
+          "dimensions_mm": [
+            40.0,
+            12.0,
+            60.0
+          ],
+          "generator": "geometric-mascot@1",
+          "mesh_objects": 1,
+          "model_construction_seconds": 0.23339153999404516,
+          "native_save_and_stl_export_seconds": 0.0010652619967004284,
+          "python_version": "3.13.5",
+          "status": "pass",
+          "unit_scale_metres": 0.001
+        },
+        "render_wall_seconds": 9.159401436001644,
+        "runtime_metrics": {
+          "generation": {
+            "controls": {
+              "aggregate_process_tree_memory_limit": false,
+              "filesystem_isolation": false,
+              "network_isolation": false,
+              "per_process_address_space_limit": 4294967296,
+              "process_count_limit": false,
+              "process_group_timeout": true,
+              "sanitized_environment": true,
+              "thread_environment_limit": 2
+            },
+            "cpu_scope": "waited-for child processes; descendant accounting is OS-dependent",
+            "cpu_seconds": 3.1076659999999947,
+            "exit_code": 0,
+            "peak_rss_bytes": null,
+            "peak_rss_scope": "unavailable: cumulative child high-water mark cannot isolate this run",
+            "wall_seconds": 3.2565610299934633
+          },
+          "native_reopen": {
+            "controls": {
+              "aggregate_process_tree_memory_limit": false,
+              "filesystem_isolation": false,
+              "network_isolation": false,
+              "per_process_address_space_limit": 4294967296,
+              "process_count_limit": false,
+              "process_group_timeout": true,
+              "sanitized_environment": true,
+              "thread_environment_limit": 2
+            },
+            "cpu_scope": "waited-for child processes; descendant accounting is OS-dependent",
+            "cpu_seconds": 2.3173590000000104,
+            "exit_code": 0,
+            "peak_rss_bytes": null,
+            "peak_rss_scope": "unavailable: cumulative child high-water mark cannot isolate this run",
+            "wall_seconds": 2.3504773960012244
+          }
+        },
+        "schema_version": "1",
+        "setup_download_seconds": null,
+        "validation_wall_seconds": 0.2645526209962554
+      },
+      "repetition": 3,
+      "wall_seconds": 20.65274663400487
+    }
+  ],
+  "schema_version": "1",
+  "source_commit": "da21fe76687337b87b13fa83ff71a23fcf7beb96",
+  "suite": "smoke",
+  "summary": {
+    "calibration-part": {
+      "attempts": 3,
+      "interpretation": "Includes failures/censored observations; compare only when all geometry passes.",
+      "median_wall_seconds": 17.702763598994352,
+      "passed_geometry": 3,
+      "range_wall_seconds": [
+        16.796780755990767,
+        20.33135020500049
+      ]
+    },
+    "geometric-mascot": {
+      "attempts": 3,
+      "interpretation": "Includes failures/censored observations; compare only when all geometry passes.",
+      "median_wall_seconds": 18.509096800989937,
+      "passed_geometry": 3,
+      "range_wall_seconds": [
+        18.046079858992016,
+        20.65274663400487
+      ]
+    }
+  }
+}

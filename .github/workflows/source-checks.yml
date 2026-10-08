@@ -1,0 +1,23 @@
+name: Source checks
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.11', '3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Run independent fixtures and orchestration tests
+        run: python scripts/check-release
+      - name: Check both request contracts
+        run: |
+          PYTHONPATH=src python -m printkit check-request examples/calibration-part/request.json
+          PYTHONPATH=src python -m printkit check-request examples/geometric-mascot/request.json
+      - name: Compile sources (Blender runtime scripts are syntax checked only)
+        run: python -m compileall -q src tests

@@ -1,0 +1,16 @@
+name: Geometry runtime acceptance
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  geometry:
+    # Explicit opt-in owned runner provisioned with the documented exact runtime.
+    # No cloud runner download or package substitution is performed here.
+    runs-on: [self-hosted, linux, x64, blender-4.3.2]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Real native generation, reopen and five-view fixtures
+        env:
+          PRINTKIT_INTEGRATION: '1'
+        run: python3 scripts/check-release

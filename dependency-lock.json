@@ -1,0 +1,7 @@
+{
+  "schema_version": "1",
+  "runtime_dependencies": [],
+  "python": ">=3.11",
+  "build_dependencies": [{"name": "setuptools", "version": "84.0.0", "license": "MIT"}],
+  "policy": "Runtime uses only Python standard library. Blender and pinned upstream source are separate runtime inputs; never downloaded during generation."
+}

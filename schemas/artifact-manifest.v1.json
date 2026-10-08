@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "artifact-manifest v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "state",
+    "provenance",
+    "stages",
+    "artifacts"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1"
+    },
+    "state": {},
+    "provenance": {},
+    "stages": {},
+    "artifacts": {}
+  }
+}

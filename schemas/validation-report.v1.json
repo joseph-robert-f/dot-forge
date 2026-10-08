@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "validation-report v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "geometry_state",
+    "checks"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1"
+    },
+    "geometry_state": {
+      "enum": [
+        "blocked",
+        "geometry_validated"
+      ]
+    },
+    "checks": {
+      "type": "array"
+    }
+  }
+}

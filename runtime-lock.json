@@ -1,0 +1,24 @@
+{
+  "schema_version": "1",
+  "profiles": {
+    "calibration-linux-x86_64": {
+      "engine": "Blender",
+      "version": "4.3.2",
+      "python": "3.13.5",
+      "renderer": "BLENDER_WORKBENCH",
+      "binary_sha256": "0dfe9af0f3e67643ecf15327fa5e14e7315f61d1a81afdcafe76a71b1918e2b4",
+      "binary_checksum_scope": "observed preinstalled executable; not vendor distribution verification",
+      "official_url": "https://download.blender.org/release/Blender4.3/",
+      "status": "native generation, export, fresh reopen, five-view smoke passed; geometry validation separate"
+    },
+    "lane-a-linux-x86_64": {
+      "engine": "Blender",
+      "version": "4.5.12 LTS",
+      "official_url": "https://download.blender.org/release/Blender4.5/blender-4.5.12-linux-x64.tar.xz",
+      "archive_sha256": "95e3a2dfedba3bd32ca54fc355eac6b15a11986954ccb02815a07535d0120a25",
+      "checksum_source": "pinned upstream docker/blender-download.sha256",
+      "status": "not-tested-here; official retrieval denied HTTP 403",
+      "renderer": "BLENDER_EEVEE_NEXT"
+    }
+  }
+}

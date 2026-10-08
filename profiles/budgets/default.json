@@ -1,0 +1,1 @@
+{"schema_version":"1","wall_seconds_per_stage":600,"per_process_address_space_bytes":4294967296,"max_output_bytes":536870912,"thread_environment_limit":2,"max_triangles":10000,"sandbox":false,"aggregate_process_tree_memory_limit":false,"process_count_limit":false}

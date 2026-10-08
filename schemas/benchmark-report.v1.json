@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "benchmark-report v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "suite",
+    "summary",
+    "runs"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1"
+    },
+    "suite": {},
+    "summary": {},
+    "runs": {}
+  }
+}

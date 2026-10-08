@@ -1,0 +1,27 @@
+{
+  "schema_version": "1",
+  "generator_id": "geometric-mascot",
+  "generator_version": "1",
+  "backend": "blender",
+  "units": "mm",
+  "parameters": {
+    "width_mm": 40,
+    "depth_mm": 12,
+    "height_mm": 60
+  },
+  "dimensions_mm": [
+    40,
+    12,
+    60
+  ],
+  "tolerance_mm": 0.05,
+  "allowed_components": 1,
+  "part_count": 1,
+  "export_formats": [
+    "stl",
+    "blend"
+  ],
+  "render_profile": "five-view",
+  "validation_profile": "solid-single-part",
+  "printer_profile": null
+}
