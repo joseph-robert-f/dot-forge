@@ -18,6 +18,62 @@ import MeshPart
 GENERATOR = 'freecad-stepped-block'
 LINEAR_DEFLECTION = 0.05
 ANGULAR_DEFLECTION = 0.25
+# Analytic BRep tolerances, independent of the coarser STL tessellation and
+# request tolerance. Both FCStd and STEP must satisfy these on their own.
+NATIVE_LINEAR_TOLERANCE_MM = 1e-6
+NATIVE_ANGULAR_TOLERANCE = 1e-9
+
+
+def inspect_hole(shape, dims):
+    """Measure the reviewed full cylindrical bore, never infer it from probes.
+
+    This bounded generator has one cylindrical face and two complete circular
+    rims. Reject alternate/split surface representations rather than repairing
+    them or substituting newly generated geometry for the imported artifact.
+    """
+    w, d, h = dims
+    radius = min(w / 8, d / 6)
+    tol = NATIVE_LINEAR_TOLERANCE_MM
+    angular = NATIVE_ANGULAR_TOLERANCE
+    cylinders = [face for face in shape.Faces if isinstance(face.Surface, Part.Cylinder)]
+    circles = [edge for edge in shape.Edges if isinstance(edge.Curve, Part.Circle)]
+    if len(cylinders) != 1 or len(circles) != 2:
+        raise ValueError('Native through-hole requires one analytic cylinder and two circular rims')
+    face = cylinders[0]
+    cylinder = face.Surface
+    vertical = lambda axis: (abs(axis.x) <= angular and abs(axis.y) <= angular
+                             and abs(abs(axis.z) - 1) <= angular)
+    centered = lambda point: abs(point.x - w / 4) <= tol and abs(point.y - d / 2) <= tol
+    u0, u1, v0, v1 = face.ParameterRange
+    box = face.BoundBox
+    cylinder_ok = (centered(cylinder.Center) and vertical(cylinder.Axis)
+                   and abs(cylinder.Radius - radius) <= tol
+                   and abs((u1 - u0) - 2 * math.pi) <= angular
+                   and abs((v1 - v0) - h / 2) <= tol
+                   and abs(box.ZMin) <= tol and abs(box.ZMax - h / 2) <= tol
+                   and abs(face.Area - 2 * math.pi * radius * h / 2) <= tol)
+    # Check the actual face's rims, not unrelated circles elsewhere on the solid.
+    rims = [edge for edge in face.Edges if isinstance(edge.Curve, Part.Circle)]
+    rims_ok = len(rims) == 2 and all(
+        edge.isClosed() and centered(edge.Curve.Center) and vertical(edge.Curve.Axis)
+        and abs(edge.Curve.Radius - radius) <= tol
+        and abs(edge.Length - 2 * math.pi * radius) <= tol
+        and abs((edge.LastParameter - edge.FirstParameter) - 2 * math.pi) <= angular
+        for edge in rims)
+    rim_z = sorted(edge.Curve.Center.z for edge in rims)
+    through = len(rim_z) == 2 and abs(rim_z[0]) <= tol and abs(rim_z[1] - h / 2) <= tol
+    # The cylinder bounds a void, not a cylindrical protrusion.
+    point = face.valueAt((u0 + u1) / 2, (v0 + v1) / 2)
+    normal = face.normalAt((u0 + u1) / 2, (v0 + v1) / 2)
+    inward = normal.dot(App.Vector(point.x - cylinder.Center.x,
+                                   point.y - cylinder.Center.y, 0)) < 0
+    if not (cylinder_ok and rims_ok and through and inward):
+        raise ValueError('Native through-hole center, axis, radius, or full ledge extent differs')
+    return {'center_xy_mm': [cylinder.Center.x, cylinder.Center.y],
+            'axis': [cylinder.Axis.x, cylinder.Axis.y, cylinder.Axis.z],
+            'radius_mm': cylinder.Radius, 'z_extent_mm': [box.ZMin, box.ZMax],
+            'rim_z_mm': rim_z, 'cylindrical_face_count': len(cylinders),
+            'linear_tolerance_mm': tol, 'angular_tolerance_radians': angular}
 
 
 def dump(path, value):
@@ -50,12 +106,14 @@ def inspect_shape(shape, dims):
     actual_dims = [box.XLength, box.YLength, box.ZLength]
     origin = [box.XMin, box.YMin, box.ZMin]
     curves = sum(isinstance(edge.Curve, Part.Circle) for edge in shape.Edges)
+    hole = inspect_hole(shape, dims)
     inside = lambda x, y, z: shape.isInside(App.Vector(x, y, z), 1e-7, False)
     features = {'base_present': inside(w / 8, d / 8, h / 4),
                 'raised_step_present': inside(3 * w / 4, d / 2, 3 * h / 4),
                 'lower_ledge_clear': not inside(w / 4, d / 8, 3 * h / 4),
                 'through_hole_clear': all(not inside(w / 4, d / 2, h * f) for f in (.01, .25, .49)),
-                'circular_edges_present': curves >= 2}
+                'circular_edges_present': curves >= 2,
+                'analytic_through_hole_identity': True}
     valid = not shape.isNull() and shape.isValid() and len(shape.Solids) == 1 and shape.isClosed()
     passed = (valid and all(abs(a - b) <= 1e-6 for a, b in zip(actual_dims, dims))
               and all(abs(x) <= 1e-6 for x in origin)
@@ -66,7 +124,7 @@ def inspect_shape(shape, dims):
     return {'status': 'pass', 'brep_valid': True, 'closed': True, 'solid_count': 1,
             'dimensions_mm': actual_dims, 'origin_mm': origin, 'volume_mm3': shape.Volume,
             'expected_volume_mm3': expected_volume, 'circular_edge_count': curves,
-            'hole_radius_mm': radius, 'feature_checks': features}
+            'hole_radius_mm': hole['radius_mm'], 'hole_geometry': hole, 'feature_checks': features}
 
 
 def generate(run, request):

@@ -38,3 +38,15 @@ Shared-hardware contention and OS caches were uncontrolled. Setup/download, deve
 ## Remaining gates
 
 FreeCAD success does not resolve Blender 4.5.12 Lane A acceptance, the exact detailed-cat model, general wall/clearance assessment, slicing/toolpaths or physical-print success. Each successful example still exits with manual review required. Source CI is separate from native runtime evidence; check the actual workflow status for the exact commit used.
+
+## Additional pre-merge hardening
+
+A later controlled review found two gaps in the earlier candidate: a shifted circular hole could pass the native FCStd/STEP probes even though the STL cross-section gate was stronger, and source snapshot copying could follow a source-tree symbolic link. These findings concern gate coverage; they are not evidence that normal generation emitted a misplaced hole or that actual private data was exposed. All link tests used synthetic nonprivate markers.
+
+- FCStd and STEP now each independently verify measured analytic cylinder and complete-rim geometry: center, radius, Z axis, full lower-ledge extent, cylindrical area and inward orientation. Reports contain measured values, with 1e-6 mm linear tolerance.
+- Production-path regressions separately replace FCStd or STEP while preserving the other native file and STL. Fourteen cases cover shifted centers (0.32/1 mm), wrong radius, blind, tilted and elliptical holes; they must fail before generation is sealed.
+- Source copying and Python-source hashing use directory-descriptor-relative no-follow access. File, directory, source-root, ancestor and replacement-race links are rejected without reading external marker bytes. Special files, multiply-linked files and source budgets are checked too.
+- The frozen full suite passed **174 tests with both native integrations enabled and no skips**; 35 source snapshot/identity cases include independent no-read and replacement-race regressions.
+- The strengthened implementation hash is `fa4026d5ffeaf4eedce3e38829b6f47e8ec593c34d0aea35eac33344055e2999`. The earlier benchmark describes the earlier candidate; no new performance claim is inferred from these checks.
+
+Fresh generation and saved-source regeneration must still pass the complete native, STL, preview and bundle workflow. Native and tessellated tolerances remain separate from printed dimensions or fit.

@@ -38,7 +38,7 @@ The adapter uses the installed native FreeCAD Python modules through system Pyth
 ## What the evidence must establish
 
 1. **Native solid:** finite requested dimensions, one closed valid BRep solid, expected dimensions and analytic volume, and the expected base, raised step and through-hole.
-2. **Fresh round trip:** reopen FCStd and import STEP in a fresh process. Recheck solid validity, dimensions, volume and feature probes. File existence is insufficient.
+2. **Fresh round trip:** reopen FCStd and import STEP in a fresh process. Recheck solid validity, dimensions, volume and feature probes. Independently measure each native artifact’s analytic cylinder and its complete circular rims: hole center, radius, axis and full lower-ledge extent must match within the recorded native tolerances (1e-6 mm linear, 1e-9 radians angular). File existence is insufficient.
 3. **Independent printing-mesh checks:** parse the actual exported STL separately from FreeCAD. Check finite coordinates, dimensions, topology, connected solid-shell structure, intersections, analytic-volume agreement within the defined mesh tolerance and required-feature probes.
 4. **Five-view review:** inspect the actual STL from front, side, back, top and oblique viewpoints. Confirm the step and hole as well as the overall form. The user's visual approval remains separate.
 

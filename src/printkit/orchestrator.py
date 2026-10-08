@@ -1,7 +1,6 @@
 """Immutable attempts with hash-bound stages and conservative recovery."""
 from pathlib import Path
 import platform
-import shutil
 import subprocess
 import time
 from . import __version__
@@ -12,11 +11,12 @@ from .adapters.registry import adapter, native_artifacts
 
 
 def repository_root():
-    return Path(__file__).resolve().parents[2]
+    return Path(__file__).absolute().parents[2]
 
 def implementation_identity():
     root = Path(__file__).parent
-    files = {p.relative_to(root).as_posix(): sha256(p) for p in sorted(root.rglob("*.py"))}
+    from .snapshot import python_source_hashes
+    files = python_source_hashes(root)
     return {"version": __version__, "python_source_sha256": canonical_hash(files), "files": files}
 
 def source_commit():
@@ -87,17 +87,8 @@ def verify_stage(run, stage):
     return True
 
 def _snapshot_source(run):
-    root = repository_root()
-    target = Path(run) / "source"
-    target.mkdir()
-    # Source-only reproducibility copy, never arbitrary cwd files or VCS credentials.
-    for folder in ("src", "schemas", "examples", "profiles", "scripts", "docs", "tests", "benchmarks"):
-        source = root / folder
-        if source.exists():
-            shutil.copytree(source, target/folder, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "*.egg-info", "*.dist-info"))
-    for name in ("pyproject.toml", "README.md", "AGENTS.md", "SECURITY.md", "CONTRIBUTING.md", "LICENSE", "ASSET_LICENSE.md", "THIRD_PARTY_NOTICES.md", "dependency-lock.json", "runtime-lock.json", "upstream.lock.json"):
-        if (root/name).is_file():
-            shutil.copyfile(root/name, target/name)
+    from .snapshot import copy_source_snapshot
+    copy_source_snapshot(repository_root(), Path(run) / "source")
 
 def begin(request, run):
     check_request(request)

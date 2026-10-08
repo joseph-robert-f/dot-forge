@@ -1,5 +1,6 @@
 """Real native FreeCAD tests are opt-in; policy/path guards need no runtime."""
 import json
+import hashlib
 import os
 from pathlib import Path
 import tempfile
@@ -97,6 +98,15 @@ class FreeCADNativeTests(unittest.TestCase):
                     self.assertTrue(check['brep_valid'])
                     self.assertTrue(all(check['feature_checks'].values()))
                     self.assertAlmostEqual(check['volume_mm3'], check['expected_volume_mm3'], places=5)
+                    hole = check['hole_geometry']
+                    self.assertEqual(hole['linear_tolerance_mm'], 1e-6)
+                    self.assertEqual(hole['cylindrical_face_count'], 1)
+                    for actual, expected in zip(hole['center_xy_mm'], (dims[0] / 4, dims[1] / 2)):
+                        self.assertAlmostEqual(actual, expected, places=6)
+                    self.assertAlmostEqual(hole['radius_mm'], min(dims[0] / 8, dims[1] / 6), places=6)
+                    self.assertAlmostEqual(abs(hole['axis'][2]), 1, places=9)
+                    for actual, expected in zip(hole['z_extent_mm'], (0, dims[2] / 2)):
+                        self.assertAlmostEqual(actual, expected, places=6)
                     for actual, expected in zip(check['dimensions_mm'], dims):
                         self.assertAlmostEqual(actual, expected, places=5)
                 self.assertEqual(set(result['artifacts']), {'fcstd', 'step', 'stl'})
@@ -137,6 +147,48 @@ class FreeCADNativeTests(unittest.TestCase):
             (Path(tmp) / 'request.json').write_text(json.dumps(request((21, 16, 12))))
             with self.assertRaises(ForgeError):
                 freecad._run('reopen', Path(tmp))
+
+    def test_analytic_hole_mutations_rejected_independently(self):
+        # Replace one actual native artifact at a time; no mocking inspect_shape.
+        # Shifted holes retain exact volume, valid solids and the old void probes.
+        holes = {
+            'shift_y_032': "hole=Part.makeCylinder(2.5,12,A.Vector(5,8.32,0))",
+            'shift_y_1': "hole=Part.makeCylinder(2.5,12,A.Vector(5,9,0))",
+            'shift_x_032': "hole=Part.makeCylinder(2.5,12,A.Vector(5.32,8,0))",
+            'wrong_radius': "hole=Part.makeCylinder(2.6,12,A.Vector(5,8,0))",
+            'blind_equal_volume': "hole=Part.makeCylinder(2.5*math.sqrt(6/5.95),5.95,A.Vector(5,8,.05))",
+            'tilted_equal_volume': ("axis=A.Vector(0,.01,1);axis.normalize();"
+                                    "hole=Part.makeCylinder(2.5*math.sqrt(axis.z),14,A.Vector(5,7.99,-1),axis)"),
+            'elliptical_equal_volume': ("ellipse=Part.Ellipse(A.Vector(5,8,0),3.125,2).toShape();"
+                                        "hole=Part.Face(Part.Wire([ellipse])).extrude(A.Vector(0,0,12))"),
+        }
+        for artifact in ('fcstd', 'step'):
+            for name, hole in holes.items():
+                with self.subTest(artifact=artifact, mutation=name), tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    freecad.generate(request(), root)
+                    unchanged = ['exports/model.stl', 'exports/model.step' if artifact == 'fcstd' else 'native/model.FCStd']
+                    hashes = {p: hashlib.sha256((root / p).read_bytes()).hexdigest() for p in unchanged}
+                    script = ("import sys,math;sys.path.insert(0,'/usr/lib/freecad/lib');"
+                              "import FreeCAD as A,Part;from pathlib import Path;"
+                              "p=Path(sys.argv[1]);" + hole + ";"
+                              "s=Part.makeBox(20,16,6).fuse(Part.makeBox(10,16,6,A.Vector(10,0,6))).cut(hole).removeSplitter();"
+                              "assert s.isValid() and s.isClosed() and len(s.Solids)==1;"
+                              + ("expected=2880-math.pi*2.5**2*6;"
+                                 "assert abs(s.Volume-expected)<=max(1e-6,expected*1e-8);"
+                                 if name != 'wrong_radius' else '')
+                              + ("d=A.openDocument(str(p/'native/model.FCStd'));d.Objects[0].Shape=s;"
+                                 "d.recompute();d.save();A.closeDocument(d.Name)"
+                                 if artifact == 'fcstd' else "s.exportStep(str(p/'exports/model.step'))"))
+                    freecad.run_process([freecad.PYTHON, '-I', '-B', '-c', script, tmp],
+                                        root, root / 'logs/fixture.log', timeout=30)
+                    for path, expected in hashes.items():
+                        self.assertEqual(hashlib.sha256((root / path).read_bytes()).hexdigest(), expected)
+                    (root / 'native/reopen.json').unlink()
+                    with self.assertRaises(ForgeError):
+                        freecad._run('reopen', root)
+                    self.assertFalse((root / 'native/reopen.json').exists())
+                    self.assertIn('Native through-hole', (root / 'logs/freecad-reopen.log').read_text())
 
 
 if __name__ == '__main__':
