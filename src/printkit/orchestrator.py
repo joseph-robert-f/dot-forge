@@ -80,7 +80,7 @@ def _snapshot_source(run):
     for folder in ("src", "schemas", "examples", "profiles", "scripts", "docs", "tests", "benchmarks"):
         source = root / folder
         if source.exists():
-            shutil.copytree(source, target/folder, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+            shutil.copytree(source, target/folder, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "*.egg-info", "*.dist-info"))
     for name in ("pyproject.toml", "README.md", "AGENTS.md", "SECURITY.md", "CONTRIBUTING.md", "LICENSE", "ASSET_LICENSE.md", "THIRD_PARTY_NOTICES.md", "dependency-lock.json", "runtime-lock.json", "upstream.lock.json"):
         if (root/name).is_file():
             shutil.copyfile(root/name, target/name)

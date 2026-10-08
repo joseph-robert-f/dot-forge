@@ -15,3 +15,7 @@ Use a fresh output filename for bundling; do not place the bundle inside its own
 See command help for the exact `--run`, `--output` and bundle path options. Preserve the original attempt whenever repairing geometry; rerun generation, independent validation and preview stages on the repair.
 
 Integrity verification independently reruns required geometry gates; it does not trust a recorded pass label. It checks exact artifact inventories and hashes, and rejects an inconsistent manifest, report or mesh. Hashes still do not authenticate the author or prove the design matches intent.
+
+## Deliverable selection
+
+Bundles include only the documented model, source, preview, logs and report artifacts. Process-HOME caches and unrelated root files stay in the private run directory and are not read into or added to the ZIP. The manifest records this selection policy. Exact inventory and hash verification apply to selected deliverables; ZIPs containing extra non-deliverable members are rejected. Adding an unrecorded file inside an artifact directory still invalidates the manifest. Symlink artifacts are never followed. No runtime cache is deleted by bundling.

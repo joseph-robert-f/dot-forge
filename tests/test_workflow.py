@@ -83,7 +83,7 @@ class WorkflowTests(unittest.TestCase):
 
     def test_unlisted_file_rejected(self):
         flow.run_all(self.request,self.run)
-        (self.run/'extra.txt').write_text('untracked')
+        (self.run/'exports/extra.txt').write_text('untracked')
         with self.assertRaises(ForgeError):verify_run(self.run)
 
     def test_validator_crash_never_passes(self):
