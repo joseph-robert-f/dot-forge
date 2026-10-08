@@ -9,7 +9,7 @@ from .contracts import check_request
 def parser():
     root=argparse.ArgumentParser(prog="printkit",description="Bounded reviewed 3D model generation with independent evidence")
     commands=root.add_subparsers(dest="command",required=True)
-    cmd=commands.add_parser("doctor");cmd.add_argument("--json",action="store_true");cmd.add_argument("--smoke",metavar="NEW_RUN")
+    cmd=commands.add_parser("doctor");cmd.add_argument("--json",action="store_true");cmd.add_argument("--smoke",metavar="NEW_RUN");cmd.add_argument("--backend",choices=["blender","freecad"],default="blender")
     cmd=commands.add_parser("check-request");cmd.add_argument("request")
     for name in ("run","generate"):
         cmd=commands.add_parser(name);cmd.add_argument("--request",required=True);cmd.add_argument("--output",required=True)
@@ -18,7 +18,7 @@ def parser():
         if name=="validate":cmd.add_argument("--profile",default="solid-single-part",choices=["solid-single-part"])
         if name=="bundle":cmd.add_argument("--output")
     cmd=commands.add_parser("verify-bundle");cmd.add_argument("bundle")
-    cmd=commands.add_parser("benchmark");cmd.add_argument("--suite",default="smoke",choices=["smoke"]);cmd.add_argument("--output",required=True);cmd.add_argument("--repetitions",type=int,default=3)
+    cmd=commands.add_parser("benchmark");cmd.add_argument("--suite",default="smoke",choices=["smoke","freecad-smoke"]);cmd.add_argument("--output",required=True);cmd.add_argument("--repetitions",type=int,default=3)
     return root
 
 def report_exit(report):
@@ -34,8 +34,8 @@ def main(argv=None):
         code=0
         if args.command=="doctor":
             from .doctor import doctor
-            result=doctor(args.smoke)
-            if result["blender"]["status"]=="unavailable":code=3
+            result=doctor(args.smoke,args.backend)
+            if result[args.backend]["status"] in ("unavailable","incompatible"):code=3
             if args.smoke and result.get("smoke_geometry_state")!="geometry_validated":code=4
         elif args.command=="check-request":
             check_request(load_json(args.request));result={"schema_version":"1","status":"pass"}
@@ -60,7 +60,7 @@ def main(argv=None):
             result=verify_bundle(args.bundle)
         elif args.command=="benchmark":
             from .benchmark import benchmark
-            result=benchmark(args.output,args.repetitions)
+            result=benchmark(args.output,args.repetitions,args.suite)
             if any(r["geometry_state"]!="geometry_validated" for r in result["runs"]):code=4
         print(json.dumps(result,sort_keys=True,allow_nan=False))
         return code

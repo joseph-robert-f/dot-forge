@@ -19,6 +19,26 @@
       "checksum_source": "pinned upstream docker/blender-download.sha256",
       "status": "not-tested-here; official retrieval denied HTTP 403",
       "renderer": "BLENDER_EEVEE_NEXT"
+    },
+    "freecad-linux-x86_64": {
+      "engine": "FreeCAD",
+      "version": "1.0.0",
+      "occ_version": "7.8.1",
+      "python": "3.13.5",
+      "runtime_kind": "system-python-native-freecad",
+      "binary_sha256": "889c603f0d17cb54060951bcf4c4f9b8c9ebd9e52b392c70209bbb9755d797d9",
+      "native_library_sha256": {
+        "FreeCAD.so": "7622d8856e41aba3887ced4aa9cf5ba79fde4320644f1487eb132c702fd8d21f",
+        "MeshPart.so": "e3065ba38c71fe59a1fa17a7c0aed4ff5fcf3676c2364e50e08b59238b039062",
+        "Part.so": "345e6a719048bd0260f3ecfaa169ed2d1db32dc0358c9c1a13d98df11681affb",
+        "libFreeCADApp.so": "207130ed77344e4942e48c9ad3c526eec0cd075fe367fd7c41de9342d4a83feb",
+        "libFreeCADBase.so": "3d8beed2be652ffd81ac389f1fe1b9a357efedbb47be5458fc74454c3e98eb2c"
+      },
+      "hash_scope": "Observed system Python and five FreeCAD entrypoint/core libraries; not vendor-distribution or full transitive-runtime verification.",
+      "official_source": "https://github.com/FreeCAD/FreeCAD",
+      "occ_source": "https://github.com/Open-Cascade-SAS/OCCT",
+      "preview_engine": "Blender 4.3.2 / BLENDER_WORKBENCH",
+      "status": "native generation and FCStd/STEP reopen tested; full workflow release acceptance recorded separately"
     }
   }
 }

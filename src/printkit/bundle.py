@@ -92,7 +92,10 @@ def verify_run(run, require_complete=True):
     actual = {p.relative_to(run).as_posix() for p in files}
     if actual != seen:
         raise ForgeError("Manifest does not cover exact deliverable contents", 4, "manifest_inventory_mismatch")
-    for required in ("request.json", "validation.json", "exports/model.stl", "native/model.blend", "metrics.json"):
+    from .contracts import check_request
+    from .adapters.registry import native_artifacts
+    request = check_request(load_json(run / "request.json"))
+    for required in ["request.json", "validation.json", "metrics.json", *native_artifacts(request)]:
         if required not in seen:
             raise ForgeError(f"Missing required artifact: {required}", 4, "invalid_manifest")
     validation = load_json(run / "validation.json")
@@ -104,16 +107,23 @@ def verify_run(run, require_complete=True):
     from .contracts import check_request
     from .isolated_validation import validate_bounded
     request = check_request(load_json(run / "request.json"))
-    fresh = validate_bounded(run / "exports/model.stl", request)
-    if fresh.get("geometry_state") != validation.get("geometry_state"):
-        raise ForgeError("Recorded geometry verdict is not reproducible", 4, "forged_validation")
-    if fresh.get("metrics", {}).get("sha256") != expected:
-        raise ForgeError("Mesh changed during integrity validation", 4, "validation_hash_mismatch")
-    recorded_gates = {c.get("code"): c.get("status") for c in validation.get("checks", []) if c.get("required")}
-    actual_gates = {c.get("code"): c.get("status") for c in fresh.get("checks", []) if c.get("required")}
-    if recorded_gates != actual_gates:
-        raise ForgeError("Recorded geometry gates differ from fresh validation", 4, "forged_validation")
-    if manifest.get("provenance", {}).get("geometry_state") != validation.get("geometry_state"):
+    recorded_state = validation.get("geometry_state")
+    if recorded_state not in ("blocked", "geometry_validated"):
+        raise ForgeError("Unsupported recorded geometry verdict", 4, "invalid_manifest")
+    if recorded_state == "geometry_validated":
+        fresh = validate_bounded(run / "exports/model.stl", request)
+        if fresh.get("geometry_state") != "geometry_validated":
+            raise ForgeError("Recorded geometry verdict is not reproducible", 4, "forged_validation")
+        if fresh.get("metrics", {}).get("sha256") != expected:
+            raise ForgeError("Mesh changed during integrity validation", 4, "validation_hash_mismatch")
+        recorded_gates = {c.get("code"): c.get("status") for c in validation.get("checks", []) if c.get("required")}
+        actual_gates = {c.get("code"): c.get("status") for c in fresh.get("checks", []) if c.get("required")}
+        if recorded_gates != actual_gates:
+            raise ForgeError("Recorded geometry gates differ from fresh validation", 4, "forged_validation")
+    # A blocked report is diagnostic evidence, not a geometry approval. Preserve
+    # it even if the validator is unavailable or would reach a different result
+    # later. Never upgrade its recorded state while checking transport integrity.
+    if manifest.get("provenance", {}).get("geometry_state") != recorded_state:
         raise ForgeError("Manifest and validation disagree", 4, "forged_validation")
     return manifest
 
@@ -164,6 +174,8 @@ def verify_bundle(path):
                             target.write(block)
                 manifest = verify_run(directory)
             return {"schema_version": "1", "status": "pass", "artifact_count": len(manifest["artifacts"]),
-                    "sha256": sha256(path), "authenticity": "unsigned; only internal integrity verified"}
+                    "sha256": sha256(path), "geometry_state": manifest["provenance"]["geometry_state"],
+                    "geometry_revalidation": "passed" if manifest["provenance"]["geometry_state"] == "geometry_validated" else "not_requested_for_blocked_diagnostics",
+                    "authenticity": "unsigned; internal integrity is not print approval"}
     except (OSError, zipfile.BadZipFile, KeyError, ValueError) as exc:
         raise ForgeError(f"Invalid bundle: {exc}", 4, "invalid_bundle") from exc

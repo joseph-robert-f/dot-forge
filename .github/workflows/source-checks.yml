@@ -19,5 +19,6 @@ jobs:
         run: |
           PYTHONPATH=src python -m printkit check-request examples/calibration-part/request.json
           PYTHONPATH=src python -m printkit check-request examples/geometric-mascot/request.json
+          PYTHONPATH=src python -m printkit check-request examples/freecad-stepped-part/request.json
       - name: Compile sources (Blender runtime scripts are syntax checked only)
         run: python -m compileall -q src tests

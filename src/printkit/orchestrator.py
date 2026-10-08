@@ -1,27 +1,31 @@
 """Immutable attempts with hash-bound stages and conservative recovery."""
 from pathlib import Path
 import platform
-import shutil
 import subprocess
 import time
 from . import __version__
 from .common import ForgeError, canonical_hash, load_json, sha256, write_json
 from .contracts import check_request
 from .bundle import finalize, verify_run
+from .adapters.registry import adapter, native_artifacts
 
 
 def repository_root():
-    return Path(__file__).resolve().parents[2]
+    return Path(__file__).absolute().parents[2]
 
 def implementation_identity():
     root = Path(__file__).parent
-    files = {p.relative_to(root).as_posix(): sha256(p) for p in sorted(root.rglob("*.py"))}
+    from .snapshot import python_source_hashes
+    files = python_source_hashes(root)
     return {"version": __version__, "python_source_sha256": canonical_hash(files), "files": files}
 
 def source_commit():
     try:
         result = subprocess.run(["git", "rev-parse", "HEAD"], cwd=repository_root(), capture_output=True, text=True, timeout=5)
-        return result.stdout.strip() if result.returncode == 0 else "uncommitted"
+        if result.returncode != 0:
+            return "uncommitted"
+        dirty = subprocess.run(["git", "status", "--porcelain", "--untracked-files=normal"], cwd=repository_root(), capture_output=True, text=True, timeout=5)
+        return "uncommitted" if dirty.returncode or dirty.stdout.strip() else result.stdout.strip()
     except (OSError, subprocess.TimeoutExpired):
         return "unavailable"
 
@@ -39,10 +43,20 @@ def verify_identity(run):
     if generation.is_file():
         provenance = load_json(generation).get("provenance", {})
         if provenance.get("binary_sha256"):
+            request = check_request(load_json(run/"request.json"))
+            current = adapter(request["backend"]).discover()
+            version_key = "freecad_version" if request["backend"] == "freecad" else "blender_version"
+            fields = ["binary_sha256"] + (["native_module_sha256", "native_library_sha256", "occ_version", "python_version"] if request["backend"] == "freecad" else [])
+            if current.get("version") != provenance.get(version_key) or any(current.get(key) != provenance.get(key) for key in fields):
+                raise ForgeError("Runtime identity changed; regenerate in a fresh attempt", 4, "runtime_changed")
+    rendered = run/"render.json"
+    if rendered.is_file():
+        provenance = load_json(rendered).get("provenance", {})
+        if provenance.get("binary_sha256"):
             from .adapters.blender import discover
             current = discover()
-            if current.get("binary_sha256") != provenance["binary_sha256"] or current.get("version") != provenance.get("blender_version"):
-                raise ForgeError("Runtime identity changed; regenerate in a fresh attempt", 4, "runtime_changed")
+            if current.get("version") != provenance.get("blender_version") or current.get("binary_sha256") != provenance["binary_sha256"]:
+                raise ForgeError("Preview runtime identity changed; regenerate previews in a fresh attempt", 4, "preview_runtime_changed")
     return journal
 
 def stage_record(run, stage, paths, details=None):
@@ -58,7 +72,7 @@ def verify_stage(run, stage):
     if not record or record.get("status") != "complete":
         return False
     from .common import safe_file
-    required = {"generation": {"native/model.blend", "exports/model.stl", "generation.json"},
+    required = {"generation": {*native_artifacts(check_request(load_json(run/"request.json"))), "generation.json"},
                 "validation": {"validation.json", "exports/model.stl"},
                 "render": {"render.json", *[f"previews/{view}.png" for view in ("front", "side", "back", "top", "oblique")]}}
     artifacts = record.get("artifacts", {})
@@ -73,17 +87,8 @@ def verify_stage(run, stage):
     return True
 
 def _snapshot_source(run):
-    root = repository_root()
-    target = Path(run) / "source"
-    target.mkdir()
-    # Source-only reproducibility copy, never arbitrary cwd files or VCS credentials.
-    for folder in ("src", "schemas", "examples", "profiles", "scripts", "docs", "tests", "benchmarks"):
-        source = root / folder
-        if source.exists():
-            shutil.copytree(source, target/folder, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "*.egg-info", "*.dist-info"))
-    for name in ("pyproject.toml", "README.md", "AGENTS.md", "SECURITY.md", "CONTRIBUTING.md", "LICENSE", "ASSET_LICENSE.md", "THIRD_PARTY_NOTICES.md", "dependency-lock.json", "runtime-lock.json", "upstream.lock.json"):
-        if (root/name).is_file():
-            shutil.copyfile(root/name, target/name)
+    from .snapshot import copy_source_snapshot
+    copy_source_snapshot(repository_root(), Path(run) / "source")
 
 def begin(request, run):
     check_request(request)
@@ -115,17 +120,16 @@ def sanitize_logs(run):
             path.write_text(text)
 
 def generate(request, run):
-    from .adapters import blender
     run = begin(request, run)
     started = time.monotonic()
     try:
-        result = blender.generate(request, run)
+        result = adapter(request["backend"]).generate(request, run)
         write_json(run/"generation.json", result)
         write_json(run/"metrics.json", {"schema_version": "1", "generation_wall_seconds": time.monotonic()-started,
                    "setup_download_seconds": None, "assistant_development_seconds": None, "human_iteration_seconds": None,
                    "model_provider_usage": None, "hardware": {"architecture": platform.machine(), "system": platform.system()},
                    "runtime_metrics": result.get("metrics", {}), "native_stage_metrics": result.get("native_generation", {}), "cache": "native engine launched fresh; OS caches uncontrolled"})
-        stage_record(run, "generation", ["native/model.blend", "exports/model.stl", "generation.json"], {"request_sha256": sha256(run/"request.json")})
+        stage_record(run, "generation", native_artifacts(request) + ["generation.json"], {"request_sha256": sha256(run/"request.json")})
     except Exception as exc:
         write_json(run/"failure.json", {"schema_version": "1", "stage": "generation", "code": getattr(exc, "finding", "internal_failure"),
                    "message": str(exc), "next_action": "Inspect retained logs; correct runtime then resume into a new attempt."})

@@ -1,0 +1,28 @@
+{
+  "schema_version": "1",
+  "generator_id": "freecad-stepped-block",
+  "generator_version": "1",
+  "backend": "freecad",
+  "units": "mm",
+  "parameters": {
+    "width_mm": 30,
+    "depth_mm": 24,
+    "height_mm": 18
+  },
+  "dimensions_mm": [
+    30,
+    24,
+    18
+  ],
+  "tolerance_mm": 0.05,
+  "allowed_components": 1,
+  "part_count": 1,
+  "export_formats": [
+    "stl",
+    "fcstd",
+    "step"
+  ],
+  "render_profile": "five-view",
+  "validation_profile": "solid-single-part",
+  "printer_profile": null
+}

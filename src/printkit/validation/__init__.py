@@ -45,7 +45,8 @@ def validate_mesh(path, request):
 
     def finish():
         present = {c['code'] for c in checks}
-        for code in GEOMETRY_CODES:
+        required_codes = GEOMETRY_CODES + (('generator_contract', 'generator_features', 'generator_volume', 'generator_cross_sections') if request.get('generator_id') == 'freecad-stepped-block' else ())
+        for code in required_codes:
             if code not in present:
                 check(code, 'unknown', method='not evaluated because a prerequisite failed')
         for code in ('wall_thickness', 'small_features', 'clearances', 'build_envelope',
@@ -157,6 +158,10 @@ def validate_mesh(path, request):
                     elif result: nesting.append([i, j])
             check('shell_nesting', 'fail' if nesting else ('unknown' if unresolved else 'pass'), nesting, [],
                   method='exact rational ray parity; deterministic edge-degeneracy retries', evidence=nesting)
+        if request.get('generator_id') == 'freecad-stepped-block' and all(c['status'] == 'pass' for c in checks if c['required']):
+            from .generator_checks import check_generator
+            checks.extend(check_generator(triangles, request, ensure_budget))
+            ensure_budget()
         return finish()
     except ValidationTimeout as exc:
         check('validation_deadline', 'unknown', str(exc), MAX_VALIDATION_SECONDS,

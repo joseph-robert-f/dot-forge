@@ -1,0 +1,450 @@
+{
+  "environment": {
+    "architecture": "x86_64",
+    "available_cores": 9,
+    "available_memory_bytes": null,
+    "shared_hardware_contention": "uncontrolled",
+    "system": "Linux"
+  },
+  "methodology": {
+    "assistant_development_seconds": null,
+    "cache": "OS filesystem caches not cleared; first repetition is not guaranteed cold",
+    "cold_setup_download_seconds": null,
+    "engine_startup": "fresh native backend processes and Blender preview process; included in stage times",
+    "excluded_work": "Setup/download, development and human review are unavailable, not zero. No cost claim.",
+    "human_iteration_seconds": null,
+    "model_provider_usage": null,
+    "peak_rss_bytes": null,
+    "process_scope": "see each stage CPU metric; not aggregate tree memory",
+    "warm_engine_execution": "not measured; no persistent engine"
+  },
+  "repetitions": 3,
+  "runs": [
+    {
+      "case": "freecad-stepped-part",
+      "geometry_state": "geometry_validated",
+      "mesh_metrics": {
+        "bounds_mm": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            30.0,
+            24.0,
+            18.0
+          ]
+        ],
+        "byte_size": 11484,
+        "component_count": 1,
+        "dimensions_mm": [
+          30.0,
+          24.0,
+          18.0
+        ],
+        "encoding": "binary",
+        "intersection_candidates": 9028,
+        "intersection_pair_tests": 2390,
+        "sha256": "817ea3118caf36cb5551a50356cba014b62d204eaae5e56968063ea3c678637a",
+        "signed_volume_signs": [
+          1
+        ],
+        "signed_volumes_mm3": [
+          9323.397243755624
+        ],
+        "triangle_count": 228,
+        "validation_seconds": 2.002148794999812,
+        "volume_underflow_exact_mm3": {}
+      },
+      "metrics": {
+        "assistant_development_seconds": null,
+        "cache": "native engine launched fresh; OS caches uncontrolled",
+        "generation_wall_seconds": 2.3166053390013985,
+        "hardware": {
+          "architecture": "x86_64",
+          "system": "Linux"
+        },
+        "human_iteration_seconds": null,
+        "model_provider_usage": null,
+        "native_stage_metrics": {
+          "model_construction_seconds": 0.02665643600630574,
+          "native_save_and_export_seconds": 0.015050871996209025,
+          "runtime": {
+            "native_module": "FreeCAD.so",
+            "occ_version": "7.8.1",
+            "python_version": "3.13.5",
+            "version": "1.0.0"
+          },
+          "shape": {
+            "brep_valid": true,
+            "circular_edge_count": 2,
+            "closed": true,
+            "dimensions_mm": [
+              30.0,
+              24.0,
+              18.0
+            ],
+            "expected_volume_mm3": 9322.392179780041,
+            "feature_checks": {
+              "base_present": true,
+              "circular_edges_present": true,
+              "lower_ledge_clear": true,
+              "raised_step_present": true,
+              "through_hole_clear": true
+            },
+            "hole_radius_mm": 3.75,
+            "origin_mm": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "solid_count": 1,
+            "status": "pass",
+            "volume_mm3": 9322.392179780041
+          },
+          "status": "pass",
+          "tessellation": {
+            "angular_deflection_radians": 0.25,
+            "linear_deflection_mm": 0.05,
+            "relative": false
+          },
+          "triangles": 228
+        },
+        "render_wall_seconds": 11.522392507991754,
+        "runtime_metrics": {
+          "generation": {
+            "controls": {
+              "aggregate_process_tree_memory_limit": false,
+              "filesystem_isolation": false,
+              "network_isolation": false,
+              "per_process_address_space_limit": 4294967296,
+              "process_count_limit": false,
+              "process_group_timeout": true,
+              "sanitized_environment": true,
+              "thread_environment_limit": 2
+            },
+            "cpu_scope": "waited-for child processes; descendant accounting is OS-dependent",
+            "cpu_seconds": 0.634272,
+            "exit_code": 0,
+            "peak_rss_bytes": null,
+            "peak_rss_scope": "unavailable: cumulative child high-water mark cannot isolate this run",
+            "wall_seconds": 0.8255279580043862
+          },
+          "native_reopen": {
+            "controls": {
+              "aggregate_process_tree_memory_limit": false,
+              "filesystem_isolation": false,
+              "network_isolation": false,
+              "per_process_address_space_limit": 4294967296,
+              "process_count_limit": false,
+              "process_group_timeout": true,
+              "sanitized_environment": true,
+              "thread_environment_limit": 2
+            },
+            "cpu_scope": "waited-for child processes; descendant accounting is OS-dependent",
+            "cpu_seconds": 0.6569520000000002,
+            "exit_code": 0,
+            "peak_rss_bytes": null,
+            "peak_rss_scope": "unavailable: cumulative child high-water mark cannot isolate this run",
+            "wall_seconds": 0.8332756330055417
+          }
+        },
+        "schema_version": "1",
+        "setup_download_seconds": null,
+        "validation_wall_seconds": 2.030578498990508
+      },
+      "repetition": 1,
+      "wall_seconds": 22.6218461440003
+    },
+    {
+      "case": "freecad-stepped-part",
+      "geometry_state": "geometry_validated",
+      "mesh_metrics": {
+        "bounds_mm": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            30.0,
+            24.0,
+            18.0
+          ]
+        ],
+        "byte_size": 11484,
+        "component_count": 1,
+        "dimensions_mm": [
+          30.0,
+          24.0,
+          18.0
+        ],
+        "encoding": "binary",
+        "intersection_candidates": 9028,
+        "intersection_pair_tests": 2390,
+        "sha256": "817ea3118caf36cb5551a50356cba014b62d204eaae5e56968063ea3c678637a",
+        "signed_volume_signs": [
+          1
+        ],
+        "signed_volumes_mm3": [
+          9323.397243755624
+        ],
+        "triangle_count": 228,
+        "validation_seconds": 1.8672354689915664,
+        "volume_underflow_exact_mm3": {}
+      },
+      "metrics": {
+        "assistant_development_seconds": null,
+        "cache": "native engine launched fresh; OS caches uncontrolled",
+        "generation_wall_seconds": 2.0336300539929653,
+        "hardware": {
+          "architecture": "x86_64",
+          "system": "Linux"
+        },
+        "human_iteration_seconds": null,
+        "model_provider_usage": null,
+        "native_stage_metrics": {
+          "model_construction_seconds": 0.043481322994921356,
+          "native_save_and_export_seconds": 0.011868469009641558,
+          "runtime": {
+            "native_module": "FreeCAD.so",
+            "occ_version": "7.8.1",
+            "python_version": "3.13.5",
+            "version": "1.0.0"
+          },
+          "shape": {
+            "brep_valid": true,
+            "circular_edge_count": 2,
+            "closed": true,
+            "dimensions_mm": [
+              30.0,
+              24.0,
+              18.0
+            ],
+            "expected_volume_mm3": 9322.392179780041,
+            "feature_checks": {
+              "base_present": true,
+              "circular_edges_present": true,
+              "lower_ledge_clear": true,
+              "raised_step_present": true,
+              "through_hole_clear": true
+            },
+            "hole_radius_mm": 3.75,
+            "origin_mm": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "solid_count": 1,
+            "status": "pass",
+            "volume_mm3": 9322.392179780041
+          },
+          "status": "pass",
+          "tessellation": {
+            "angular_deflection_radians": 0.25,
+            "linear_deflection_mm": 0.05,
+            "relative": false
+          },
+          "triangles": 228
+        },
+        "render_wall_seconds": 8.323661650007125,
+        "runtime_metrics": {
+          "generation": {
+            "controls": {
+              "aggregate_process_tree_memory_limit": false,
+              "filesystem_isolation": false,
+              "network_isolation": false,
+              "per_process_address_space_limit": 4294967296,
+              "process_count_limit": false,
+              "process_group_timeout": true,
+              "sanitized_environment": true,
+              "thread_environment_limit": 2
+            },
+            "cpu_scope": "waited-for child processes; descendant accounting is OS-dependent",
+            "cpu_seconds": 0.6115640000000013,
+            "exit_code": 0,
+            "peak_rss_bytes": null,
+            "peak_rss_scope": "unavailable: cumulative child high-water mark cannot isolate this run",
+            "wall_seconds": 0.7376268439984415
+          },
+          "native_reopen": {
+            "controls": {
+              "aggregate_process_tree_memory_limit": false,
+              "filesystem_isolation": false,
+              "network_isolation": false,
+              "per_process_address_space_limit": 4294967296,
+              "process_count_limit": false,
+              "process_group_timeout": true,
+              "sanitized_environment": true,
+              "thread_environment_limit": 2
+            },
+            "cpu_scope": "waited-for child processes; descendant accounting is OS-dependent",
+            "cpu_seconds": 0.626414000000004,
+            "exit_code": 0,
+            "peak_rss_bytes": null,
+            "peak_rss_scope": "unavailable: cumulative child high-water mark cannot isolate this run",
+            "wall_seconds": 0.7315489680040628
+          }
+        },
+        "schema_version": "1",
+        "setup_download_seconds": null,
+        "validation_wall_seconds": 1.8924942340090638
+      },
+      "repetition": 2,
+      "wall_seconds": 17.943625714993686
+    },
+    {
+      "case": "freecad-stepped-part",
+      "geometry_state": "geometry_validated",
+      "mesh_metrics": {
+        "bounds_mm": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            30.0,
+            24.0,
+            18.0
+          ]
+        ],
+        "byte_size": 11484,
+        "component_count": 1,
+        "dimensions_mm": [
+          30.0,
+          24.0,
+          18.0
+        ],
+        "encoding": "binary",
+        "intersection_candidates": 9028,
+        "intersection_pair_tests": 2390,
+        "sha256": "817ea3118caf36cb5551a50356cba014b62d204eaae5e56968063ea3c678637a",
+        "signed_volume_signs": [
+          1
+        ],
+        "signed_volumes_mm3": [
+          9323.397243755624
+        ],
+        "triangle_count": 228,
+        "validation_seconds": 1.6743857450055657,
+        "volume_underflow_exact_mm3": {}
+      },
+      "metrics": {
+        "assistant_development_seconds": null,
+        "cache": "native engine launched fresh; OS caches uncontrolled",
+        "generation_wall_seconds": 2.614277287008008,
+        "hardware": {
+          "architecture": "x86_64",
+          "system": "Linux"
+        },
+        "human_iteration_seconds": null,
+        "model_provider_usage": null,
+        "native_stage_metrics": {
+          "model_construction_seconds": 0.03846141199755948,
+          "native_save_and_export_seconds": 0.0160224600112997,
+          "runtime": {
+            "native_module": "FreeCAD.so",
+            "occ_version": "7.8.1",
+            "python_version": "3.13.5",
+            "version": "1.0.0"
+          },
+          "shape": {
+            "brep_valid": true,
+            "circular_edge_count": 2,
+            "closed": true,
+            "dimensions_mm": [
+              30.0,
+              24.0,
+              18.0
+            ],
+            "expected_volume_mm3": 9322.392179780041,
+            "feature_checks": {
+              "base_present": true,
+              "circular_edges_present": true,
+              "lower_ledge_clear": true,
+              "raised_step_present": true,
+              "through_hole_clear": true
+            },
+            "hole_radius_mm": 3.75,
+            "origin_mm": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "solid_count": 1,
+            "status": "pass",
+            "volume_mm3": 9322.392179780041
+          },
+          "status": "pass",
+          "tessellation": {
+            "angular_deflection_radians": 0.25,
+            "linear_deflection_mm": 0.05,
+            "relative": false
+          },
+          "triangles": 228
+        },
+        "render_wall_seconds": 9.787795269992785,
+        "runtime_metrics": {
+          "generation": {
+            "controls": {
+              "aggregate_process_tree_memory_limit": false,
+              "filesystem_isolation": false,
+              "network_isolation": false,
+              "per_process_address_space_limit": 4294967296,
+              "process_count_limit": false,
+              "process_group_timeout": true,
+              "sanitized_environment": true,
+              "thread_environment_limit": 2
+            },
+            "cpu_scope": "waited-for child processes; descendant accounting is OS-dependent",
+            "cpu_seconds": 0.6929580000000044,
+            "exit_code": 0,
+            "peak_rss_bytes": null,
+            "peak_rss_scope": "unavailable: cumulative child high-water mark cannot isolate this run",
+            "wall_seconds": 0.8208358690026216
+          },
+          "native_reopen": {
+            "controls": {
+              "aggregate_process_tree_memory_limit": false,
+              "filesystem_isolation": false,
+              "network_isolation": false,
+              "per_process_address_space_limit": 4294967296,
+              "process_count_limit": false,
+              "process_group_timeout": true,
+              "sanitized_environment": true,
+              "thread_environment_limit": 2
+            },
+            "cpu_scope": "waited-for child processes; descendant accounting is OS-dependent",
+            "cpu_seconds": 0.8232359999999943,
+            "exit_code": 0,
+            "peak_rss_bytes": null,
+            "peak_rss_scope": "unavailable: cumulative child high-water mark cannot isolate this run",
+            "wall_seconds": 1.0479629440087592
+          }
+        },
+        "schema_version": "1",
+        "setup_download_seconds": null,
+        "validation_wall_seconds": 1.6833119959919713
+      },
+      "repetition": 3,
+      "wall_seconds": 19.84939067698724
+    }
+  ],
+  "schema_version": "1",
+  "source_commit": "uncommitted",
+  "suite": "freecad-smoke",
+  "summary": {
+    "freecad-stepped-part": {
+      "attempts": 3,
+      "interpretation": "Includes failures/censored observations; compare only when all geometry passes.",
+      "median_wall_seconds": 19.84939067698724,
+      "passed_geometry": 3,
+      "range_wall_seconds": [
+        17.943625714993686,
+        22.6218461440003
+      ]
+    }
+  }
+}

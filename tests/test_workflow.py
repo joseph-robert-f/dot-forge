@@ -121,3 +121,17 @@ class WorkflowTests(unittest.TestCase):
         with self.assertRaises(ForgeError):load_json(p)
 
 if __name__=='__main__':unittest.main()
+
+class DiagnosticBundleTests(unittest.TestCase):
+    setUp = WorkflowTests.setUp
+    def test_blocked_validator_diagnostics_can_be_preserved(self):
+        flow.generate(self.request,self.run)
+        with patch('printkit.validation.validate_mesh',side_effect=RuntimeError('temporary failure')):
+            report=flow.validate(self.run)
+        self.assertEqual(report['geometry_state'],'blocked')
+        flow.render(self.run);flow.finish(self.run)
+        with patch('printkit.isolated_validation.validate_bounded',side_effect=AssertionError('must not need validator for blocked diagnostic transport')):
+            create_bundle(self.run)
+            result=verify_bundle(self.run.with_suffix('.zip'))
+        self.assertEqual(result['geometry_state'],'blocked')
+        self.assertEqual(result['geometry_revalidation'],'not_requested_for_blocked_diagnostics')

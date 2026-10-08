@@ -23,3 +23,5 @@ Preview rendering uses the exported printing STL. Inspect front, side, back, top
 Slice the exact validated STL using the intended printer, material, orientation and profile. Inspect repaired geometry, missing thin features, empty layers, islands and supports. Then assess a real print when dimensions, fit or use require it. Neither step is performed by this starter release. Safety-critical, structural, medical, food-contact, electrical and child-safety uses require additional assessment.
 
 Hashes bind a report to file bytes. An unsigned self-consistent manifest does not prove authenticity, authorship, design correctness or print safety.
+
+For `freecad-stepped-block`, required exported-STL checks additionally compare analytic volume (0.2% tolerance), named solid/void probes, and two exact rational horizontal cross-sections. The sections check loop structure and the declared hole center/diameter against tessellation-limited tolerances. A missing or shifted hole must not inherit a pass merely because the mesh is watertight. Finite samples and selected sections do not certify every surface, wall or physical fit.

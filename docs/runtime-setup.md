@@ -20,4 +20,10 @@ On an environment where the exact official runtime can legitimately be obtained,
 
 ## Deferred options
 
-A Docker route exists in the upstream project, but this starter has not accepted it as a fallback runtime. Do not assume Docker or nested containers are available. FreeCAD, 3D Slicer and additional platform profiles remain deferred integrations. No applications or container images are redistributed here.
+A Docker route exists in the upstream project, but this starter has not accepted it as a fallback runtime. Do not assume Docker or nested containers are available. 3D Slicer remains deferred. Additional operating-system profiles are outside the current Linux-focused scope. No applications or container images are redistributed here.
+
+## FreeCAD native profile
+
+The curated stepped-part workflow uses installed FreeCAD 1.0.0 / Open CASCADE 7.8.1 modules through Linux system Python, not a GUI session. The tested distro paths are `/usr/bin/python3` and `/usr/lib/freecad/lib`; doctor verifies versions and hashes before execution. This is a specific Linux profile, not a generic runtime installer. The installed `freecadcmd` launcher was unreliable in the test environment; it is neither invoked nor represented as the tested execution path.
+
+Generation, fresh FCStd reopening and STEP reimport use isolated Python invocation with a sanitized environment and existing execution budgets. Actual printing STL is independently validated, and Blender 4.3.2 supplies the same five views. Source distribution contains no FreeCAD binaries. On another dot’s computer, unavailable or incompatible tools remain blocked until supported setup is authorized.

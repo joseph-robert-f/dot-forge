@@ -126,12 +126,16 @@ def generate(request,run_dir,blender=None,upstream=None):
 
 def render(request,run_dir,blender=None):
     run=Path(run_dir).resolve()
+    capability=discover(blender)
+    if capability.get('calibration-block') not in ('unverified','available'):
+        raise RuntimeUnavailable('Five-view previews require the tested Linux x86_64 Blender 4.3.2 profile')
     metrics=_run('preview',run,blender)
     for view in VIEWS:
         path=run/'previews'/f'{view}.png'
         if not path.is_file() or path.stat().st_size<100:raise AdapterError('Preview missing')
     return {'status':'pass','views':[f'previews/{v}.png' for v in VIEWS],'metrics':metrics,
-            'subject':'exact exported printing STL','visual_completeness':'unknown'}
+            'subject':'exact exported printing STL','visual_completeness':'unknown',
+            'provenance':{'blender_version':capability['version'],'binary_sha256':capability['binary_sha256']}}
 
 
 def smoke(run_dir,blender=None,upstream=None):

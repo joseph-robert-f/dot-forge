@@ -28,14 +28,18 @@
       "enum": [
         "calibration-block",
         "geometric-mascot",
-        "lane-a-character"
+        "lane-a-character",
+        "freecad-stepped-block"
       ]
     },
     "generator_version": {
       "const": "1"
     },
     "backend": {
-      "const": "blender"
+      "enum": [
+        "blender",
+        "freecad"
+      ]
     },
     "units": {
       "const": "mm"
@@ -65,9 +69,16 @@
       "const": 1
     },
     "export_formats": {
-      "const": [
-        "stl",
-        "blend"
+      "enum": [
+        [
+          "stl",
+          "blend"
+        ],
+        [
+          "stl",
+          "fcstd",
+          "step"
+        ]
       ]
     },
     "render_profile": {
@@ -124,6 +135,15 @@
                 "maximum": 100
               }
             }
+          },
+          "backend": {
+            "const": "blender"
+          },
+          "export_formats": {
+            "const": [
+              "stl",
+              "blend"
+            ]
           }
         }
       }
@@ -163,6 +183,15 @@
                 "maximum": 100
               }
             }
+          },
+          "backend": {
+            "const": "blender"
+          },
+          "export_formats": {
+            "const": [
+              "stl",
+              "blend"
+            ]
           }
         }
       }
@@ -180,6 +209,64 @@
           "parameters": {
             "type": "object",
             "maxProperties": 0
+          },
+          "backend": {
+            "const": "blender"
+          },
+          "export_formats": {
+            "const": [
+              "stl",
+              "blend"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "generator_id": {
+            "const": "freecad-stepped-block"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "parameters": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "width_mm",
+              "depth_mm",
+              "height_mm"
+            ],
+            "properties": {
+              "width_mm": {
+                "type": "number",
+                "minimum": 5,
+                "maximum": 100
+              },
+              "depth_mm": {
+                "type": "number",
+                "minimum": 5,
+                "maximum": 100
+              },
+              "height_mm": {
+                "type": "number",
+                "minimum": 5,
+                "maximum": 100
+              }
+            }
+          },
+          "backend": {
+            "const": "freecad"
+          },
+          "export_formats": {
+            "const": [
+              "stl",
+              "fcstd",
+              "step"
+            ]
           }
         }
       }
