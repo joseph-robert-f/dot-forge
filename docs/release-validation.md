@@ -35,3 +35,15 @@ Three repetitions per original case, six successful geometry runs:
 ## Still blocked or unresolved
 
 Blender 4.5.12 Lane A end-to-end acceptance, exact prior detailed-cat reproduction, full architecture MVP acceptance, measured walls/clearances, slicer/toolpath assessment and physical testing remain outstanding. See [acceptance map](acceptance.md). Source CI checks the committed Python matrix separately; inspect the actual GitHub checks for the commit you use.
+
+## Deliverable-only bundle hardening
+
+A follow-up packaging change limits ZIPs to the explicit source/native/export/preview/log/QA and named-report boundary. Generated Mesa/Blender caches and unrelated process-HOME files remain in the private attempt directory and are not read into the archive. Extra non-deliverable ZIP members are rejected. Installed package bookkeeping is excluded from source snapshots.
+
+- Updated Python implementation hash: `7ef1cc82c5e80e9a52120915eafc56b8a4a6b2dbc8cce709a72344e5b3226755`.
+- Full source and actual Blender integration suite: **100 tests passed, no skips**.
+- Independent bundle-scope review added four passing adversarial regressions, including a large excluded cache whose bytes must never be opened.
+- A fresh mascot run, five-view render and cache-free 85-artifact ZIP passed independent re-verification; runtime cache files remained untouched outside the ZIP.
+- Geometry generation is unchanged; the mascot STL retains the hash listed above.
+
+The earlier timing sample describes the original preview implementation. No new performance or cold-install claim is inferred from this packaging fix. Older bundles listing runtime caches are rejected by the stricter reader; regenerate into a new attempt rather than rewriting successful historical evidence.

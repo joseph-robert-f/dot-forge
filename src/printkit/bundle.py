@@ -1,4 +1,7 @@
-"""Hash-verified portable run bundles; never extracts untrusted archives."""
+"""Hash-verified bundles with bounded, path-checked materialization.
+
+Never executes embedded source.
+"""
 from pathlib import Path, PurePosixPath
 import hashlib
 import json
@@ -10,23 +13,56 @@ from .common import ForgeError, load_json, safe_file, sha256, write_json
 MANIFEST = "manifest.json"
 MAX_BUNDLE = 536870912
 
-def artifact_records(run):
+# Only these deliverables belong in a portable run. The run directory may also
+# serve as the native runtime's HOME; its caches/settings are never artifacts.
+ARTIFACT_DIRECTORIES = ("source", "native", "exports", "previews", "logs", "qa")
+ARTIFACT_ROOT_FILES = (
+    "request.json", "resolved-profile.json", "journal.json", "generation.json",
+    "validation.json", "render.json", "metrics.json", "failure.json",
+)
+MAX_MEMBERS = 10000
+
+def artifact_path(name):
+    """Whether a canonical relative name is inside the deliverable boundary."""
+    if not isinstance(name, str):
+        return False
+    path = PurePosixPath(name)
+    if path.is_absolute() or ".." in path.parts or "\\" in name or path.as_posix() != name:
+        return False
+    return name in ARTIFACT_ROOT_FILES or (len(path.parts) > 1 and path.parts[0] in ARTIFACT_DIRECTORIES)
+
+def artifact_files(run):
+    """Check all paths for symlinks, but never open excluded runtime files."""
     run = Path(run)
-    records = []
-    for path in sorted(run.rglob("*")):
+    if run.is_symlink():
+        raise ForgeError("Run contains a symlink", 4, "unsafe_artifact_path")
+    files = []
+    # Bound traversal as well as delivered content. Do not follow symlinks even
+    # in excluded HOME trees: they still indicate an unsafe run directory.
+    for count, path in enumerate(run.rglob("*"), 1):
+        if count > MAX_MEMBERS:
+            raise ForgeError("Run inventory exceeds verification budget", 4, "output_budget")
         if path.is_symlink():
             raise ForgeError("Run contains a symlink", 4, "unsafe_artifact_path")
-        if path.is_file() and path.name not in {MANIFEST, "COMPLETE"} and not path.name.startswith(".partial-"):
-            relative = path.relative_to(run).as_posix()
-            records.append({"path": relative, "bytes": path.stat().st_size, "sha256": sha256(path)})
-    if sum(x["bytes"] for x in records) > MAX_BUNDLE:
+        if artifact_path(path.relative_to(run).as_posix()) and path.is_file():
+            files.append(path)
+    if sum(path.stat().st_size for path in files) > MAX_BUNDLE:
         raise ForgeError("Bundle byte budget exceeded", 4, "output_budget")
-    return records
+    return sorted(files)
+
+def artifact_records(run):
+    run = Path(run)
+    return [{"path": path.relative_to(run).as_posix(), "bytes": path.stat().st_size,
+             "sha256": sha256(path)} for path in artifact_files(run)]
 
 def finalize(run, provenance, stages):
     run = Path(run)
     manifest = {"schema_version": "1", "state": "complete", "provenance": provenance,
                 "stages": stages, "artifacts": artifact_records(run),
+                "artifact_policy": {"name": "deliverables-only-v1",
+                    "directories": list(ARTIFACT_DIRECTORIES), "root_files": list(ARTIFACT_ROOT_FILES),
+                    "envelope_files": [MANIFEST, "COMPLETE"],
+                    "inventory": "Exact within selected trees; runtime HOME caches/settings and unrelated root files excluded."},
                 "trust": "Hashes detect corruption; this manifest is unsigned and is not proof against intentional forgery."}
     write_json(run / MANIFEST, manifest)
     write_json(run / "COMPLETE", {"manifest_sha256": sha256(run / MANIFEST)})
@@ -34,11 +70,7 @@ def finalize(run, provenance, stages):
 
 def verify_run(run, require_complete=True):
     run = Path(run)
-    if run.is_symlink() or any(p.is_symlink() for p in run.rglob("*")):
-        raise ForgeError("Run contains symlink artifacts", 4, "unsafe_artifact_path")
-    files = [p for p in run.rglob("*") if p.is_file()]
-    if len(files) > 10000 or sum(p.stat().st_size for p in files) > MAX_BUNDLE:
-        raise ForgeError("Run inventory exceeds verification budget", 4, "output_budget")
+    files = artifact_files(run)
     manifest = load_json(run / MANIFEST)
     if manifest.get("schema_version") != "1" or manifest.get("state") != "complete":
         raise ForgeError("Unsupported or incomplete manifest", 4, "invalid_manifest")
@@ -51,15 +83,15 @@ def verify_run(run, require_complete=True):
         raise ForgeError("Manifest has no artifacts", 4, "invalid_manifest")
     seen = set()
     for item in records:
-        if not isinstance(item, dict) or set(item) != {"path", "bytes", "sha256"} or item["path"] in seen:
+        if not isinstance(item, dict) or set(item) != {"path", "bytes", "sha256"} or not artifact_path(item["path"]) or item["path"] in seen:
             raise ForgeError("Invalid or duplicate manifest record", 4, "invalid_manifest")
         seen.add(item["path"])
         path = safe_file(run, item["path"])
         if not path.is_file() or path.stat().st_size != item["bytes"] or sha256(path) != item["sha256"]:
             raise ForgeError(f"Artifact hash/size mismatch: {item['path']}", 4, "artifact_hash_mismatch")
-    actual = {p.relative_to(run).as_posix() for p in run.rglob("*") if p.is_file() and p.name not in {MANIFEST, "COMPLETE"}}
+    actual = {p.relative_to(run).as_posix() for p in files}
     if actual != seen:
-        raise ForgeError("Manifest does not cover exact run contents", 4, "manifest_inventory_mismatch")
+        raise ForgeError("Manifest does not cover exact deliverable contents", 4, "manifest_inventory_mismatch")
     for required in ("request.json", "validation.json", "exports/model.stl", "native/model.blend", "metrics.json"):
         if required not in seen:
             raise ForgeError(f"Missing required artifact: {required}", 4, "invalid_manifest")
@@ -112,11 +144,13 @@ def verify_bundle(path):
         with zipfile.ZipFile(path) as archive:
             entries = archive.infolist()
             names = [x.filename for x in entries]
-            if len(names) != len(set(names)) or len(names) > 10000:
+            if len(names) != len(set(names)) or len(names) > MAX_MEMBERS:
                 raise ForgeError("Duplicate/excessive bundle members", 4, "unsafe_bundle")
             if sum(x.file_size for x in entries) > MAX_BUNDLE:
                 raise ForgeError("Uncompressed bundle exceeds budget", 4, "unsafe_bundle")
             for item in entries:
+                if item.filename not in {MANIFEST, "COMPLETE"} and not artifact_path(item.filename):
+                    raise ForgeError("Bundle member outside deliverable boundary", 4, "unsafe_bundle")
                 p = PurePosixPath(item.filename)
                 if p.is_absolute() or ".." in p.parts or "\\" in item.filename or item.is_dir() or ((item.external_attr >> 16) & 0o170000) == 0o120000:
                     raise ForgeError("Unsafe bundle member", 4, "unsafe_bundle")
