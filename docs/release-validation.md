@@ -2,6 +2,27 @@
 
 This evidence supports sharing the **bounded native preview**. It does not complete the original architecture MVP: the pinned Lane A runtime gate remains blocked, and no physical-print claim is made.
 
+## Evidence scope and current default
+
+The historical results and source hashes below remain evidence for the exact implementation tested; they are not silently reassigned to later changes. The default `dot-native` profile now groups the two Blender families with the independently verified [FreeCAD stepped-part workflow](freecad-verification.md). Its observed installed stack is Blender 4.3.2, FreeCAD 1.0.0 / Open CASCADE 7.8.1, orchestration Python 3.12.14 and FreeCAD system Python 3.13.5. A Slicer 5.10.0 installation directory was found, but current startup/version probing failed without a usable Qt display/plugin; it remains optional observational inventory only.
+
+On each dot, use `doctor --json --all-smoke NEW_DIRECTORY` for fresh execution evidence across all three default generators. Merely adding the profile or listing installed tools does not establish acceptance. Lane A remains an optional blocked integration with the exact Blender 4.5.12 LTS requirement; it does not gate default-profile acceptance, and its historical architecture obligation is still incomplete. No runtime upgrades, solver changes or new print-readiness claims follow from this alignment.
+
+## Runtime-alignment verification: 2026-10-08
+
+The alignment changes were tested against package Python-source identity `9c30024908697f900dd2a4ef6756029ce27f0dc380928ac8cae2187a26734a67`. No model construction, Boolean solver, validation tolerance or supported generator parameters changed.
+
+- Source-only suite: **194 tests passed, 7 native opt-in tests skipped**.
+- Actual installed-runtime suite: **194 tests passed, no skips**, in 260.9 seconds, using `PRINTKIT_INTEGRATION=1 PRINTKIT_FREECAD_INTEGRATION=1 PRINTKIT_DOT_INTEGRATION=1 python3 scripts/check-release`.
+- All three default generators completed generation, native reopen, exported-STL validation, five-view rendering and hash-verified bundles. Each copied bundle was verified and extracted; each family regenerated using its embedded source with `python -S -B` and `PYTHONPATH`, without pip packages or downloaded/upgraded native applications.
+- The real FreeCAD negative fixtures still reject displaced, wrong-radius, blind, tilted and elliptical holes in FCStd and STEP independently. Source-snapshot no-link and bundle-integrity regressions remain passing.
+- New fail-closed tests cover wrong native versions, Python versions, platform, missing STL operators/Workbench, failed probes, partial smoke failures, and runtime changes during stage reuse.
+- Fifteen actual views were inspected across the bundled block, flat mascot and stepped through-hole examples. They show the expected bounded features. This is technical visual review, not user design approval or printing acceptance.
+- Current native discovery confirms Blender 4.3.2 / Python 3.13.5 / Workbench / registered STL operators; FreeCAD 1.0.0 / Open CASCADE 7.8.1 / Python 3.13.5. Blender reports FAST and EXACT Boolean solvers, with no MANIFOLD; the native examples do not use Boolean solvers.
+- The full local test-log SHA-256 is `61e77f81e9e85c3cb6f7b5fc27cce27698f9813e7f37cf5feb9a85219fd8e6b6`. This records a local run; automated GitHub source CI is separate from manual native-runner acceptance.
+
+The checks above use already installed applications on this dot’s Linux computer. They do not certify every dot image, untested parameter combinations, Lane A, slicer/toolpath suitability or physical prints. Optional Slicer remains unverified in the current runtime scan.
+
 ## Tested implementation and environment
 
 - Python implementation SHA-256: `eb3e0ec45ed01609c0026db82617da9f17c334db7119ed816c4c8b057fc89394` (the CLI's canonical hash over all package Python source files).

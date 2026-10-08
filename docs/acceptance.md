@@ -2,6 +2,10 @@
 
 This source release supplies **bounded native modeling instructions for a dot's Linux cloud computer**. It is not completion of the proposed architecture MVP, a cross-platform application or a runtime installer. A capability is accepted only with evidence for the exact source, runtime and request; adapter code and a checked-in lock file alone are not execution evidence.
 
+## Default dot-native acceptance
+
+Default acceptance covers the three installed-native families below: `calibration-block`, `geometric-mascot` and `freecad-stepped-block`. Use `doctor --json --all-smoke NEW_DIRECTORY` to execute every family on each dot. Capability discovery, optional-tool inventory and another computer's evidence are not substitutes for fresh per-dot smoke results. All required default workflows must pass their geometry scope; visual approval and printing checks remain separate. Optional Lane A is not a prerequisite for this profile.
+
 ## Existing bounded Blender preview
 
 - Source-only Python 3.11+ CLI with no pip runtime dependencies; native applications are separate prerequisites.
@@ -23,17 +27,17 @@ Fresh FCStd BRep reopening, STEP solid round-trip checks, independent STL topolo
 
 Even a successful FreeCAD geometry run leaves printer/process/material, wall/clearance suitability, slicing, visual approval and physical-print checks separate. Native-solid validity does not certify the tessellated mesh or real-world use.
 
-## Blocked: required architecture acceptance
+## Blocked: optional Lane A and original architecture acceptance
 
-- Pinned Lane A end-to-end regeneration requires Blender 4.5.12 LTS. Blender 4.3.2 is incompatible and official exact-runtime retrieval returned HTTP 403. The adapter is present; exact-runtime acceptance is not complete.
-- Architecture MVP acceptance as a whole: the Lane A gate remains open. Successful original Blender or FreeCAD examples cannot substitute for it.
+- Optional pinned Lane A end-to-end regeneration requires Blender 4.5.12 LTS. Blender 4.3.2 is incompatible and official exact-runtime retrieval returned HTTP 403. The adapter is present; exact-runtime acceptance is not complete.
+- Original architecture MVP acceptance as a whole: its Lane A gate remains open. Successful original Blender or FreeCAD examples cannot substitute for it. This historical contract remains unchanged, but does not gate default `dot-native` acceptance.
 - Any run whose required geometry check fails, crashes, is unavailable or exhausts its budget. Such evidence is blocked, not geometry-validated.
 
 ## Deferred or not certified
 
 - General measured wall thickness, tiny-feature and clearance assessment; full orientation/support assessment; named slicer/toolpath checks and physical-print evidence. Bounded feature probes are not substitutes for these checks.
 - General modeling requests, assemblies, intentional hollow/nested-shell profiles and broader generator families.
-- Experimental 3D Slicer and additional runtime/operating-system profiles. Cross-platform installers and desktop-app packaging are outside this Linux instruction set.
+- Detected 3D Slicer files are optional and experimental; inventory does not establish integration, toolpath validation or generator acceptance. Additional runtime/operating-system profiles. Cross-platform installers and desktop-app packaging are outside this Linux instruction set.
 - Adversarial untrusted-code execution with network/filesystem isolation and aggregate process-tree resource controls.
 - Exhaustive coverage of every proposed architectural fixture, signed releases and binary runtime redistribution.
 - A fresh-machine test without relying on existing native installations; downloadable runtime setup and broader benchmark claims.

@@ -1,6 +1,6 @@
 # Quickstart
 
-This is a Linux native preview for the two original bounded generators. It is not the blocked Lane A migration or a general text-to-3D engine. Read [runtime setup](runtime-setup.md) before installing anything.
+This is the default `dot-native` Linux profile for three bounded generators: Blender calibration block and flat robot mascot, plus the FreeCAD stepped block with a through-hole. It uses installed applications, without downloads or upgrades. Optional Lane A is separate and blocked; it is not required for this default workflow. Read [runtime setup](runtime-setup.md) before considering any setup change.
 
 ## 1. Use a reviewed source checkout
 
@@ -13,20 +13,20 @@ python -m printkit --help
 python -m printkit doctor --help
 ```
 
-The same commands are available as `printkit` when the project entry point is installed. A package installation needs build tooling; the `PYTHONPATH` route avoids a package installation for this checkout.
+The same commands are available as `printkit` after an editable installation that retains this full reviewed source checkout. A standalone wheel is not a supported distribution: workflows need the checkout’s schemas, examples, locks and snapshot inputs. The default `PYTHONPATH` route avoids pip, build-tool installation and downloads.
 
-Use an already installed Blender 4.3.2 executable. If necessary, set `PRINTKIT_BLENDER` to its reviewed executable path. Do not download another runtime silently or change the runtime guard.
+Use the already installed Blender 4.3.2 and FreeCAD 1.0.0 / Open CASCADE 7.8.1 native modules. If necessary, set `PRINTKIT_BLENDER` to its reviewed executable path. FreeCAD uses system Python; see [runtime setup](runtime-setup.md). Do not download or upgrade a runtime silently or change a runtime guard.
 
 ## 2. Check source and capability
 
 ```sh
 python -m unittest discover -s tests -v
 python -m printkit doctor --json
-python -m printkit doctor --json --smoke build/doctor-smoke-001
+python -m printkit doctor --json --all-smoke build/dot-native-smoke-001
 python -m printkit check-request examples/calibration-part/request.json
 ```
 
-`calibration-part` is the example directory; its generator ID is `calibration-block`. The explicit `--smoke` command generates, reopens, validates and renders a fresh calibration run. Discovery without that option remains unverified. Inspect its outputs to establish actual capability. A Lane A incompatibility message is expected on the 4.3.2 profile.
+`calibration-part` is the example directory; its generator ID is `calibration-block`. The explicit `--all-smoke` command executes all three default generators into a new parent directory, including native reopening, exported-STL validation and five-view rendering. Inspect each result; a failed required default family is not a pass. Doctor success requires all three native geometry/render workflows to pass; it leaves manual/printing checks unknown. Discovery without smoke remains unverified. Optional Lane A incompatibility and observational optional-tool inventory do not block the default profile. For a selected Blender calibration smoke only, use `doctor --json --smoke NEW_RUN`; use `doctor --backend freecad --json --smoke NEW_RUN` for the stepped part.
 
 ## 3. Create a fresh example attempt
 

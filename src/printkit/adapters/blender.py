@@ -8,9 +8,10 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import tempfile
 from .base import AdapterError, RuntimeUnavailable
 from ..execution import run_process
-from ..common import write_json, load_json
+from ..common import ForgeError, write_json, load_json
 
 ROOT = Path(__file__).resolve().parents[3]
 SCRIPT = Path(__file__).with_name('native_scene.py')
@@ -74,8 +75,23 @@ def discover(blender=None, upstream=None):
         version=result.stdout.splitlines()[0].removeprefix('Blender ').strip()
         report.update(version=version,binary_sha256=hashlib.sha256(binary.read_bytes()).hexdigest(),
                       status='unverified',executable=binary.name)
+        supported = version=='4.3.2' and platform.system()=='Linux' and platform.machine()=='x86_64'
+        if supported:
+            with tempfile.TemporaryDirectory(prefix='printkit-blender-discover-') as temporary:
+                run=Path(temporary)
+                _run('discover',run,binary)
+                native=load_json(run/'runtime.json')
+            report.update(python_version=native['python_version'], renderer=native['renderer'],
+                          boolean_solvers=native['boolean_solvers'],
+                          stl_import=native['stl_import'], stl_export=native['stl_export'])
+            supported=(native['version']==version and native['python_version']=='3.13.5'
+                       and native['renderer']=='BLENDER_WORKBENCH'
+                       and native['stl_import'] is True and native['stl_export'] is True)
+        report['status']='unverified' if supported else 'incompatible'
+        if not supported:
+            report['reason']='Default native profile requires Linux x86_64 Blender 4.3.2 / Python 3.13.5 with Workbench and STL import/export'
         for model in ('calibration-block','geometric-mascot'):
-            report[model]='unverified' if version=='4.3.2' and platform.system()=='Linux' and platform.machine()=='x86_64' else 'incompatible'
+            report[model]='unverified' if supported else 'incompatible'
         if version!='4.5.12 LTS':
             report['lane-a-character']='incompatible'
             report['lane_a_reason']='Pinned upstream CLI requires Blender 4.5.12 LTS; its guard is not patched'
@@ -83,8 +99,11 @@ def discover(blender=None, upstream=None):
         try:report['upstream']=verify_upstream(source)
         except (AdapterError,OSError) as exc:report['upstream']={'status':'unavailable','reason':str(exc)}
         if version=='4.5.12 LTS' and report['upstream']['status']=='pass':report['lane-a-character']='unverified'
-    except (OSError,subprocess.SubprocessError,RuntimeUnavailable,IndexError) as exc:
+    except (OSError,subprocess.SubprocessError,ForgeError,IndexError,KeyError,ValueError) as exc:
+        report['status']='unavailable'
         report['reason']=str(exc)
+        for model in ('calibration-block','geometric-mascot','lane-a-character'):
+            report[model]='unavailable'
     return report
 
 
@@ -94,6 +113,7 @@ def _run(mode,run,blender=None):
     return run_process([binary,'--background','--factory-startup','--offline-mode',
                         '--disable-autoexec','--threads','2','--python-exit-code','1',
                         '--python',SCRIPT,'--',mode,run],run,run/'logs'/f'{mode}.log',
+                       timeout=30 if mode=='discover' else 600,
                        env_extra={'BLENDER_USER_CONFIG':str(run/'.blender-config'),
                                   'BLENDER_USER_SCRIPTS':str(run/'.blender-scripts')})
 
@@ -121,7 +141,8 @@ def generate(request,run_dir,blender=None,upstream=None):
             'provenance':{'generator_id':model,'generator_version':'1',
                           'implementation':'dot-forge-original-reviewed-native',
                           'script_sha256':hashlib.sha256(SCRIPT.read_bytes()).hexdigest(),
-                          'blender_version':capability['version'],'binary_sha256':capability['binary_sha256']}}
+                          'blender_version':capability['version'],'python_version':capability.get('python_version'),
+                          'binary_sha256':capability['binary_sha256']}}
 
 
 def render(request,run_dir,blender=None):
@@ -135,7 +156,8 @@ def render(request,run_dir,blender=None):
         if not path.is_file() or path.stat().st_size<100:raise AdapterError('Preview missing')
     return {'status':'pass','views':[f'previews/{v}.png' for v in VIEWS],'metrics':metrics,
             'subject':'exact exported printing STL','visual_completeness':'unknown',
-            'provenance':{'blender_version':capability['version'],'binary_sha256':capability['binary_sha256']}}
+            'provenance':{'blender_version':capability['version'],'python_version':capability.get('python_version'),
+                          'binary_sha256':capability['binary_sha256']}}
 
 
 def smoke(run_dir,blender=None,upstream=None):

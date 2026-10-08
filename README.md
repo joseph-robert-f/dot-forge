@@ -2,7 +2,7 @@
 
 Premade instructions and reviewed model generators for making **bounded, original 3D-printing candidates on a dot's Linux cloud computer**. Give your dot this repository and the prompt below; you do not need to operate a modeling app yourself.
 
-This is a source-only starter, not an application installer or a general text-to-anything modeler. Python 3.11+ coordinates separately installed native applications. Your dot must check its own computer: another dot may not have the same applications or capabilities.
+This is a source-only starter, not an application installer or a general text-to-anything modeler. The default `dot-native` profile uses the applications already installed on the dot cloud computer: Blender 4.3.2 and FreeCAD 1.0.0 / Open CASCADE 7.8.1. Python 3.11+ coordinates them (observed orchestration Python 3.12.14; system Python 3.13.5 for FreeCAD). Your dot must check its own computer: another dot may not have the same applications or capabilities.
 
 ## Copy this to your dot
 
@@ -20,7 +20,9 @@ For a specific starting point, add one of these:
 
 Choose FreeCAD for this supported dimensioned-solid family and Blender for the supported flat mascot or calibration mesh. A different part, assembly or organic character needs a separately reviewed generator; a prompt cannot expand these families automatically.
 
-**Release scope remains a bounded native preview.** The pinned upstream Lane A adapter requires Blender 4.5.12 LTS and is still blocked: official exact-runtime retrieval returned HTTP 403. No alternate solver or bypass is substituted. The working Blender examples and the new FreeCAD route do not complete that gate. See [acceptance status](docs/acceptance.md).
+**The default workflow is the three bounded native generators above.** Run `python -m printkit doctor --json --all-smoke NEW_DIRECTORY` to test all three on each dot. Discovery alone is not acceptance. Optional installed tools, including experimental 3D Slicer, are observational inventory, not supported model generators.
+
+**Release scope remains a bounded native preview.** The optional pinned upstream Lane A adapter still requires Blender 4.5.12 LTS and remains blocked: official exact-runtime retrieval returned HTTP 403. It is not required for default `dot-native` acceptance. No alternate solver or bypass is substituted; the original architecture MVP remains incomplete because its Lane A contract is unchanged. See [acceptance status](docs/acceptance.md).
 
 A closed solid, successful render or geometry pass does not establish print suitability. Printer/material settings, thickness and clearance assessment, orientation/supports, slicing, visual approval and a physical test remain separate checks.
 

@@ -9,7 +9,7 @@ from .contracts import check_request
 def parser():
     root=argparse.ArgumentParser(prog="printkit",description="Bounded reviewed 3D model generation with independent evidence")
     commands=root.add_subparsers(dest="command",required=True)
-    cmd=commands.add_parser("doctor");cmd.add_argument("--json",action="store_true");cmd.add_argument("--smoke",metavar="NEW_RUN");cmd.add_argument("--backend",choices=["blender","freecad"],default="blender")
+    cmd=commands.add_parser("doctor");cmd.add_argument("--json",action="store_true");smokes=cmd.add_mutually_exclusive_group();smokes.add_argument("--smoke",metavar="NEW_RUN");smokes.add_argument("--all-smoke",metavar="NEW_DIR");cmd.add_argument("--backend",choices=["blender","freecad"],default="blender")
     cmd=commands.add_parser("check-request");cmd.add_argument("request")
     for name in ("run","generate"):
         cmd=commands.add_parser(name);cmd.add_argument("--request",required=True);cmd.add_argument("--output",required=True)
@@ -34,9 +34,10 @@ def main(argv=None):
         code=0
         if args.command=="doctor":
             from .doctor import doctor
-            result=doctor(args.smoke,args.backend)
+            result=doctor(args.smoke,args.backend,args.all_smoke)
             if result[args.backend]["status"] in ("unavailable","incompatible"):code=3
             if args.smoke and result.get("smoke_geometry_state")!="geometry_validated":code=4
+            if args.all_smoke and result["default_profile"]["smoke_status"]!="pass":code=4
         elif args.command=="check-request":
             check_request(load_json(args.request));result={"schema_version":"1","status":"pass"}
         elif args.command in ("run","generate"):
