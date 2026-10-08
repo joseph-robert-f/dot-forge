@@ -46,8 +46,8 @@ def verify_identity(run):
             request = check_request(load_json(run/"request.json"))
             current = adapter(request["backend"]).discover()
             version_key = "freecad_version" if request["backend"] == "freecad" else "blender_version"
-            fields = ["binary_sha256"] + (["native_module_sha256", "native_library_sha256", "occ_version", "python_version"] if request["backend"] == "freecad" else [])
-            if current.get("version") != provenance.get(version_key) or any(current.get(key) != provenance.get(key) for key in fields):
+            fields = ["binary_sha256"] + (["native_module_sha256", "native_library_sha256", "occ_version", "python_version"] if request["backend"] == "freecad" else ["python_version"])
+            if current.get("status") in ("unavailable", "incompatible") or current.get("version") != provenance.get(version_key) or any(current.get(key) != provenance.get(key) for key in fields):
                 raise ForgeError("Runtime identity changed; regenerate in a fresh attempt", 4, "runtime_changed")
     rendered = run/"render.json"
     if rendered.is_file():
@@ -55,7 +55,10 @@ def verify_identity(run):
         if provenance.get("binary_sha256"):
             from .adapters.blender import discover
             current = discover()
-            if current.get("version") != provenance.get("blender_version") or current.get("binary_sha256") != provenance["binary_sha256"]:
+            if (current.get("status") in ("unavailable", "incompatible")
+                or current.get("version") != provenance.get("blender_version")
+                or current.get("python_version") != provenance.get("python_version")
+                or current.get("binary_sha256") != provenance["binary_sha256"]):
                 raise ForgeError("Preview runtime identity changed; regenerate previews in a fresh attempt", 4, "preview_runtime_changed")
     return journal
 

@@ -1,4 +1,4 @@
-name: Geometry runtime acceptance
+name: Dot native runtime acceptance
 on:
   workflow_dispatch:
 permissions:
@@ -7,10 +7,12 @@ jobs:
   geometry:
     # Explicit opt-in owned runner provisioned with the documented exact runtime.
     # No cloud runner download or package substitution is performed here.
-    runs-on: [self-hosted, linux, x64, blender-4.3.2]
+    runs-on: [self-hosted, linux, x64, blender-4.3.2, freecad-1.0.0-occ-7.8.1]
     steps:
       - uses: actions/checkout@v4
-      - name: Real native generation, reopen and five-view fixtures
+      - name: All three native generators, negative fixtures and bundle regeneration
         env:
           PRINTKIT_INTEGRATION: '1'
+          PRINTKIT_FREECAD_INTEGRATION: '1'
+          PRINTKIT_DOT_INTEGRATION: '1'
         run: python3 scripts/check-release

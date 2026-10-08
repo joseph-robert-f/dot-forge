@@ -1,9 +1,9 @@
 # CLI reference
 
-Run from a reviewed checkout with `PYTHONPATH=src python -m printkit`, or use an installed `printkit` entry point. Commands return JSON on stdout and diagnostic text on stderr. JSON reports use `schema_version: "1"`; help is human-readable argparse output.
+Run from a reviewed checkout with `PYTHONPATH=src python -m printkit`, or use an editable-install `printkit` entry point while retaining the complete checkout (standalone wheels are unsupported). Commands return JSON on stdout and diagnostic text on stderr. JSON reports use `schema_version: "1"`; help is human-readable argparse output.
 
 ```text
-printkit doctor [--json] [--backend blender|freecad] [--smoke NEW_RUN]
+printkit doctor [--json] [--backend blender|freecad] [--smoke NEW_RUN | --all-smoke NEW_DIRECTORY]
 printkit check-request REQUEST_JSON
 printkit run --request REQUEST_JSON --output NEW_RUN
 printkit generate --request REQUEST_JSON --output NEW_RUN
@@ -16,7 +16,7 @@ printkit resume --run RUN
 printkit verify-bundle BUNDLE_ZIP
 ```
 
-- `doctor` discovers Python, platform, scratch, Blender and FreeCAD capabilities. `--json` is accepted for clarity; output is JSON either way. `--smoke` performs a real selected-backend generation/export/reopen/validation/render into a new run.
+- `doctor` discovers Python, platform, scratch, Blender and FreeCAD capabilities and reports the default `dot-native` profile. Optional-tool inventory is observational and does not imply workflow support. `--json` is accepted for clarity; output is JSON either way. `--smoke` performs a real selected-backend generation/export/reopen/validation/render into a new run. `--all-smoke` executes all three default generators into a new parent directory; inspect every result for default-profile acceptance. Neither mode downloads or upgrades applications. Optional Lane A remains separately blocked and is not required for default acceptance.
 - `check-request` checks the strict supported request contract without generating geometry.
 - `generate` creates the source snapshot and native/export artifacts. It does not establish independent geometry validity.
 - `run` generates, validates, renders and finalizes the evidence directory. ZIP bundling is separate.
@@ -42,6 +42,6 @@ Completed attempts are immutable: standalone `validate` and `render` reject a co
 | 6 | Execution timeout |
 | 7 | Internal failure |
 
-A geometry-valid `run`, `validate` or `inspect` normally exits 5 because printing/manual checks remain unresolved. Do not use `command && next-command` if you intend to continue after this expected review state without examining it. A successful doctor smoke or benchmark may exit 0 for its narrower geometry-test scope while printing remains unverified. Read the structured report, not just the exit code.
+A geometry-valid `run`, `validate` or `inspect` normally exits 5 because printing/manual checks remain unresolved. Do not use `command && next-command` if you intend to continue after this expected review state without examining it. A successful doctor smoke or benchmark may exit 0 for its narrower geometry-test scope while printing remains unverified. `doctor --all-smoke` succeeds only when all three required native workflows pass their geometry and render checks; manual/printing checks remain unknown. Read the structured report, not just the exit code.
 
 `doctor --backend blender|freecad` chooses the smoke workflow and command exit status (default: blender). Both native capabilities are reported. `--smoke NEW_RUN` performs the selected complete workflow, including actual STL validation and Blender previews.

@@ -35,6 +35,7 @@ def discover():
             _run('discover', run)
             native = load_json(run / 'runtime.json')
         supported = (native['version'] == '1.0.0' and native['occ_version'] == '7.8.1'
+                     and native['python_version'] == '3.13.5'
                      and platform.system() == 'Linux' and platform.machine() == 'x86_64')
         report.update(version=native['version'], occ_version=native['occ_version'],
                       python_version=native['python_version'], executable=PYTHON.name,
@@ -43,7 +44,7 @@ def discover():
                       status='unverified' if supported else 'incompatible')
         report[GENERATOR] = report['status']
         if not supported:
-            report['reason'] = 'Requires tested Linux x86_64 FreeCAD 1.0.0 / OCC 7.8.1 native profile'
+            report['reason'] = 'Requires tested Linux x86_64 FreeCAD 1.0.0 / OCC 7.8.1 / Python 3.13.5 native profile'
     except (ForgeError, OSError, KeyError, ValueError) as exc:
         report['reason'] = str(exc)
     return report

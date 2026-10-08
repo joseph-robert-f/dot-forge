@@ -9,7 +9,17 @@
       "binary_sha256": "0dfe9af0f3e67643ecf15327fa5e14e7315f61d1a81afdcafe76a71b1918e2b4",
       "binary_checksum_scope": "observed preinstalled executable; not vendor distribution verification",
       "official_url": "https://download.blender.org/release/Blender4.3/",
-      "status": "native generation, export, fresh reopen, five-view smoke passed; geometry validation separate"
+      "status": "native generation, export, fresh reopen, five-view smoke passed; geometry validation separate",
+      "capabilities": {
+        "renderer": "BLENDER_WORKBENCH",
+        "stl_import": true,
+        "stl_export": true,
+        "boolean_solvers": [
+          "FAST",
+          "EXACT"
+        ],
+        "MANIFOLD": false
+      }
     },
     "lane-a-linux-x86_64": {
       "engine": "Blender",
@@ -18,7 +28,8 @@
       "archive_sha256": "95e3a2dfedba3bd32ca54fc355eac6b15a11986954ccb02815a07535d0120a25",
       "checksum_source": "pinned upstream docker/blender-download.sha256",
       "status": "not-tested-here; official retrieval denied HTTP 403",
-      "renderer": "BLENDER_EEVEE_NEXT"
+      "renderer": "BLENDER_EEVEE_NEXT",
+      "required_for_default": false
     },
     "freecad-linux-x86_64": {
       "engine": "FreeCAD",
@@ -39,6 +50,37 @@
       "occ_source": "https://github.com/Open-Cascade-SAS/OCCT",
       "preview_engine": "Blender 4.3.2 / BLENDER_WORKBENCH",
       "status": "native generation and FCStd/STEP reopen tested; full workflow release acceptance recorded separately"
+    },
+    "dot-native": {
+      "system": "Linux",
+      "architecture": "x86_64",
+      "required_profiles": [
+        "calibration-linux-x86_64",
+        "freecad-linux-x86_64"
+      ],
+      "generators": [
+        "calibration-block",
+        "geometric-mascot",
+        "freecad-stepped-block"
+      ],
+      "orchestrator_python": ">=3.11",
+      "observed_orchestrator_python": "3.12.14",
+      "optional_profiles": [
+        "lane-a-linux-x86_64",
+        "slicer-experimental"
+      ],
+      "acceptance": "All three current generators must generate, reopen, export, independently validate and render; printing/manual checks remain separate."
+    },
+    "slicer-experimental": {
+      "engine": "3D Slicer",
+      "observed_installation_directory": "/opt/slicer/5.10.0",
+      "version_hint": "5.10.0",
+      "version_verification": "directory hint only in current scan; --version failed without an X display",
+      "required": false,
+      "status": "experimental-unverified; no supported generator or print slicing integration",
+      "official_url": "https://www.slicer.org/"
     }
-  }
+  },
+  "default_profile": "dot-native",
+  "baseline_scope": "Observed dot Linux cloud image on 2026-10-08; not a promise that every dot has these applications. Discover and smoke-test on each computer. No application downloads or upgrades."
 }

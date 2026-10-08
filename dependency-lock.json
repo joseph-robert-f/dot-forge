@@ -3,5 +3,5 @@
   "runtime_dependencies": [],
   "python": ">=3.11",
   "build_dependencies": [{"name": "setuptools", "version": "84.0.0", "license": "MIT"}],
-  "policy": "Runtime uses only Python standard library. Blender and pinned upstream source are separate runtime inputs; never downloaded during generation."
+  "policy": "Runtime orchestration uses only Python standard library. The default dot-native profile uses separately installed Blender and FreeCAD/Open CASCADE; optional Lane A uses separately reviewed pinned upstream source and its exact runtime. Optional tool inventory is not a dependency or acceptance claim. No runtime is downloaded or upgraded during generation."
 }

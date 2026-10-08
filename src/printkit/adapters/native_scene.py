@@ -127,7 +127,14 @@ if __name__ == '__main__':
     mode, directory=args
     run=Path(directory).resolve()
     for name in ('native','exports','previews'):(run/name).mkdir(exist_ok=True)
-    if mode=='generate':generate(run,json.loads((run/'request.json').read_text()))
+    if mode=='discover':
+        bpy.context.scene.render.engine='BLENDER_WORKBENCH'
+        dump(run/'runtime.json',{'version':bpy.app.version_string,
+             'python_version':sys.version.split()[0], 'renderer':bpy.context.scene.render.engine,
+             'boolean_solvers':[i.identifier for i in bpy.types.BooleanModifier.bl_rna.properties['solver'].enum_items],
+             'stl_import':bpy.ops.wm.stl_import.get_rna_type().identifier=='WM_OT_stl_import',
+             'stl_export':bpy.ops.wm.stl_export.get_rna_type().identifier=='WM_OT_stl_export'})
+    elif mode=='generate':generate(run,json.loads((run/'request.json').read_text()))
     elif mode=='reopen':reopen(run)
     elif mode=='preview':preview(run)
     else:raise ValueError('unsupported reviewed operation')
