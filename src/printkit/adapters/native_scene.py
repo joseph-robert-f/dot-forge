@@ -109,8 +109,10 @@ def preview(run):
     scene.collection.objects.link(camera);scene.camera=camera
     camera.data.type='ORTHO';camera.data.ortho_scale=extent*1.65
     camera.data.clip_end=distance*10
+    request=json.loads((run/'request.json').read_text())
+    oblique=(-1,-1,.8) if request.get('backend') == 'freecad' else (1,-1,.8)
     for name,direction in [('front',(0,-1,0)),('side',(1,0,0)),('back',(0,1,0)),
-                           ('top',(0,0,1)),('oblique',(1,-1,.8))]:
+                           ('top',(0,0,1)),('oblique',oblique)]:
         camera.location=center+Vector(direction).normalized()*distance
         camera.rotation_euler=(center-camera.location).to_track_quat('-Z','Y').to_euler()
         scene.render.filepath=str(run/'previews'/f'{name}.png')

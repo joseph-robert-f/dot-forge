@@ -18,7 +18,7 @@ Runtime orchestration uses the Python standard library and declares no third-par
 
 Blender is an external application with its own [licensing terms](https://www.blender.org/about/license/). Runtime version and provenance records are in `runtime-lock.json`; no Blender binary, container image, font package or runtime archive is distributed. Observed executable hashes are not vendor-distribution verification.
 
-FreeCAD and 3D Slicer integrations are deferred. Their names in the roadmap do not mean their binaries, source or dependencies are included or that their licenses have been cleared for future redistribution.
+The FreeCAD adapter invokes separately installed FreeCAD 1.0.0 / Open CASCADE 7.8.1 native modules through system Python. [FreeCAD describes its main source as LGPL version 2 or later](https://www.freecad.org/contributing.php), with individual files and dependencies having their own notices. [Open CASCADE uses LGPL 2.1 with its additional exception](https://github.com/Open-Cascade-SAS/OCCT/blob/master/README.md). Consult the exact installed distribution and upstream licensing notices before any binary redistribution. This repository contains only the original adapter and generator source, not those applications or libraries. 3D Slicer integration remains deferred.
 
 ## Assets and output
 
