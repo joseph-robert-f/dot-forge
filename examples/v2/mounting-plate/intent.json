@@ -1,0 +1,94 @@
+{
+  "ask": "I need a 60 x 40 mm mounting plate, 5 mm thick, with four 4 mm screw holes 6 mm in from each corner. Flat bottom, rounded corners.",
+  "confirmation": {
+    "by": "user",
+    "note": "Example: user accepted a 4 mm corner radius as a placeholder.",
+    "status": "confirmed"
+  },
+  "envelope": {
+    "size_mm": [
+      60,
+      40,
+      5
+    ],
+    "tolerance_mm": 0.05
+  },
+  "features": [
+    {
+      "axis": "z",
+      "depth": "through",
+      "diameter_mm": 4,
+      "id": "screw-hole-1",
+      "kind": "hole",
+      "position_mm": [
+        6,
+        6
+      ],
+      "source": "four 4 mm screw holes 6 mm in from each corner",
+      "tolerance_mm": 0.05
+    },
+    {
+      "axis": "z",
+      "depth": "through",
+      "diameter_mm": 4,
+      "id": "screw-hole-2",
+      "kind": "hole",
+      "position_mm": [
+        54,
+        6
+      ],
+      "source": "four 4 mm screw holes 6 mm in from each corner",
+      "tolerance_mm": 0.05
+    },
+    {
+      "axis": "z",
+      "depth": "through",
+      "diameter_mm": 4,
+      "id": "screw-hole-3",
+      "kind": "hole",
+      "position_mm": [
+        6,
+        34
+      ],
+      "source": "four 4 mm screw holes 6 mm in from each corner",
+      "tolerance_mm": 0.05
+    },
+    {
+      "axis": "z",
+      "depth": "through",
+      "diameter_mm": 4,
+      "id": "screw-hole-4",
+      "kind": "hole",
+      "position_mm": [
+        54,
+        34
+      ],
+      "source": "four 4 mm screw holes 6 mm in from each corner",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "flat-bottom",
+      "kind": "planar_face",
+      "min_area_mm2": 2300,
+      "normal": "-z",
+      "offset": "min",
+      "source": "flat bottom",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "rounded-corners",
+      "kind": "note",
+      "source": "rounded corners",
+      "text": "All four vertical corners are rounded. The ask gives no radius; the plan uses 4 mm."
+    }
+  ],
+  "schema_version": "intent.v1",
+  "solid_count": 1,
+  "units": "mm",
+  "unknowns": [
+    "corner radius",
+    "screw head type (countersunk or pan)",
+    "printer and material",
+    "load on the plate"
+  ]
+}

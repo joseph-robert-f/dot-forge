@@ -2,6 +2,8 @@
 
 Dot Forge accepts declarative requests for a finite set of reviewed generators. Do not use it to execute arbitrary prompt-authored code, request-supplied scripts, shell commands, imported BLEND files, plugins or unreviewed generators. A repository checkout is executable code: review the selected revision and its dependencies before running it.
 
+The v2 preview accepts a declarative build plan (`schemas/plan.v1.json`). A fixed interpreter maps each operation name to one reviewed FreeCAD function. Plan values are never evaluated, imported or used as attribute or module names. Plans have step, point, copy and coordinate budgets. A plan widens the set of shapes, not the set of code that runs. FreeCAD still runs without network or filesystem isolation.
+
 ## Controls and limitations
 
 Generation uses fixed subprocess arguments, a reduced environment and a dedicated working directory. The Linux execution wrapper applies a wall-time watchdog and process-group cleanup; per-process address-space and file-size limits; output-directory size polling; and thread environment settings. See the recorded run controls for what actually applied.

@@ -44,7 +44,23 @@ The default profile is `dot-native`. It supports these three model families. Eac
 - **`geometric-mascot`** uses Blender. It makes the supplied flat robot outline with a constant depth. The supported dimensions change its size; they do not define a new character.
 - **`freecad-stepped-block`** uses FreeCAD. It makes an integral half-height base, a raised half-width step, and a vertical through-hole. The generator sets the step and hole proportions. See the [FreeCAD workflow](docs/freecad-workflow.md).
 
-Choose Blender for the block or flat mascot. Choose FreeCAD for the supported stepped solid. A different part, assembly, or organic character needs a separately reviewed generator. Keep changes within the [request contract](schemas/model-request.v1.json) and the selected generator's supported parameters.
+Choose Blender for the block or flat mascot. Choose FreeCAD for the supported stepped solid. A different part, assembly, or organic character needs a separately reviewed generator, or the v2 preview below. Keep changes within the [request contract](schemas/model-request.v1.json) and the selected generator's supported parameters.
+
+## v2 preview: open-ended parts in FreeCAD
+
+v2 is for a part that none of the three families can make. You do not choose a generator. Instead:
+
+1. **Intent.** The assistant writes the ask as measurable checks in `intent.json`: envelope, holes, flat faces and volume. Requirements that it cannot measure become notes for a person. Values that the ask does not state stay unknown. The user confirms the intent before any geometry is made.
+2. **Plan.** The assistant writes a FreeCAD feature tree in `plan.json`: primitives, extrusions, booleans, patterns and fillets. The plan is data, not code, and it is bound to the confirmed intent by hash.
+3. **Proof.** `printkit build` interprets the plan in FreeCAD, measures the solid, and checks each intent item. It also runs the independent STL checks. The report keeps "is it the part that was asked for?", "is the mesh sound?" and "is it ready to print?" separate.
+
+```sh
+python -m printkit check-intent examples/v2/mounting-plate/intent.json
+python -m printkit check-plan examples/v2/mounting-plate/plan.json --intent examples/v2/mounting-plate/intent.json
+python -m printkit build --intent examples/v2/mounting-plate/intent.json --plan examples/v2/mounting-plate/plan.json --output build/plate-001
+```
+
+**This is a preview.** The FreeCAD interpreter has not been run on a real FreeCAD runtime yet, and v2 does not make previews or bundles yet. See [v2: intent, plan, proof](docs/v2-intent-and-plan.md).
 
 ## Start with your Dot
 

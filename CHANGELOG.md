@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased: v2 preview
+
+- Add the v2 intent spec (`schemas/intent.v1.json`). It records the user's ask as measurable checks, notes for a person, and unknowns. A build needs a confirmed intent.
+- Add the v2 build plan (`schemas/plan.v1.json`). It is a declarative FreeCAD feature tree with 16 operations, bound to one intent by hash.
+- Add `printkit check-intent`, `check-plan`, `build` and `conform`.
+- Add a fixed FreeCAD plan interpreter and B-rep measurer. **It has not been run on a real FreeCAD runtime yet.**
+- Add conformance checks for envelope, volume, axis-aligned holes (through or blind) and flat faces. Unrequested holes go to a person.
+- Add two examples: the stepped block written as a plan, and an open-ended mounting plate.
+- v1 requests, generators and checks do not change. A report with `overall_state: blocked` now always exits 4.
+
 ## 1.02
 
 Release display name: **1.02**. The package version is **1.0.2**, and the Git tag is **v1.0.2**. This is a regular release, ready for the three supported Linux workflows. The existing 1.01 pre-release remains available.

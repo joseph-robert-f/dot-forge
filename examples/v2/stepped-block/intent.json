@@ -1,0 +1,69 @@
+{
+  "ask": "A 30 x 24 x 18 mm stepped calibration block: a full-width base of half height, a raised step over the right half, and a vertical through-hole in the lower ledge.",
+  "confirmation": {
+    "by": "user",
+    "note": "Example: matches the v1 freecad-stepped-block at 30 x 24 x 18 mm.",
+    "status": "confirmed"
+  },
+  "envelope": {
+    "size_mm": [
+      30,
+      24,
+      18
+    ],
+    "tolerance_mm": 0.01
+  },
+  "features": [
+    {
+      "axis": "z",
+      "depth": "through",
+      "diameter_mm": 7.5,
+      "id": "ledge-hole",
+      "kind": "hole",
+      "position_mm": [
+        7.5,
+        12
+      ],
+      "source": "vertical through-hole in the lower ledge",
+      "tolerance_mm": 0.01
+    },
+    {
+      "id": "flat-bottom",
+      "kind": "planar_face",
+      "min_area_mm2": 675,
+      "normal": "-z",
+      "offset": "min",
+      "source": "full-width base",
+      "tolerance_mm": 0.01
+    },
+    {
+      "id": "ledge-top",
+      "kind": "planar_face",
+      "min_area_mm2": 315,
+      "normal": "+z",
+      "offset": 9,
+      "source": "base of half height",
+      "tolerance_mm": 0.01
+    },
+    {
+      "id": "step-top",
+      "kind": "planar_face",
+      "min_area_mm2": 359,
+      "normal": "+z",
+      "offset": "max",
+      "source": "raised step over the right half",
+      "tolerance_mm": 0.01
+    }
+  ],
+  "schema_version": "intent.v1",
+  "solid_count": 1,
+  "units": "mm",
+  "unknowns": [
+    "printer and material",
+    "intended use beyond calibration"
+  ],
+  "volume_mm3": {
+    "max": 9325,
+    "min": 9320
+  }
+}
