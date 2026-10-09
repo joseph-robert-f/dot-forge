@@ -12,7 +12,7 @@ On each dot, use `doctor --json --all-smoke NEW_DIRECTORY` for fresh execution e
 
 The alignment changes were tested against package Python-source identity `9c30024908697f900dd2a4ef6756029ce27f0dc380928ac8cae2187a26734a67`. No model construction, Boolean solver, validation tolerance or supported generator parameters changed.
 
-- Source-only suite: **194 tests passed, 7 native opt-in tests skipped**.
+- Source-only suite: **194 tests run: 187 passed and 7 native opt-in tests skipped**.
 - Actual installed-runtime suite: **194 tests passed, no skips**, in 260.9 seconds, using `PRINTKIT_INTEGRATION=1 PRINTKIT_FREECAD_INTEGRATION=1 PRINTKIT_DOT_INTEGRATION=1 python3 scripts/check-release`.
 - All three default generators completed generation, native reopen, exported-STL validation, five-view rendering and hash-verified bundles. Each copied bundle was verified and extracted; each family regenerated using its embedded source with `python -S -B` and `PYTHONPATH`, without pip packages or downloaded/upgraded native applications.
 - The real FreeCAD negative fixtures still reject displaced, wrong-radius, blind, tilted and elliptical holes in FCStd and STEP independently. Source-snapshot no-link and bundle-integrity regressions remain passing.
