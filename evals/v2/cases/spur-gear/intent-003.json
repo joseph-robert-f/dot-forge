@@ -1,0 +1,66 @@
+{
+  "ask": "A 20 tooth spur gear, module 1, 6 mm thick, with a 5 mm D-shaft bore.",
+  "confirmation": {
+    "by": "user",
+    "note": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions. Revision: a D-bore is not a full cylinder, so it cannot be a measured hole. Moved to a note. Attempt 3: the D-bore is measured as a partial hole (286 degrees of a 5 mm circle) and the flat as a face 4.5 mm across from the far wall.",
+    "status": "confirmed"
+  },
+  "envelope": {
+    "size_mm": [
+      21.989,
+      21.989,
+      6
+    ],
+    "tolerance_mm": 0.05
+  },
+  "features": [
+    {
+      "id": "face-low",
+      "kind": "planar_face",
+      "min_area_mm2": 250,
+      "normal": "-z",
+      "offset": "min",
+      "source": "6 mm thick",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "teeth",
+      "kind": "note",
+      "source": "20 tooth spur gear, module 1",
+      "text": "20 involute teeth, module 1, 20 degree pressure angle."
+    },
+    {
+      "axis": "z",
+      "diameter_mm": 5,
+      "id": "bore",
+      "kind": "partial_hole",
+      "length_mm": 6,
+      "max_arc_deg": 292,
+      "min_arc_deg": 280,
+      "position_mm": [
+        10.9945,
+        10.9945
+      ],
+      "source": "5 mm D-shaft bore",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "d-flat",
+      "kind": "planar_face",
+      "max_area_mm2": 19,
+      "min_area_mm2": 17,
+      "normal": "-y",
+      "offset": 12.9945,
+      "source": "5 mm D-shaft bore",
+      "tolerance_mm": 0.05
+    }
+  ],
+  "schema_version": "intent.v1",
+  "solid_count": 1,
+  "units": "mm",
+  "unknowns": [
+    "mating gear",
+    "backlash",
+    "printer and material"
+  ]
+}

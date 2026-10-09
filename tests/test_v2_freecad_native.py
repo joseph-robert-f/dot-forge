@@ -145,6 +145,20 @@ class FreeCADPlanNativeTests(unittest.TestCase):
         self.assertEqual(statuses(report)['feature:slot-wall-low'], 'fail')
         self.assertEqual(statuses(report)['feature:slot-wall-high'], 'fail')
 
+    def test_partial_holes_measure_channels_slots_and_d_bores(self):
+        for name, attempt in (('cable-clip', '002'), ('slotted-plate', '003'), ('spur-gear', '003')):
+            with self.subTest(name=name):
+                report, _ = self.build(*field_case(name, attempt))
+                self.assert_conforms(report)
+        # No mouth: the channel is a full hole, so it is not the requested partial hole.
+        intent, _ = field_case('cable-clip', '002')
+        report, _ = self.build(intent, rebind(intent, load_json(FIELD / 'cable-clip/mutants/no-mouth.json')))
+        self.assertEqual(statuses(report)['feature:cable-channel'], 'fail')
+        self.assertEqual(statuses(report)['unrequested_holes'], 'needs_review')
+        intent, _ = field_case('spur-gear', '003')
+        report, _ = self.build(intent, rebind(intent, load_json(FIELD / 'spur-gear/mutants/round-bore.json')))
+        self.assertEqual(statuses(report)['feature:bore'], 'fail')
+
     def test_end_kinds_need_full_proof(self):
         # A void end must be clear across the whole aperture; a shoulder ring must be completely filled.
         script = '''

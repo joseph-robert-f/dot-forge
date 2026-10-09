@@ -157,6 +157,38 @@ class ConformanceTests(unittest.TestCase):
                     face['max_area_mm2'] = bound
                 self.assertEqual(statuses(conform(intent, stepped_measurement()))['feature:' + face['id']], expected)
 
+    def test_partial_hole_checks_arc_position_and_length(self):
+        intent, _ = example('stepped-block')
+        intent['features'].append({'id': 'channel', 'kind': 'partial_hole', 'axis': 'y', 'diameter_mm': 6,
+                                   'position_mm': [10, 9], 'min_arc_deg': 250, 'max_arc_deg': 270,
+                                   'length_mm': 24, 'tolerance_mm': 0.05})
+        channel = {'axis': 'y', 'radius_mm': 3, 'angle_rad': math.radians(259), 'kind': 'void',
+                   'position_mm': [10, 9], 'span_mm': [0, 24], 'ends_open': None, 'arc_rad': math.radians(259)}
+        cases = [
+            ({}, 'pass'),
+            ({'arc_rad': math.radians(240)}, 'fail'),
+            ({'arc_rad': math.radians(280)}, 'fail'),
+            ({'span_mm': [0, 20]}, 'fail'),
+            ({'position_mm': [12, 9]}, 'fail'),
+            ({'radius_mm': 3.5}, 'fail'),
+            ({'kind': 'boss'}, 'fail'),  # A convex round is not a channel.
+            # The parameter range can say more than the section; only the section counts.
+            ({'angle_rad': math.radians(300), 'arc_rad': math.radians(200)}, 'fail'),
+            ({'arc_rad': None}, 'unknown'),
+            ({'arc_rad': float('nan')}, 'unknown'),
+        ]
+        for change, expected in cases:
+            with self.subTest(change=change):
+                m = stepped_measurement()
+                m['cylinders'].append(dict(channel, **change))
+                report = conform(intent, m)
+                self.assertEqual(statuses(report)['feature:channel'], expected)
+                self.assertEqual(report['intent_state'], 'conforms' if expected == 'pass' else 'blocked')
+        # A full hole is never a partial hole, and a partial hole is never an unrequested full hole.
+        m = stepped_measurement()
+        m['cylinders'].append(dict(channel, angle_rad=2 * math.pi, arc_rad=None))
+        self.assertEqual(statuses(conform(intent, m))['feature:channel'], 'fail')
+
     def test_hole_ends_must_match_exactly(self):
         intent, _ = example('stepped-block')
         intent['features'][0]['depth'] = {'ends': {'min': 'shoulder', 'max': 'outside'}, 'depth_mm': 9}

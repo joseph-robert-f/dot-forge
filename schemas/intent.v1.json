@@ -321,6 +321,77 @@
                 "maxLength": 500
               }
             }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "A cylindrical void that does not go all the way around, such as a channel, a slot end or a D-bore. The arc is measured at the middle of its length.",
+            "required": [
+              "id",
+              "kind",
+              "axis",
+              "diameter_mm",
+              "position_mm",
+              "min_arc_deg",
+              "tolerance_mm"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "kind": {
+                "const": "partial_hole"
+              },
+              "axis": {
+                "enum": [
+                  "x",
+                  "y",
+                  "z"
+                ]
+              },
+              "diameter_mm": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 500
+              },
+              "position_mm": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "description": "Axis z: [x, y]. Axis y: [x, z]. Axis x: [y, z]."
+              },
+              "min_arc_deg": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "exclusiveMaximum": 360
+              },
+              "max_arc_deg": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "exclusiveMaximum": 360,
+                "description": "Optional. It must not be less than min_arc_deg."
+              },
+              "length_mm": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 500
+              },
+              "tolerance_mm": {
+                "type": "number",
+                "minimum": 0.001,
+                "maximum": 5
+              },
+              "source": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              }
+            }
           }
         ]
       }

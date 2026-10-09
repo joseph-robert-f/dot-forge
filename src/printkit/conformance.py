@@ -100,6 +100,36 @@ def check_hole_ends(feature, hole, code, expected):
     return record(code, "pass" if ok else "fail", actual, expected, method)
 
 
+def partial_holes(m):
+    return [c for c in m["cylinders"] if c["kind"] == "void" and c["angle_rad"] < FULL_TURN
+            and c["axis"] is not None and c.get("position_mm") is not None]
+
+
+def check_partial(feature, measured, claimed):
+    """A partial cylindrical void at this axis, diameter and position, with its arc at mid-length."""
+    axis, tol, want_d = feature["axis"], feature["tolerance_mm"], feature["diameter_mm"]
+    code = f"feature:{feature['id']}"
+    expected = {k: feature[k] for k in ("axis", "diameter_mm", "position_mm", "min_arc_deg", "max_arc_deg",
+                                        "length_mm", "tolerance_mm") if k in feature}
+    matches = [(i, c) for i, c in enumerate(measured) if c["axis"] == axis and i not in claimed
+               and want_d - tol <= 2 * c["radius_mm"] <= want_d + tol
+               and all(abs(a - b) <= tol for a, b in zip(c["position_mm"], feature["position_mm"]))]
+    method = "partial analytic cylinder diameter/axis/position; exact section at mid-length gives the arc"
+    if not matches:
+        return record(code, "fail", None, expected,
+                      f"no partial cylindrical void on axis {axis} at this diameter and position")
+    index, part = min(matches, key=lambda ic: math.dist(ic[1]["position_mm"], feature["position_mm"]))
+    claimed.add(index)
+    arc, span = part.get("arc_rad"), part.get("span_mm")
+    actual = {"diameter_mm": 2 * part["radius_mm"], "position_mm": part["position_mm"], "span_mm": span,
+              "arc_deg": math.degrees(arc) if finite(arc) else None}
+    if not finite(arc) or not isinstance(span, list) or len(span) != 2 or not all(map(finite, span)):
+        return record(code, "unknown", actual, expected, "the arc could not be measured")
+    ok = feature["min_arc_deg"] <= actual["arc_deg"] <= feature.get("max_arc_deg", 360) \
+        and ("length_mm" not in feature or abs((span[1] - span[0]) - feature["length_mm"]) <= tol)
+    return record(code, "pass" if ok else "fail", actual, expected, method)
+
+
 def check_planar(feature, m):
     axis = feature["normal"][1]
     size = dict(zip(AXES, m["size_mm"]))[axis]
@@ -132,10 +162,13 @@ def conform(intent, measurement):
         checks.append(record("volume", "pass" if v["min"] <= m["volume_mm3"] <= v["max"] else "fail",
                              m["volume_mm3"], v))
     measured, claimed = holes(m), set()
+    partial, partial_claimed = partial_holes(m), set()
     # Exact intent features claim holes first; each measured hole satisfies at most one feature.
     for feature in intent["features"]:
         if feature["kind"] == "hole":
             checks.append(check_hole(feature, measured, claimed))
+        elif feature["kind"] == "partial_hole":
+            checks.append(check_partial(feature, partial, partial_claimed))
         elif feature["kind"] == "planar_face":
             checks.append(check_planar(feature, m))
         else:

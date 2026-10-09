@@ -287,6 +287,19 @@ def end_kinds(shape, foot, direction, radius, span, ends_open, inner_radii):
         return [{True: 'outside', False: 'floor'}.get(e) for e in ends_open]
 
 
+def mid_arc(faces, direction, radius, at):
+    """Arc a partial cylinder covers at the middle of its length, from the exact section.
+
+    The parameter range can follow an approximated trim curve, so it is not used.
+    Returns None if the section fails.
+    """
+    try:
+        length = sum(edge.Length for face in faces for wire in face.slice(direction, at) for edge in wire.Edges)
+        return length / radius if length > 0 and math.isfinite(length) else None
+    except Exception:
+        return None
+
+
 def cylinders(shape, low):
     """Group analytic cylinder faces into whole cylinders and probe each one."""
     pieces = []
@@ -308,7 +321,7 @@ def cylinders(shape, low):
             span = [(box.XMin, box.YMin, box.ZMin)[i], (box.XMax, box.YMax, box.ZMax)[i]]
         pieces.append({'axis': axis, 'direction': direction, 'foot': foot, 'radius': surface.Radius,
                        'span': span, 'angle': u1 - u0,
-                       'void': faces_axis(face, surface, direction)})
+                       'void': faces_axis(face, surface, direction), 'faces': [face]})
     groups = []
     for piece in sorted(pieces, key=lambda p: p['span'][0]):
         for group in groups:
@@ -320,9 +333,10 @@ def cylinders(shape, low):
                 group['span'][1] = max(group['span'][1], piece['span'][1])
                 # Split faces of one cylinder share a span and add up their angles.
                 group['angle'] = group['angle'] + piece['angle'] if same else max(group['angle'], piece['angle'])
+                group['faces'] += piece['faces']
                 break
         else:
-            groups.append(dict(piece, span=list(piece['span'])))
+            groups.append(dict(piece, span=list(piece['span']), faces=list(piece['faces'])))
     result = []
     for g in groups:
         d, foot, (s0, s1) = g['direction'], g['foot'], g['span']
@@ -342,6 +356,8 @@ def cylinders(shape, low):
                          and o['angle'] >= 2 * math.pi - 1e-6 and (o['foot'] - foot).Length <= LINEAR_TOL
                          and o['radius'] < g['radius'] - 2 * SHOULDER_EDGE_MM]
                 entry['ends'] = end_kinds(shape, foot, d, g['radius'], (s0, s1), entry['ends_open'], inner)
+                if g['angle'] < 2 * math.pi - 1e-6:
+                    entry['arc_rad'] = mid_arc(g['faces'], d, g['radius'], (s0 + s1) / 2)
         result.append(entry)
     return result
 
@@ -415,6 +431,8 @@ def same_cylinder(a, b):
     near = lambda x, y, tol: (x is None) == (y is None) and (x is None or all(abs(i - j) <= tol for i, j in zip(x, y)))
     return (a['kind'] == b['kind'] and a['axis'] == b['axis'] and a['ends_open'] == b['ends_open']
             and a.get('ends') == b.get('ends')
+            and (a.get('arc_rad') is None) == (b.get('arc_rad') is None)
+            and (a.get('arc_rad') is None or abs(a['arc_rad'] - b['arc_rad']) <= 1e-6)
             and abs(a['radius_mm'] - b['radius_mm']) <= LINEAR_TOL and abs(a['angle_rad'] - b['angle_rad']) <= 1e-6
             and near(a['position_mm'], b['position_mm'], 1e-5) and near(a['span_mm'], b['span_mm'], SPAN_TOL))
 

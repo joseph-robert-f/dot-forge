@@ -22,6 +22,15 @@ def hole(id, axis, d, pos, depth="through", source=""):
             "depth": depth, "tolerance_mm": T, "source": source}
 
 
+def partial(id, axis, d, pos, arc, length=None, source=""):
+    """A partial cylindrical void: arc is (min, max) in degrees at mid-length."""
+    out = {"id": id, "kind": "partial_hole", "axis": axis, "diameter_mm": d, "position_mm": pos,
+           "min_arc_deg": arc[0], "max_arc_deg": arc[1], "tolerance_mm": T, "source": source}
+    if length:
+        out["length_mm"] = length
+    return out
+
+
 def face(id, normal, offset, area, source=""):
     return {"id": id, "kind": "planar_face", "normal": normal, "offset": offset,
             "min_area_mm2": area, "tolerance_mm": T, "source": source}
@@ -315,7 +324,15 @@ ATTEMPTS = {
         revise(spec, "a D-bore is not a full cylinder, so it cannot be a measured hole. Moved to a note.",
                lambda fs: [f for f in fs if f["id"] != "bore"] + [
                    note("bore", "5 mm bore for the D-shaft, centred on the gear.", "5 mm D-shaft bore")]),
-        None)],
+        None),
+        lambda spec: (
+            revise(spec, "Attempt 3: the D-bore is measured as a partial hole (286 degrees of a 5 mm circle) "
+                         "and the flat as a face 4.5 mm across from the far wall.",
+                   lambda fs: [f for f in fs if f["id"] not in ("bore", "d-flat")] + [
+                       partial("bore", "z", 5, [GEAR_TIP, GEAR_TIP], (280, 292), 6, "5 mm D-shaft bore"),
+                       dict(face("d-flat", "-y", round(GEAR_TIP + 2, 4), 17, "5 mm D-shaft bore"),
+                            max_area_mm2=19)]),
+            None)],
     "hollow-ball": [
         lambda spec: (
             revise(spec, "a sealed cavity is not supported. User accepted a 3 mm drain hole at the bottom.",
@@ -329,10 +346,26 @@ ATTEMPTS = {
     "counterbored-spacer": [lambda spec: (
         revise(spec, "the counterbore floor is a shoulder around the clearance hole, not a solid floor.",
                set_depth("counterbore", {"ends": {"min": "shoulder", "max": "outside"}, "depth_mm": 5})), None)],
-    "slotted-plate": [lambda spec: (
-        revise(spec, "the slot walls are 15 mm of flat between the round ends (45 mm2 each), so they get a "
-                     "maximum area too. A longer slot now fails.",
-               lambda fs: [dict(f, max_area_mm2=46) if f["id"].startswith("slot-wall") else f for f in fs]), None)],
+    "slotted-plate": [
+        lambda spec: (
+            revise(spec, "the slot walls are 15 mm of flat between the round ends (45 mm2 each), so they get a "
+                         "maximum area too. A longer slot now fails.",
+                   lambda fs: [dict(f, max_area_mm2=46) if f["id"].startswith("slot-wall") else f for f in fs]),
+            None),
+        lambda spec: (
+            revise(spec, "Attempt 3: the round slot ends are measured as two half holes.",
+                   lambda fs: [f for f in fs if f["id"] != "slot-ends"] + [
+                       partial(f"slot-end-{i}", "z", 5, [x, 10], (175, 185), 3, "slot 5 mm wide and 20 mm long")
+                       for i, x in ((1, 17.5), (2, 32.5))]),
+            None)],
+    "cable-clip": [lambda spec: (
+        revise(spec, "the cable channel is measured as a partial hole: 6.5 mm across, open at the bottom "
+                     "through a 5 mm mouth, so about 259 degrees.",
+               lambda fs: [f for f in fs if f["id"] != "cable-channel"] + [
+                   partial("cable-channel", "y", 6.5, [16, 5], (250, 270), 12, "holds one 6 mm cable"),
+                   note("cable-fit", "The 6 mm cable snaps in through the 5 mm mouth and stays put.",
+                        "holds one 6 mm cable")]),
+        None)],
     "shaft-collar": [lambda spec: (
         revise(spec, "the set-screw hole opens into the bore, not to the outside at both ends.",
                set_depth("set-screw", {"ends": {"min": "outside", "max": "void"}})), None)],
@@ -366,7 +399,12 @@ MUTANTS = {
         ("counterbore-from-bottom", "Counterbore cut from the bottom.",
          lambda: edit("counterbored-spacer", cbore={"at_mm": [8, 8, -1]}))],
     "cable-clip": [("no-channel", "Cable channel and its opening left out.",
-                    lambda: drop("cable-clip", "clip", "channel", "mouth"))],
+                    lambda: drop("cable-clip", "clip", "channel", "mouth")),
+                   ("no-mouth", "Channel cut without the opening, so the cable cannot snap in.",
+                    lambda: drop("cable-clip", "clip", "mouth"))],
+    "spur-gear": [("round-bore", "Plain round bore, no flat for the D-shaft.",
+                   lambda: (lambda p: dict(p, steps=[s for s in p["steps"] if s["id"] not in ("keep", "d-shaft")]))(
+                       edit("spur-gear", gear={"tools": ["shaft"]})))],
     "box-lid": [("lip-no-clearance", "Lip sized to the opening, 80 x 50, with no clearance.",
                  lambda: edit("box-lid", lip_outer={"size_mm": [80, 50, 4], "at_mm": [2, 2, 0]}))],
     "phone-stand": [("lean-70", "Support face at 70 degrees, not 60.",

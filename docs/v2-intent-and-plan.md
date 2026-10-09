@@ -56,10 +56,13 @@ All positions are in mm from the **minimum corner of the part's bounding box**. 
 | `envelope` (top level) | Bounding box of the solid | `size_mm` [x, y, z], `tolerance_mm` |
 | `volume_mm3` (top level, optional) | Solid volume | `min`, `max` |
 | `hole` | A full cylindrical void on an axis. Full-aperture B-rep checks decide what each end opens into. | `axis`, `diameter_mm`, `position_mm`, `depth`, `tolerance_mm` |
+| `partial_hole` | A cylindrical void that does not go all the way around, on an axis. An exact section at the middle of its length gives the arc. | `axis`, `diameter_mm`, `position_mm`, `min_arc_deg`, optional `max_arc_deg` and `length_mm`, `tolerance_mm` |
 | `planar_face` | Sum of flat face areas with this outward normal at this offset | `normal`, `offset` (`min`, `max` or mm), `min_area_mm2`, optional `max_area_mm2`, `tolerance_mm` |
 | `note` | Not measured. A person compares the views with the text. | `text` |
 
 Hole position: for axis `z`, use `[x, y]`. For axis `y`, use `[x, z]`. For axis `x`, use `[y, z]`.
+Partial hole: use it for a channel, a round slot end or a D-bore. Position and diameter work as for a hole. The arc is the part of the circle that is wall, in degrees, measured at the middle of the length: a half-round slot end is 180, and a 5 mm D-bore with a flat 4.5 mm from the far side is 286. Set `min_arc_deg` and `max_arc_deg` around the arc you expect. A full circle is never a partial hole, so a channel cut without its opening fails, and the full hole goes to `unrequested_holes`. A cross hole at the middle of the length reduces the measured arc.
+
 Face area: the check adds up every flat face with the same outward normal at the same offset. `min_area_mm2` catches a face that is missing or too small. `max_area_mm2` catches a face that is too big, for example the wall of a slot that is too long. Set the maximum from all the faces at that offset, not from one face.
 
 Hole depth has three forms:
@@ -107,7 +110,7 @@ See `schemas/intent.v1.json`, `schemas/plan.v1.json` and the two examples:
 ## Limits
 
 - One solid only. Assemblies and sealed cavities are not supported. `native_solid` requires one shell for each solid.
-- Features measured today: envelope, volume, axis-aligned cylindrical holes and axis-aligned flat faces. Other requirements (fillet radius, wall thickness, text, threads, angled holes and faces, slots, channels, D-bores) are notes for a person. A partial cylinder is never a measured hole. They are never a pass.
+- Features measured today: envelope, volume, axis-aligned cylindrical holes, axis-aligned partial holes and axis-aligned flat faces. Other requirements (fillet radius, wall thickness, text, threads, angled holes and faces) are notes for a person. They are never a pass. A partial cylinder is never a full hole.
 - A confirmed intent is a process record, not a signature. The tool cannot prove that the user saw it.
 - The STL check allows the envelope tolerance plus 0.05 mm, because mesh vertices on curved faces can sit inside the true surface.
 - The plan is interpreted by fixed code, but FreeCAD still runs without network or filesystem isolation. See [SECURITY.md](../SECURITY.md).

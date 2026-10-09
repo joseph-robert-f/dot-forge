@@ -1,0 +1,69 @@
+{
+  "ask": "A clip that screws to the underside of my desk and holds one 6 mm cable. I'll use a 3.5 mm wood screw.",
+  "confirmation": {
+    "by": "user",
+    "note": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions. Revision: the cable channel is measured as a partial hole: 6.5 mm across, open at the bottom through a 5 mm mouth, so about 259 degrees.",
+    "status": "confirmed"
+  },
+  "envelope": {
+    "size_mm": [
+      24,
+      12,
+      10
+    ],
+    "tolerance_mm": 0.05
+  },
+  "features": [
+    {
+      "axis": "z",
+      "depth": "through",
+      "diameter_mm": 4,
+      "id": "screw",
+      "kind": "hole",
+      "position_mm": [
+        6,
+        6
+      ],
+      "source": "3.5 mm wood screw",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "desk-face",
+      "kind": "planar_face",
+      "min_area_mm2": 260,
+      "normal": "+z",
+      "offset": "max",
+      "source": "screws to the underside of my desk",
+      "tolerance_mm": 0.05
+    },
+    {
+      "axis": "y",
+      "diameter_mm": 6.5,
+      "id": "cable-channel",
+      "kind": "partial_hole",
+      "length_mm": 12,
+      "max_arc_deg": 270,
+      "min_arc_deg": 250,
+      "position_mm": [
+        16,
+        5
+      ],
+      "source": "holds one 6 mm cable",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "cable-fit",
+      "kind": "note",
+      "source": "holds one 6 mm cable",
+      "text": "The 6 mm cable snaps in through the 5 mm mouth and stays put."
+    }
+  ],
+  "schema_version": "intent.v1",
+  "solid_count": 1,
+  "units": "mm",
+  "unknowns": [
+    "countersink for the screw head",
+    "how tight the cable should be held",
+    "printer and material"
+  ]
+}

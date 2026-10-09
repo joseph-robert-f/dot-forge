@@ -25,6 +25,9 @@ OPTIONAL = {"volume_mm3"}
 FEATURE_FIELDS = {
     "hole": ({"id", "kind", "axis", "diameter_mm", "position_mm", "depth", "tolerance_mm"}, {"source"}),
     "planar_face": ({"id", "kind", "normal", "offset", "min_area_mm2", "tolerance_mm"}, {"source", "max_area_mm2"}),
+    # A cylindrical void that does not go all the way around: a channel, a slot end, a D-bore.
+    "partial_hole": ({"id", "kind", "axis", "diameter_mm", "position_mm", "min_arc_deg", "tolerance_mm"},
+                     {"source", "max_arc_deg", "length_mm"}),
     "note": ({"id", "kind", "text"}, {"source"}),
 }
 
@@ -72,7 +75,7 @@ def check_feature(feature, envelope, index):
         text(feature["text"], f"{name}.text", 500)
         return
     number(feature["tolerance_mm"], f"{name}.tolerance_mm", 0.001, 5)
-    if feature["kind"] == "hole":
+    if feature["kind"] in ("hole", "partial_hole"):
         if feature["axis"] not in AXES:
             raise ForgeError(f"{name}.axis must be one of {AXES}")
         number(feature["diameter_mm"], f"{name}.diameter_mm", 0, 500, low_open=True)
@@ -82,6 +85,17 @@ def check_feature(feature, envelope, index):
                              "from the envelope minimum corner")
         for value, axis in zip(position, plane_axes(feature["axis"])):
             number(value, f"{name}.position_mm.{axis}", 0, size[axis])
+        if feature["kind"] == "partial_hole":
+            number(feature["min_arc_deg"], f"{name}.min_arc_deg", 0, 360, low_open=True)
+            if feature["min_arc_deg"] == 360:
+                raise ForgeError(f"{name}.min_arc_deg must be less than 360; a full circle is a hole")
+            if "max_arc_deg" in feature:
+                number(feature["max_arc_deg"], f"{name}.max_arc_deg", feature["min_arc_deg"], 360)
+                if feature["max_arc_deg"] == 360:
+                    raise ForgeError(f"{name}.max_arc_deg must be less than 360; a full circle is a hole")
+            if "length_mm" in feature:
+                number(feature["length_mm"], f"{name}.length_mm", 0, size[feature["axis"]], low_open=True)
+            return
         depth = feature["depth"]
         if isinstance(depth, dict) and "ends" in depth:
             exact_fields(depth, {"ends"}, {"depth_mm"}, f"{name}.depth")

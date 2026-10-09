@@ -38,8 +38,10 @@
     "person_checks": 1,
     "unknowns": 3,
     "status": "confirmed",
+    "revision": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions. Revision: the cable channel is measured as a partial hole: 6.5 mm across, open at the bottom through a 5 mm mouth, so about 259 degrees.",
     "mutants": {
-      "no-channel": "Cable channel and its opening left out."
+      "no-channel": "Cable channel and its opening left out.",
+      "no-mouth": "Channel cut without the opening, so the cable cannot snap in."
     }
   },
   {
@@ -107,7 +109,7 @@
     "person_checks": 1,
     "unknowns": 2,
     "status": "confirmed",
-    "revision": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions. Revision: the slot walls are 15 mm of flat between the round ends (45 mm2 each), so they get a maximum area too. A longer slot now fails.",
+    "revision": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions. Revision: the slot walls are 15 mm of flat between the round ends (45 mm2 each), so they get a maximum area too. A longer slot now fails. Attempt 3: the round slot ends are measured as two half holes.",
     "mutants": {
       "long-slot": "Slot 25 mm long, not 20."
     }
@@ -152,7 +154,10 @@
     "person_checks": 2,
     "unknowns": 3,
     "status": "confirmed",
-    "revision": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions. Revision: a D-bore is not a full cylinder, so it cannot be a measured hole. Moved to a note."
+    "revision": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions. Revision: a D-bore is not a full cylinder, so it cannot be a measured hole. Moved to a note. Attempt 3: the D-bore is measured as a partial hole (286 degrees of a 5 mm circle) and the flat as a face 4.5 mm across from the far wall.",
+    "mutants": {
+      "round-bore": "Plain round bore, no flat for the D-shaft."
+    }
   },
   {
     "case": "hollow-ball",

@@ -13,6 +13,10 @@ def example(name):
     return load_json(EXAMPLES / name / 'intent.json'), load_json(EXAMPLES / name / 'plan.json')
 
 
+# A valid partial hole for the stepped block; the tests break one field at a time.
+PARTIAL = {'id': 'channel', 'kind': 'partial_hole', 'axis': 'y', 'diameter_mm': 6, 'position_mm': [10, 9],
+           'min_arc_deg': 180, 'tolerance_mm': 0.05}
+
 class IntentTests(unittest.TestCase):
     def test_examples_pass(self):
         for name in ('stepped-block', 'mounting-plate', 'knob'):
@@ -72,6 +76,12 @@ class IntentTests(unittest.TestCase):
             lambda i: i['features'][1].update(offset=99),
             lambda i: i['features'][1].update(max_area_mm2=i['features'][1]['min_area_mm2'] - 1),
             lambda i: i['features'][1].update(max_area_mm2='600'),
+            lambda i: i['features'].append(dict(PARTIAL, min_arc_deg=360)),
+            lambda i: i['features'].append(dict(PARTIAL, max_arc_deg=100)),
+            lambda i: i['features'].append(dict(PARTIAL, max_arc_deg=360)),
+            lambda i: i['features'].append(dict(PARTIAL, length_mm=99)),
+            lambda i: i['features'].append({k: v for k, v in PARTIAL.items() if k != 'min_arc_deg'}),
+            lambda i: i['features'].append(dict(PARTIAL, depth='through')),
             lambda i: i['features'].append(copy.deepcopy(i['features'][0])),
             lambda i: i['volume_mm3'].update(min=10, max=5),
         ]
