@@ -1,0 +1,66 @@
+{
+  "ask": "A simple phone stand. The phone leans back at about 60 degrees, there's a lip at the front so it doesn't slide off, and it needs to fit a phone in a case, so around 80 mm wide.",
+  "confirmation": {
+    "by": "user",
+    "note": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions.",
+    "status": "confirmed"
+  },
+  "envelope": {
+    "size_mm": [
+      75,
+      80,
+      74.28
+    ],
+    "tolerance_mm": 0.05
+  },
+  "features": [
+    {
+      "id": "bottom",
+      "kind": "planar_face",
+      "min_area_mm2": 5900,
+      "normal": "-z",
+      "offset": "min",
+      "source": "simple phone stand",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "seat",
+      "kind": "planar_face",
+      "min_area_mm2": 900,
+      "normal": "+z",
+      "offset": 5,
+      "source": "fit a phone in a case",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "lip-face",
+      "kind": "planar_face",
+      "min_area_mm2": 700,
+      "normal": "+x",
+      "offset": 4,
+      "source": "a lip at the front so it doesn't slide off",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "lean-angle",
+      "kind": "note",
+      "source": "leans back at about 60 degrees",
+      "text": "The support face leans back 60 degrees from horizontal."
+    },
+    {
+      "id": "phone-fit",
+      "kind": "note",
+      "source": "fit a phone in a case",
+      "text": "A phone in its case fits in the 12 mm seat."
+    }
+  ],
+  "schema_version": "intent.v1",
+  "solid_count": 1,
+  "units": "mm",
+  "unknowns": [
+    "phone thickness in its case",
+    "phone height",
+    "charging cable access",
+    "printer and material"
+  ]
+}

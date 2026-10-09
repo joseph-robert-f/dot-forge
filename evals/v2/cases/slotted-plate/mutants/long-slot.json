@@ -1,0 +1,86 @@
+{
+  "intent_sha256": "87f80b99b108ab3de468e1d30a7aeae7e47c3b00c19545d8ce9357d9d8fb9682",
+  "result": "part",
+  "schema_version": "plan.v1",
+  "steps": [
+    {
+      "id": "plate",
+      "op": "box",
+      "size_mm": [
+        50,
+        20,
+        3
+      ]
+    },
+    {
+      "at_mm": [
+        17.5,
+        7.5,
+        -1
+      ],
+      "id": "slot-mid",
+      "op": "box",
+      "size_mm": [
+        20,
+        5,
+        5
+      ]
+    },
+    {
+      "at_mm": [
+        17.5,
+        10,
+        -1
+      ],
+      "height_mm": 5,
+      "id": "slot-end-a",
+      "op": "cylinder",
+      "radius_mm": 2.5
+    },
+    {
+      "at_mm": [
+        37.5,
+        10,
+        -1
+      ],
+      "height_mm": 5,
+      "id": "slot-end-b",
+      "op": "cylinder",
+      "radius_mm": 2.5
+    },
+    {
+      "at_mm": [
+        6,
+        10,
+        -1
+      ],
+      "height_mm": 5,
+      "id": "drill",
+      "op": "cylinder",
+      "radius_mm": 2
+    },
+    {
+      "count": 2,
+      "id": "drills",
+      "op": "linear_pattern",
+      "step_mm": [
+        38,
+        0,
+        0
+      ],
+      "target": "drill"
+    },
+    {
+      "from": "plate",
+      "id": "part",
+      "op": "cut",
+      "tools": [
+        "slot-mid",
+        "slot-end-a",
+        "slot-end-b",
+        "drills"
+      ]
+    }
+  ],
+  "units": "mm"
+}

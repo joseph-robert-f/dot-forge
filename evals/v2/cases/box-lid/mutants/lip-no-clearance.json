@@ -1,0 +1,66 @@
+{
+  "intent_sha256": "0971f04b5ab81032e45a0576340c89822f9c33ca1f46d477c1c3bb7a5244685f",
+  "result": "lid",
+  "schema_version": "plan.v1",
+  "steps": [
+    {
+      "at_mm": [
+        0,
+        0,
+        4
+      ],
+      "id": "plate",
+      "op": "box",
+      "size_mm": [
+        84,
+        54,
+        2
+      ]
+    },
+    {
+      "at_mm": [
+        2,
+        2,
+        0
+      ],
+      "id": "lip-outer",
+      "op": "box",
+      "size_mm": [
+        80,
+        50,
+        4
+      ]
+    },
+    {
+      "at_mm": [
+        3.75,
+        3.75,
+        -1
+      ],
+      "id": "lip-inner",
+      "op": "box",
+      "size_mm": [
+        76.5,
+        46.5,
+        5
+      ]
+    },
+    {
+      "from": "lip-outer",
+      "id": "lip",
+      "op": "cut",
+      "tools": [
+        "lip-inner"
+      ]
+    },
+    {
+      "id": "lid",
+      "of": [
+        "plate",
+        "lip"
+      ],
+      "op": "union"
+    }
+  ],
+  "units": "mm"
+}

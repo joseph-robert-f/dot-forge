@@ -1,0 +1,85 @@
+{
+  "ask": "Lid for a project box. The opening is 80 x 50 mm inside and the walls are 2 mm thick. Make the lid 2 mm thick with a lip that drops 4 mm into the opening so it press-fits.",
+  "confirmation": {
+    "by": "user",
+    "note": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions.",
+    "status": "confirmed"
+  },
+  "envelope": {
+    "size_mm": [
+      84,
+      54,
+      6
+    ],
+    "tolerance_mm": 0.05
+  },
+  "features": [
+    {
+      "id": "top",
+      "kind": "planar_face",
+      "min_area_mm2": 4500,
+      "normal": "+z",
+      "offset": "max",
+      "source": "lid 2 mm thick over an 80 x 50 opening with 2 mm walls",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "lip-bottom",
+      "kind": "planar_face",
+      "min_area_mm2": 390,
+      "normal": "-z",
+      "offset": "min",
+      "source": "a lip that drops 4 mm",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "lip-x-high",
+      "kind": "planar_face",
+      "min_area_mm2": 190,
+      "normal": "+x",
+      "offset": 81.85,
+      "source": "lip fits inside the 80 mm opening",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "lip-x-low",
+      "kind": "planar_face",
+      "min_area_mm2": 190,
+      "normal": "-x",
+      "offset": 2.15,
+      "source": "lip fits inside the 80 mm opening",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "lip-y-high",
+      "kind": "planar_face",
+      "min_area_mm2": 300,
+      "normal": "+y",
+      "offset": 51.85,
+      "source": "lip fits inside the 50 mm opening",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "lip-y-low",
+      "kind": "planar_face",
+      "min_area_mm2": 300,
+      "normal": "-y",
+      "offset": 2.15,
+      "source": "lip fits inside the 50 mm opening",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "press-fit",
+      "kind": "note",
+      "source": "so it press-fits",
+      "text": "The lip must press-fit. Only trying it on the real box shows this."
+    }
+  ],
+  "schema_version": "intent.v1",
+  "solid_count": 1,
+  "units": "mm",
+  "unknowns": [
+    "actual box tolerance",
+    "printer and material"
+  ]
+}

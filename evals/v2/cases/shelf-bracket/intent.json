@@ -1,0 +1,102 @@
+{
+  "ask": "Shelf bracket: 60 mm down the wall, 60 mm under the shelf, 25 mm wide, 4 mm thick, with a triangle brace between the legs. Two 4 mm screw holes in each leg.",
+  "confirmation": {
+    "by": "user",
+    "note": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions.",
+    "status": "confirmed"
+  },
+  "envelope": {
+    "size_mm": [
+      60,
+      25,
+      60
+    ],
+    "tolerance_mm": 0.05
+  },
+  "features": [
+    {
+      "axis": "x",
+      "depth": "through",
+      "diameter_mm": 4,
+      "id": "wall-1",
+      "kind": "hole",
+      "position_mm": [
+        6.5,
+        10
+      ],
+      "source": "two 4 mm screw holes in each leg",
+      "tolerance_mm": 0.05
+    },
+    {
+      "axis": "x",
+      "depth": "through",
+      "diameter_mm": 4,
+      "id": "wall-2",
+      "kind": "hole",
+      "position_mm": [
+        18.5,
+        10
+      ],
+      "source": "two 4 mm screw holes in each leg",
+      "tolerance_mm": 0.05
+    },
+    {
+      "axis": "z",
+      "depth": "through",
+      "diameter_mm": 4,
+      "id": "shelf-1",
+      "kind": "hole",
+      "position_mm": [
+        50,
+        6.5
+      ],
+      "source": "two 4 mm screw holes in each leg",
+      "tolerance_mm": 0.05
+    },
+    {
+      "axis": "z",
+      "depth": "through",
+      "diameter_mm": 4,
+      "id": "shelf-2",
+      "kind": "hole",
+      "position_mm": [
+        50,
+        18.5
+      ],
+      "source": "two 4 mm screw holes in each leg",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "wall-face",
+      "kind": "planar_face",
+      "min_area_mm2": 1400,
+      "normal": "-x",
+      "offset": "min",
+      "source": "60 mm down the wall",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "shelf-face",
+      "kind": "planar_face",
+      "min_area_mm2": 1400,
+      "normal": "+z",
+      "offset": "max",
+      "source": "60 mm under the shelf",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "brace",
+      "kind": "note",
+      "source": "a triangle brace between the legs",
+      "text": "A triangle brace joins the two legs."
+    }
+  ],
+  "schema_version": "intent.v1",
+  "solid_count": 1,
+  "units": "mm",
+  "unknowns": [
+    "shelf load",
+    "screw type",
+    "printer and material"
+  ]
+}

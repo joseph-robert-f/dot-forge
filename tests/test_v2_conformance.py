@@ -28,7 +28,7 @@ def hole(position, radius=3.75, span=(0, 9), ends=(True, True), angle=2 * math.p
 
 def stepped_measurement():
     """What the helper reports for the stepped-block example built as planned."""
-    return {'valid': True, 'closed': True, 'solid_count': 1, 'size_mm': [30, 24, 18],
+    return {'valid': True, 'closed': True, 'solid_count': 1, 'shell_count': 1, 'size_mm': [30, 24, 18],
             'volume_mm3': .75 * 30 * 24 * 18 - HOLE_AREA * 9,
             'cylinders': [hole((7.5, 12))],
             'planes': [{'normal': '-z', 'offset_mm': 0, 'area_mm2': 720 - HOLE_AREA},
@@ -42,7 +42,7 @@ def plate_measurement():
     corners = [hole(p, radius=4, span=(0, 5), angle=math.pi / 2, kind='boss') for p in ((4, 4), (56, 4), (4, 36), (56, 36))]
     holes = [hole(p, radius=2, span=(0, 5)) for p in ((6, 6), (54, 6), (6, 34), (54, 34))]
     area = 2400 - 4 * (16 - 4 * math.pi) - 4 * 4 * math.pi
-    return {'valid': True, 'closed': True, 'solid_count': 1, 'size_mm': [60, 40, 5], 'volume_mm3': area * 5,
+    return {'valid': True, 'closed': True, 'solid_count': 1, 'shell_count': 1, 'size_mm': [60, 40, 5], 'volume_mm3': area * 5,
             'cylinders': corners + holes, 'planes': [{'normal': '-z', 'offset_mm': 0, 'area_mm2': area}]}
 
 
@@ -75,15 +75,17 @@ class ConformanceTests(unittest.TestCase):
 
     def test_wrong_geometry_blocks(self):
         intent, _ = example('stepped-block')
-        cases = {
-            'envelope': lambda m: m.update(size_mm=[30, 24, 18.5]),
-            'native_solid': lambda m: m.update(solid_count=2),
-            'volume': lambda m: m.update(volume_mm3=9000),
-            'feature:ledge-hole': lambda m: m['cylinders'][0].update(radius_mm=3.5),
-            'feature:flat-bottom': lambda m: m['planes'][0].update(area_mm2=600),
-        }
-        for code, edit in cases.items():
-            with self.subTest(code=code):
+        cases = [
+            ('envelope', lambda m: m.update(size_mm=[30, 24, 18.5])),
+            ('native_solid', lambda m: m.update(solid_count=2)),
+            # A sealed cavity is a second shell in one solid.
+            ('native_solid', lambda m: m.update(shell_count=2)),
+            ('volume', lambda m: m.update(volume_mm3=9000)),
+            ('feature:ledge-hole', lambda m: m['cylinders'][0].update(radius_mm=3.5)),
+            ('feature:flat-bottom', lambda m: m['planes'][0].update(area_mm2=600)),
+        ]
+        for index, (code, edit) in enumerate(cases):
+            with self.subTest(code=code, index=index):
                 m = stepped_measurement()
                 edit(m)
                 report = conform(intent, m)

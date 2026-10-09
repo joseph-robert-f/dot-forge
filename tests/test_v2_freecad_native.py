@@ -13,10 +13,16 @@ from printkit.common import ForgeError, canonical_hash, load_json
 from printkit.forge import build
 
 EXAMPLES = Path(__file__).parents[1] / 'examples/v2'
+FIELD = Path(__file__).parents[1] / 'evals/v2/cases'
 
 
 def example(name):
     return load_json(EXAMPLES / name / 'intent.json'), load_json(EXAMPLES / name / 'plan.json')
+
+
+def field_case(name, attempt='001'):
+    intent = 'intent.json' if attempt == '001' else f'intent-{attempt}.json'
+    return load_json(FIELD / name / intent), load_json(FIELD / name / f'plan-{attempt}.json')
 
 
 def rebind(intent, plan):
@@ -94,6 +100,27 @@ class FreeCADPlanNativeTests(unittest.TestCase):
                 reopened = load_json(run / 'native/reopen.json')
                 self.assertTrue(reopened['fresh_process'])
                 self.assertEqual(len(report['generation']['provenance']['script_sha256']), 64)
+
+    def test_field_cases_measure_coaxial_and_curved_holes(self):
+        """Regressions found by the field test in evals/v2."""
+        for name in ('counterbored-spacer', 'tube', 'shaft-collar'):
+            with self.subTest(name=name):
+                report, run = self.build(*field_case(name))
+                self.assert_conforms(report)
+                # An outer wall around a bore is a boss, never an unrequested hole.
+                self.assertEqual(statuses(report)['unrequested_holes'], 'pass')
+        report, run = self.build(*field_case('counterbored-spacer'))
+        bore = next(c for c in load_json(run / 'native/measure.json')['cylinders'] if abs(c['radius_mm'] - 4.5) < 1e-6)
+        # The probe below the counterbore floor must not fall into the clearance hole.
+        self.assertEqual(bore['ends_open'], [False, True])
+
+    def test_sealed_cavity_blocks(self):
+        report, run = self.build(*field_case('hollow-ball'))
+        self.assertEqual(report['intent_state'], 'blocked')
+        self.assertEqual(statuses(report)['native_solid'], 'fail')
+        self.assertEqual(load_json(run / 'native/measure.json')['shell_count'], 2)
+        report, _ = self.build(*field_case('hollow-ball', '003'))
+        self.assert_conforms(report)
 
     def test_stepped_block_matches_v1_measurements(self):
         intent, plan = example('stepped-block')

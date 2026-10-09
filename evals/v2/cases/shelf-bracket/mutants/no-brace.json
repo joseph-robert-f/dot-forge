@@ -1,0 +1,94 @@
+{
+  "intent_sha256": "4e533df71c9c112581882cf9d040b366870f7222b47deaf318279a2fb3b1b1a9",
+  "result": "bracket",
+  "schema_version": "plan.v1",
+  "steps": [
+    {
+      "height_mm": 25,
+      "id": "profile",
+      "op": "extrude",
+      "plane": "xz",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          4,
+          56
+        ],
+        [
+          60,
+          56
+        ],
+        [
+          60,
+          60
+        ],
+        [
+          0,
+          60
+        ]
+      ]
+    },
+    {
+      "at_mm": [
+        -1,
+        6.5,
+        10
+      ],
+      "axis": "x",
+      "height_mm": 6,
+      "id": "wall-drill",
+      "op": "cylinder",
+      "radius_mm": 2
+    },
+    {
+      "count": 2,
+      "id": "wall-drills",
+      "op": "linear_pattern",
+      "step_mm": [
+        0,
+        12,
+        0
+      ],
+      "target": "wall-drill"
+    },
+    {
+      "at_mm": [
+        50,
+        6.5,
+        55
+      ],
+      "height_mm": 6,
+      "id": "shelf-drill",
+      "op": "cylinder",
+      "radius_mm": 2
+    },
+    {
+      "count": 2,
+      "id": "shelf-drills",
+      "op": "linear_pattern",
+      "step_mm": [
+        0,
+        12,
+        0
+      ],
+      "target": "shelf-drill"
+    },
+    {
+      "from": "profile",
+      "id": "bracket",
+      "op": "cut",
+      "tools": [
+        "wall-drills",
+        "shelf-drills"
+      ]
+    }
+  ],
+  "units": "mm"
+}

@@ -24,7 +24,8 @@ def check_measurement(m):
     """Reject malformed measurements instead of letting them pass by omission."""
     try:
         ok = (isinstance(m, dict) and type(m["valid"]) is bool and type(m["closed"]) is bool
-              and type(m["solid_count"]) is int and len(m["size_mm"]) == 3 and all(map(finite, m["size_mm"]))
+              and type(m["solid_count"]) is int and type(m["shell_count"]) is int
+              and len(m["size_mm"]) == 3 and all(map(finite, m["size_mm"]))
               and finite(m["volume_mm3"]) and isinstance(m["cylinders"], list) and isinstance(m["planes"], list))
         for c in m["cylinders"]:
             ok = ok and c["axis"] in (*AXES, None) and finite(c["radius_mm"]) and finite(c["angle_rad"]) \
@@ -95,9 +96,13 @@ def check_planar(feature, m):
 
 def conform(intent, measurement):
     m = check_measurement(measurement)
-    checks = [record("native_solid", "pass" if m["valid"] and m["closed"] and m["solid_count"] == intent["solid_count"] else "fail",
-                     {"valid": m["valid"], "closed": m["closed"], "solid_count": m["solid_count"]},
-                     {"valid": True, "closed": True, "solid_count": intent["solid_count"]})]
+    # One shell per solid: an inner shell is a sealed cavity, which v2 does not support.
+    whole = m["valid"] and m["closed"] and m["solid_count"] == intent["solid_count"] == m["shell_count"]
+    checks = [record("native_solid", "pass" if whole else "fail",
+                     {"valid": m["valid"], "closed": m["closed"], "solid_count": m["solid_count"],
+                      "shell_count": m["shell_count"]},
+                     {"valid": True, "closed": True, "solid_count": intent["solid_count"],
+                      "shell_count": intent["solid_count"]})]
     envelope = intent["envelope"]
     checks.append(record("envelope", "pass" if all(abs(a - b) <= envelope["tolerance_mm"]
                                                    for a, b in zip(m["size_mm"], envelope["size_mm"])) else "fail",

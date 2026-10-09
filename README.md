@@ -10,7 +10,7 @@ This repository contains source and instructions. It does not install applicatio
 
 [See it in action](#see-it-in-action) · [How it works](#how-it-works) · [Start with your Dot](#start-with-your-dot) · [Run the commands](#run-the-commands) · [Read the report](#read-the-report)
 
-> **Status: preview.** The native tests pass on a Dot's FreeCAD 1.0.0 / Open CASCADE 7.8.1 profile (commit `09128ea`). Five-view previews and evidence bundles are not connected to this workflow yet.
+> **Status: preview.** The native tests passed on a Dot's FreeCAD 1.0.0 / Open CASCADE 7.8.1 profile at commit `09128ea`. The measurer changed after that, from a [field test](evals/v2/README.md) with thirteen new requests. Run the native tests again on your Dot. Five-view previews and evidence bundles are not connected to this workflow yet.
 
 ## See it in action
 
@@ -89,7 +89,7 @@ python -m unittest discover -s tests
 PRINTKIT_FREECAD_INTEGRATION=1 python3 -m unittest tests.test_v2_freecad_native -v
 ```
 
-The first command runs the source tests. The second builds the examples and several fault cases in the installed FreeCAD. All 7 native tests must pass. A skipped test is not a pass.
+The first command runs the source tests. The second builds the examples and several fault cases in the installed FreeCAD. All 9 native tests must pass. A skipped test is not a pass.
 
 ### 2. Check the intent and the plan
 
@@ -150,8 +150,8 @@ To check a measurement against an intent again, run `python -m printkit conform 
 
 ## Limits
 
-- One solid only. Assemblies and hollow or nested shells are not supported.
-- Measured today: envelope, volume, holes on the x, y or z axis, and flat faces on those axes. Fillet radius, wall thickness, angled holes, threads and text are notes for a person. They are never a pass.
+- One solid only. Assemblies and sealed cavities are not supported. A part with a cavity fails `native_solid`.
+- Measured today: envelope, volume, holes on the x, y or z axis, and flat faces on those axes. Fillet radius, wall thickness, angled faces, slots, channels, D-bores, threads and text are notes for a person. They are never a pass. The [field test](evals/v2/README.md) lists the gaps it found.
 - A confirmed intent is a process record, not a signature. The tool cannot prove that you saw it.
 - Five-view previews and evidence ZIP bundles are not connected to this workflow yet. Compare the part with your request yourself before you use it.
 - Printer and material settings, clearances, orientation, supports, slicing and a physical test remain open.

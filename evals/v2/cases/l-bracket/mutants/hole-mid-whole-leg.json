@@ -1,0 +1,66 @@
+{
+  "intent_sha256": "f5a207d1dca279b840faf1f05fabcfdccc035fa108c23cc9fc057ab45951beec",
+  "result": "bracket",
+  "schema_version": "plan.v1",
+  "steps": [
+    {
+      "id": "base",
+      "op": "box",
+      "size_mm": [
+        30,
+        20,
+        3
+      ]
+    },
+    {
+      "id": "wall",
+      "op": "box",
+      "size_mm": [
+        3,
+        20,
+        30
+      ]
+    },
+    {
+      "id": "body",
+      "of": [
+        "base",
+        "wall"
+      ],
+      "op": "union"
+    },
+    {
+      "at_mm": [
+        16.5,
+        10,
+        -1
+      ],
+      "height_mm": 5,
+      "id": "drill-base",
+      "op": "cylinder",
+      "radius_mm": 2.25
+    },
+    {
+      "at_mm": [
+        -1,
+        10,
+        15
+      ],
+      "axis": "x",
+      "height_mm": 5,
+      "id": "drill-wall",
+      "op": "cylinder",
+      "radius_mm": 2.25
+    },
+    {
+      "from": "body",
+      "id": "bracket",
+      "op": "cut",
+      "tools": [
+        "drill-base",
+        "drill-wall"
+      ]
+    }
+  ],
+  "units": "mm"
+}

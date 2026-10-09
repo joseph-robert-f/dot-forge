@@ -1,0 +1,32 @@
+{
+  "ask": "make me a little box for my SD cards",
+  "confirmation": {
+    "status": "draft"
+  },
+  "envelope": {
+    "size_mm": [
+      1,
+      1,
+      1
+    ],
+    "tolerance_mm": 0.05
+  },
+  "features": [
+    {
+      "id": "holds-cards",
+      "kind": "note",
+      "source": "a little box for my SD cards",
+      "text": "Holds SD cards."
+    }
+  ],
+  "schema_version": "intent.v1",
+  "solid_count": 1,
+  "units": "mm",
+  "unknowns": [
+    "number of cards",
+    "full-size or microSD",
+    "lid or open tray",
+    "outside size",
+    "printer and material"
+  ]
+}

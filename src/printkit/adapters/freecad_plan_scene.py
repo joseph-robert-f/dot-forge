@@ -205,6 +205,30 @@ def named_axis(direction):
     return None
 
 
+def faces_axis(face, surface, direction):
+    """A void's outward (material) normal points toward the axis; a boss's points away."""
+    u0, u1, v0, v1 = face.ParameterRange
+    u, v = (u0 + u1) / 2, (v0 + v1) / 2
+    point, normal = face.valueAt(u, v), face.normalAt(u, v)
+    radial = point - surface.Center
+    radial = radial - direction * radial.dot(direction)
+    return normal.dot(radial) < 0
+
+
+def end_open(inside, foot, direction, radius, at):
+    """Probe a ring just inside the wall, beyond one end; None when the probes disagree.
+
+    Off-axis probes keep a smaller coaxial hole (under a counterbore) from
+    reading as an open end.
+    """
+    side = direction.cross(App.Vector(1, 0, 0) if abs(direction.x) < 0.9 else App.Vector(0, 1, 0)).normalize()
+    other = direction.cross(side)
+    ring = max(radius * 0.5, radius - 0.1)
+    outside = {not inside(foot + direction * at + (side * math.cos(a) + other * math.sin(a)) * ring)
+               for a in (0, math.pi / 2, math.pi, 3 * math.pi / 2)}
+    return outside.pop() if len(outside) == 1 else None
+
+
 def cylinders(shape, low):
     """Group analytic cylinder faces into whole cylinders and probe each one."""
     pieces = []
@@ -218,12 +242,19 @@ def cylinders(shape, low):
         u0, u1, v0, v1 = face.ParameterRange
         along = surface.Center.dot(direction)
         foot = surface.Center - direction * along
+        span = sorted([along + sign * v0, along + sign * v1])
+        if axis:
+            # The parameter range follows the approximated trim curve; the exact extent does not.
+            box = face.optimalBoundingBox(False, False)
+            i = 'xyz'.index(axis)
+            span = [(box.XMin, box.YMin, box.ZMin)[i], (box.XMax, box.YMax, box.ZMax)[i]]
         pieces.append({'axis': axis, 'direction': direction, 'foot': foot, 'radius': surface.Radius,
-                       'span': sorted([along + sign * v0, along + sign * v1]), 'angle': u1 - u0})
+                       'span': span, 'angle': u1 - u0,
+                       'void': faces_axis(face, surface, direction)})
     groups = []
     for piece in sorted(pieces, key=lambda p: p['span'][0]):
         for group in groups:
-            if (abs(abs(group['direction'].dot(piece['direction'])) - 1) <= 1e-9
+            if (group['void'] == piece['void'] and abs(abs(group['direction'].dot(piece['direction'])) - 1) <= 1e-9
                     and abs(group['radius'] - piece['radius']) <= LINEAR_TOL
                     and (group['foot'] - piece['foot']).Length <= LINEAR_TOL
                     and piece['span'][0] <= group['span'][1] + LINEAR_TOL):
@@ -238,16 +269,16 @@ def cylinders(shape, low):
     result = []
     for g in groups:
         d, foot, (s0, s1) = g['direction'], g['foot'], g['span']
-        void = not inside(foot + d * ((s0 + s1) / 2))
         entry = {'axis': g['axis'], 'radius_mm': g['radius'], 'angle_rad': g['angle'],
-                 'kind': 'void' if void else 'boss', 'position_mm': None, 'span_mm': None, 'ends_open': None}
+                 'kind': 'void' if g['void'] else 'boss', 'position_mm': None, 'span_mm': None, 'ends_open': None}
         if g['axis']:
             index = 'xyz'.index(g['axis'])
             plane = [i for i in range(3) if i != index]
             point = [foot.x, foot.y, foot.z]
             entry['position_mm'] = [point[i] - low[i] for i in plane]
             entry['span_mm'] = [s0 - low[index], s1 - low[index]]
-            entry['ends_open'] = [not inside(foot + d * (s0 - PROBE_MM)), not inside(foot + d * (s1 + PROBE_MM))]
+            entry['ends_open'] = [end_open(inside, foot, d, g['radius'], s0 - PROBE_MM),
+                                  end_open(inside, foot, d, g['radius'], s1 + PROBE_MM)]
         result.append(entry)
     return result
 
@@ -271,9 +302,12 @@ def planes(shape, low):
 
 
 def measure(shape):
-    box = shape.BoundBox
+    # The plain BoundBox includes trim-curve tolerance and can sit a few micrometres
+    # outside the surface; the optimal box is computed from the exact geometry.
+    box = shape.optimalBoundingBox(False, False)
     low = [box.XMin, box.YMin, box.ZMin]
     return {'valid': shape.isValid(), 'closed': shape.isClosed(), 'solid_count': len(shape.Solids),
+            'shell_count': len(shape.Shells),
             'size_mm': [box.XLength, box.YLength, box.ZLength], 'origin_mm': low,
             'volume_mm3': shape.Volume, 'area_mm2': shape.Area, 'face_count': len(shape.Faces),
             'edge_count': len(shape.Edges),
@@ -341,6 +375,7 @@ def round_trip_differences(native, step):
     """
     close = lambda a, b: abs(a - b) <= max(1e-6, abs(a) * VOLUME_AREA_RELATIVE_TOL)
     checks = {'solid_count': native['solid_count'] == step['solid_count'],
+              'shell_count': native['shell_count'] == step['shell_count'],
               'face_count': native['face_count'] == step['face_count'],
               'edge_count': native['edge_count'] == step['edge_count'],
               'size': all(abs(a - b) <= LINEAR_TOL for a, b in zip(native['size_mm'], step['size_mm'])),

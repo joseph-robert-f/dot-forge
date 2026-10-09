@@ -2,7 +2,7 @@
 
 v2 lets you make an open-ended part in FreeCAD. It does not limit you to the three reviewed generators. Instead, it controls how a part is described and how the result is checked.
 
-> **Status: preview.** The intent and plan contracts, the conformance checks and the CLI are tested without FreeCAD. The FreeCAD interpreter and measurer (`src/printkit/adapters/freecad_plan_scene.py`) pass the native tests (`tests/test_v2_freecad_native.py`) with conda-forge FreeCAD 1.0.0 and OCC 7.8.1 in a Debian 13 container. They passed on a Dot's exact runtime profile at commit `09128ea`. After a change to the helper, run `PRINTKIT_FREECAD_INTEGRATION=1 PYTHONPATH=src python3 -m unittest tests.test_v2_freecad_native -v` on your Dot before you trust a v2 result. Five-view previews and evidence bundles are not connected to v2 yet.
+> **Status: preview.** The intent and plan contracts, the conformance checks and the CLI are tested without FreeCAD. The FreeCAD interpreter and measurer (`src/printkit/adapters/freecad_plan_scene.py`) pass the native tests (`tests/test_v2_freecad_native.py`) with conda-forge FreeCAD 1.0.0 and OCC 7.8.1 in a Debian 13 container. They passed on a Dot's exact runtime profile at commit `09128ea`. The measurer changed after that (see the [field test](../evals/v2/README.md)), so run the native tests again on your Dot. After a change to the helper, run `PRINTKIT_FREECAD_INTEGRATION=1 PYTHONPATH=src python3 -m unittest tests.test_v2_freecad_native -v` on your Dot before you trust a v2 result. Five-view previews and evidence bundles are not connected to v2 yet.
 
 ## The three files
 
@@ -89,8 +89,8 @@ See `schemas/intent.v1.json`, `schemas/plan.v1.json` and the two examples:
 
 ## Limits
 
-- One solid only. Assemblies and hollow or nested shells are not supported.
-- Features measured today: envelope, volume, axis-aligned cylindrical holes and axis-aligned flat faces. Other requirements (fillet radius, wall thickness, text, threads, angled holes) are notes for a person. They are never a pass.
+- One solid only. Assemblies and sealed cavities are not supported. `native_solid` requires one shell for each solid.
+- Features measured today: envelope, volume, axis-aligned cylindrical holes and axis-aligned flat faces. Other requirements (fillet radius, wall thickness, text, threads, angled holes and faces, slots, channels, D-bores) are notes for a person. A partial cylinder is never a measured hole. They are never a pass.
 - A confirmed intent is a process record, not a signature. The tool cannot prove that the user saw it.
 - The STL check allows the envelope tolerance plus 0.05 mm, because mesh vertices on curved faces can sit inside the true surface.
 - The plan is interpreted by fixed code, but FreeCAD still runs without network or filesystem isolation. See [SECURITY.md](../SECURITY.md).

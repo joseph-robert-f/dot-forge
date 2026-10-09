@@ -1,0 +1,59 @@
+{
+  "ask": "A 50 mm long tube, 25 mm outside diameter, 21 mm inside.",
+  "confirmation": {
+    "by": "user",
+    "note": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions.",
+    "status": "confirmed"
+  },
+  "envelope": {
+    "size_mm": [
+      25,
+      25,
+      50
+    ],
+    "tolerance_mm": 0.05
+  },
+  "features": [
+    {
+      "axis": "z",
+      "depth": "through",
+      "diameter_mm": 21,
+      "id": "bore",
+      "kind": "hole",
+      "position_mm": [
+        12.5,
+        12.5
+      ],
+      "source": "21 mm inside",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "end-low",
+      "kind": "planar_face",
+      "min_area_mm2": 140,
+      "normal": "-z",
+      "offset": "min",
+      "source": "50 mm long tube",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "end-high",
+      "kind": "planar_face",
+      "min_area_mm2": 140,
+      "normal": "+z",
+      "offset": "max",
+      "source": "50 mm long tube",
+      "tolerance_mm": 0.05
+    }
+  ],
+  "schema_version": "intent.v1",
+  "solid_count": 1,
+  "units": "mm",
+  "unknowns": [
+    "printer and material"
+  ],
+  "volume_mm3": {
+    "max": 7250,
+    "min": 7200
+  }
+}

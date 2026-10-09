@@ -1,0 +1,72 @@
+{
+  "ask": "Spacer for an M5 bolt: 16 mm round, 12 mm tall, with a 5.5 mm clearance hole. Counterbore it from the top, 9 mm wide and 5 mm deep, so the bolt head sits below the surface.",
+  "confirmation": {
+    "by": "user",
+    "note": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions.",
+    "status": "confirmed"
+  },
+  "envelope": {
+    "size_mm": [
+      16,
+      16,
+      12
+    ],
+    "tolerance_mm": 0.05
+  },
+  "features": [
+    {
+      "axis": "z",
+      "depth": "through",
+      "diameter_mm": 5.5,
+      "id": "clearance",
+      "kind": "hole",
+      "position_mm": [
+        8,
+        8
+      ],
+      "source": "5.5 mm clearance hole",
+      "tolerance_mm": 0.05
+    },
+    {
+      "axis": "z",
+      "depth": {
+        "depth_mm": 5,
+        "open_end": "max"
+      },
+      "diameter_mm": 9,
+      "id": "counterbore",
+      "kind": "hole",
+      "position_mm": [
+        8,
+        8
+      ],
+      "source": "counterbore it from the top, 9 mm wide and 5 mm deep",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "bottom",
+      "kind": "planar_face",
+      "min_area_mm2": 170,
+      "normal": "-z",
+      "offset": "min",
+      "source": "16 mm round",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "top",
+      "kind": "planar_face",
+      "min_area_mm2": 130,
+      "normal": "+z",
+      "offset": "max",
+      "source": "16 mm round",
+      "tolerance_mm": 0.05
+    }
+  ],
+  "schema_version": "intent.v1",
+  "solid_count": 1,
+  "units": "mm",
+  "unknowns": [
+    "bolt head height",
+    "printer and material"
+  ]
+}

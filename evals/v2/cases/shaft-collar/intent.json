@@ -1,0 +1,60 @@
+{
+  "ask": "Shaft collar for an 8 mm rod: 20 mm outside, 10 mm tall, with a hole in the side for an M3 set screw going into the bore.",
+  "confirmation": {
+    "by": "user",
+    "note": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions.",
+    "status": "confirmed"
+  },
+  "envelope": {
+    "size_mm": [
+      20,
+      20,
+      10
+    ],
+    "tolerance_mm": 0.05
+  },
+  "features": [
+    {
+      "axis": "z",
+      "depth": "through",
+      "diameter_mm": 8.2,
+      "id": "bore",
+      "kind": "hole",
+      "position_mm": [
+        10,
+        10
+      ],
+      "source": "shaft collar for an 8 mm rod",
+      "tolerance_mm": 0.05
+    },
+    {
+      "axis": "x",
+      "depth": "through",
+      "diameter_mm": 2.5,
+      "id": "set-screw",
+      "kind": "hole",
+      "position_mm": [
+        10,
+        5
+      ],
+      "source": "a hole in the side for an M3 set screw going into the bore",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "bottom",
+      "kind": "planar_face",
+      "min_area_mm2": 250,
+      "normal": "-z",
+      "offset": "min",
+      "source": "20 mm outside, 10 mm tall",
+      "tolerance_mm": 0.05
+    }
+  ],
+  "schema_version": "intent.v1",
+  "solid_count": 1,
+  "units": "mm",
+  "unknowns": [
+    "fit on the rod",
+    "printer and material"
+  ]
+}
