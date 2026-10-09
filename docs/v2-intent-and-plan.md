@@ -1,6 +1,6 @@
 # Dot Forge v2: intent, plan, proof (preview)
 
-v2 lets you make an open-ended part in FreeCAD. It does not limit you to the three reviewed generators. The guardrail is no longer *which shape* you can make. The guardrail is *how the shape is described and proved*.
+v2 lets you make an open-ended part in FreeCAD. It does not limit you to the three reviewed generators. Instead, it controls how a part is described and how the result is checked.
 
 > **Status: preview.** The intent and plan contracts, the conformance checks and the CLI are tested without FreeCAD. The FreeCAD interpreter and measurer (`src/printkit/adapters/freecad_plan_scene.py`) pass the native tests (`tests/test_v2_freecad_native.py`) with conda-forge FreeCAD 1.0.0 and OCC 7.8.1 in a Debian 13 container. They passed on a Dot's exact runtime profile at commit `f9aba35`. After a change to the helper, run `PRINTKIT_FREECAD_INTEGRATION=1 PYTHONPATH=src python3 -m unittest tests.test_v2_freecad_native -v` on your Dot before you trust a v2 result. Five-view previews and evidence bundles are not connected to v2 yet.
 

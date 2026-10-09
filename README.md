@@ -1,32 +1,29 @@
 # Dot Forge
 
-![Dot Forge overview sheet: three rendered models, labelled as candidates that are not print-ready.](docs/media/hero.png)
+![Dot Forge: a mounting plate built in FreeCAD, labelled with its measured size and holes, and a conforms status.](docs/media/hero.png)
 
 **Make a small 3D model with your Dot. Keep the model, the source, and the check results together.**
 
-Dot Forge gives your Dot instructions and three reviewed model generators. A generator makes a fixed type of model from dimensions that you supply. Your Dot runs the tools on its Linux cloud computer. You do not need to operate Blender or FreeCAD yourself.
+Dot Forge gives your Dot instructions, three reviewed model generators, and a v2 preview for open-ended FreeCAD parts. Your Dot runs the tools on its Linux cloud computer. You do not need to operate Blender or FreeCAD yourself.
 
-Use Dot Forge to make a calibration block, a flat robot mascot, or a stepped solid with a through-hole. Each result is a **3D-printing candidate**: a model that still needs printing and physical checks. A successful geometry check does not mean that the part is ready to print or safe to use.
+- **Reviewed generators:** a calibration block, a flat robot mascot, or a stepped solid with a through-hole, made from dimensions that you supply.
+- **v2 preview:** a part described in your own words. The request becomes measurable checks, FreeCAD builds a plan, and Dot Forge measures the result against the request. See [v2 preview](#v2-preview-open-ended-parts-in-freecad).
 
-This repository contains source and instructions. It does not install applications. It cannot turn an arbitrary description into any type of model.
+Each result is a **3D-printing candidate**: a model that still needs printing and physical checks. A successful geometry check does not mean that the part is ready to print or safe to use. This repository contains source and instructions. It does not install applications.
 
 [Start with your Dot](#start-with-your-dot) · [See the examples](#supported-models) · [Run the commands](#run-from-a-source-checkout) · [Understand the checks](#what-the-checks-establish)
 
 ## See it in action
 
-![Animated walkthrough of check-request, run, inspect, bundle, and verify-bundle for the calibration block example.](docs/media/demo.gif)
+![A recorded v2 session: check the request and plan, build attempt 1 (blocked, two holes 2 mm off), change one number, build attempt 2 (conforms).](docs/media/demo.gif)
 
-This walkthrough is an illustration of the documented workflow, condensed for length. It is not a live recording of a run. See the [MP4 version](docs/media/demo.mp4). Run the commands below on your Dot's computer to get real evidence.
+This is a real v2 session, replayed. The commands, output, exit codes and times come from a recording in a Debian 13 container with FreeCAD 1.0.0 ([session data](docs/media/src/session.js)). Output is trimmed with `jq`, and the replay shortens the build waits. See the [MP4 version](docs/media/demo.mp4).
 
-![Process sheet: six steps from request.json to verify-bundle. Printing checks stay open.](docs/media/workflow.png)
+![Two renders of the mounting plate. Attempt 1 has two holes at x 52 instead of x 54 and is blocked. Attempt 2 conforms.](docs/media/proof.png)
 
-![Verification sheet: four check layers. Failed, skipped, unavailable and inconclusive checks never count as a pass.](docs/media/checks.png)
+![Three parts built from open-ended requests: a mounting plate, a knob with grip notches, and a stepped block.](docs/media/gallery.png)
 
-![Model families sheet: the three supported generators with example sizes.](docs/media/families.png)
-
-![Deliverables sheet: the files in a run directory and the delivery sequence.](docs/media/bundle.png)
-
-The sheets are illustrations. Only the model views come from real runs: they are the STL renders in `docs/images`. The source is in [docs/media/src](docs/media/src). To regenerate the media, run `node docs/media/render-media.mjs`. It needs Node, Playwright, ffmpeg, and network access to Google Fonts.
+The model images are renders of exported STL files from real v2 builds of the [v2 examples](examples/v2). The hole rings, labels and counts come from each build's measurements. The sources are in [docs/media/src](docs/media/src). To regenerate the images, build the examples, copy each `exports/model.stl` and `native/measure.json` into one folder as `<run>.stl` and `<run>.measure.json`, then run `node docs/media/render-models.mjs <folder>` and `node docs/media/render-media.mjs`. These need Node, Playwright, three.js 0.170.0, ffmpeg, and network access to Google Fonts.
 
 ## Supported models
 

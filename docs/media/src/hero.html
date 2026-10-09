@@ -1,53 +1,39 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><title>Dot Forge hero</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=block">
+<html lang="en"><head><meta charset="utf-8"><title>Dot Forge</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Geist:wght@400;500&family=Geist+Mono:wght@400;500&display=block">
 <link rel="stylesheet" href="base.css">
 <style>
 body { width: 1280px; height: 640px; }
-.left { position: absolute; left: 64px; top: 64px; width: 560px; }
-h1 { margin-top: 18px; font-size: 92px; line-height: .9; }
-h1 span { color: var(--blue); }
-.lede { font-size: 20px; margin-top: 18px; max-width: 470px; }
-.spec { margin-top: 30px; display: grid; grid-template-columns: auto auto auto; border-top: 1.5px solid var(--ink); border-bottom: 1px solid var(--ink); width: max-content; }
-.spec div { padding: 9px 22px 10px 0; margin-right: 22px; border-right: 1px solid var(--ink-3); }
-.spec div:last-child { border-right: 0; margin-right: 0; }
-.spec small { display: block; font: 500 9.5px var(--mono); letter-spacing: .14em; color: var(--ink-3); text-transform: uppercase; }
-.spec b { display: block; margin-top: 3px; font: 600 21px var(--display); letter-spacing: .01em; }
-.foot { position: absolute; left: 64px; bottom: 40px; font: 11px var(--mono); color: var(--ink-2); letter-spacing: .02em; }
-.v { position: absolute; }
-.v .plate { width: 100%; aspect-ratio: 1; }
-.cap { display: flex; justify-content: space-between; align-items: baseline; margin-top: 7px; }
-.cap span { font: 500 11px var(--mono); color: var(--ink-2); }
-.cap b { font: 600 19px var(--display); }
-.va { left: 650px; top: 58px; width: 316px; }
-.vb { left: 1010px; top: 58px; width: 206px; }
-.vc { left: 1010px; top: 320px; width: 206px; }
-.dim { position: absolute; left: 650px; top: 432px; width: 316px; height: 18px; }
-.dim i { position: absolute; top: 8px; left: 0; right: 0; height: 1px; background: var(--blue); }
-.dim i::before, .dim i::after { content: ""; position: absolute; top: -4px; border: 4.5px solid transparent; }
-.dim i::before { left: 0; border-right: 8px solid var(--blue); border-left: 0; }
-.dim i::after { right: 0; border-left: 8px solid var(--blue); border-right: 0; }
-.dim::before, .dim::after { content: ""; position: absolute; top: -6px; width: 1px; height: 24px; background: var(--blue); }
-.dim::before { left: 0; } .dim::after { right: 0; }
-.dim span { position: absolute; left: 50%; top: 0; transform: translateX(-50%); background: var(--paper); padding: 0 8px; font: 500 11px var(--mono); color: var(--blue); letter-spacing: .06em; white-space: nowrap; }
-.st { position: absolute; left: 676px; top: 480px; transform: rotate(-4deg); }
+.brand { position: absolute; left: 72px; top: 60px; }
+.top-right { position: absolute; right: 72px; top: 62px; }
+h1 { position: absolute; left: 72px; top: 156px; width: 540px; margin: 0; font-size: 60px; line-height: 1.04; }
+.lede { position: absolute; left: 74px; top: 376px; width: 440px; margin: 0; font-size: 18px; line-height: 1.5; color: var(--ink-2); }
+.steps { position: absolute; left: 74px; bottom: 64px; display: flex; gap: 26px; font: 400 13px/1 var(--mono); color: var(--ink-2); }
+.steps span b { font-weight: 500; color: var(--ink-3); margin-right: 8px; }
+#model { position: absolute; left: 510px; top: 64px; width: 760px; height: 560px; }
+.status { position: absolute; right: 72px; bottom: 60px; }
 </style></head>
-<body data-title="Overview" data-sheet="1 / 6">
-<div class="left">
-  <div class="label"><span class="no">01</span> &nbsp;Model + evidence, one bundle</div>
-  <h1>Make a small 3D model with your <span>Dot</span>.</h1>
-  <p class="lede">Keep the model, the source, and the check results together.</p>
-  <div class="spec">
-    <div><small>Generators</small><b>3 reviewed</b></div>
-    <div><small>Backends</small><b>Blender 4.3.2 · FreeCAD 1.0.0</b></div>
-    <div><small>Host</small><b>Linux x86_64</b></div>
-  </div>
-</div>
-<div class="foot">Views A–C are renders of exported STL files. Not photographs of physical prints.</div>
-<div class="v va"><div class="plate crop"><span class="tag">VIEW A</span><img src="../../images/calibration-block.png" alt=""></div><div class="cap"><span>calibration-block</span><b>20 × 20 × 10</b></div></div>
-<div class="v vb"><div class="plate crop"><span class="tag">VIEW B</span><img src="../../images/geometric-mascot.png" alt=""></div><div class="cap"><span>geometric-mascot</span><b>40 × 12 × 60</b></div></div>
-<div class="v vc"><div class="plate crop"><span class="tag">VIEW C</span><img src="../../images/freecad-stepped-block.png" alt=""></div><div class="cap"><span>freecad-stepped</span><b>30 × 24 × 18</b></div></div>
-<div class="dim"><i></i><span>EACH AXIS 5 – 100 mm</span></div>
-<div class="st stamp">Candidate · not print-ready</div>
-<script src="sheet.js"></script>
+<body>
+<div class="brand">Dot Forge</div>
+<div class="eyebrow top-right">FreeCAD · open-ended parts</div>
+<h1 class="serif">Open-ended FreeCAD parts, checked against the original request</h1>
+<p class="lede">The request becomes a list of measurable checks. FreeCAD builds the part, and Dot Forge measures the result against that list.</p>
+<div class="steps"><span><b>01</b>intent</span><span><b>02</b>plan</span><span><b>03</b>proof</span></div>
+<img id="model" src="renders/plate-hero.png" alt="">
+<div class="note" id="n-hole"><b>Ø 4.00</b> through · 4 of 4</div>
+<div class="note" id="n-size"><b>60 × 40 × 5</b> mm</div>
+<span class="pill pass status">conforms · 7 of 7 measured checks</span>
+<script src="media.js"></script>
+<script src="renders/anchors.js"></script>
+<script>
+{
+  const a = ANCHORS['plate-hero'];
+  const hole = at(a.hole, '#model'), corner = at(a.corner, '#model');
+  const nh = document.getElementById('n-hole'), ns = document.getElementById('n-size');
+  Object.assign(nh.style, { left: hole[0] - 214 + 'px', top: hole[1] + 72 + 'px' });
+  lead(hole, [hole[0] - 52, hole[1] + 78]);
+  Object.assign(ns.style, { left: corner[0] + 64 + 'px', top: corner[1] - 46 + 'px' });
+  lead([corner[0] + 4, corner[1] - 4], [corner[0] + 58, corner[1] - 39]);
+}
+</script>
 </body></html>
