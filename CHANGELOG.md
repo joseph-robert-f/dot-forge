@@ -23,6 +23,8 @@
 - Add `printkit printability` for any STL, such as a character or a figure. It reports a closed mesh, loose parts, bed size, flat base, stability, overhangs and sampled thin parts. It never judges likeness and never claims print readiness. See `docs/printability.md`.
 - The README leads with functional parts. The publishing guide covers characters and designs that belong to someone else.
 - Add `printkit preview`: a draft build with five exact line views (front, right, back, top, iso) from FreeCAD's hidden-line projection, measured overall sizes, labelled holes, and a plain summary of what will be measured, judged and not assumed. PNG through FreeCAD's Qt when present, SVG otherwise. Never a deliverable.
+- The preview PNG tries `PySide`, then `PySide2`, then `PySide6`. A Dot's Debian FreeCAD 1.0.0 has PySide2 but not FreeCAD's `PySide` shim, so it got only the SVG before. `views/raster.json` records the binding.
+- A Dot ran the full acceptance pass at commit `2ef6f33` on 2026-10-09: 16 of 16 native tests, 239 source tests with 23 opt-in skips, all 34 field-test outcomes, an approved preview whose build matched it, and both printability figures as documented.
 - `build --approved-preview` binds the build to the preview the user approved. It refuses a different intent or plan or changed preview files, and records whether the final solid matches the preview.
 - v1 requests, generators and checks do not change. A report with `overall_state: blocked` now always exits 4.
 
