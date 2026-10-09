@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.02
+
+Release display name: **1.02**. The package version is **1.0.2**, and the Git tag is **v1.0.2**. This is a regular release, ready for the three supported Linux workflows. The existing 1.01 pre-release remains available.
+
+This release updates version and release-status metadata only. It does not change model generators, geometry checks, native runtime requirements, dependencies or supported parameters. Use a new attempt after a source-version change; do not reuse evidence from a different source identity.
+
+The supported scope remains a source-only workflow for a dot's Linux x86_64 cloud computer: a Blender calibration block, a flat extruded mascot and a FreeCAD stepped solid with a through-hole. Every dot must check its installed tools and run fresh smoke acceptance. Applications are not installed or distributed.
+
+Regular-release status does not certify a physical print. Printer/material suitability, wall thickness, clearances, orientation, supports, slicing, user design approval and physical-print testing remain separate. Optional Lane A and Slicer retain their documented limits. See [acceptance](docs/acceptance.md).
+
 ## 1.01
 
 Release display name: **1.01**. The corresponding semantic package version is **1.0.1**, and the Git tag is **v1.0.1**. This naming choice preserves the requested release label while keeping the existing three-part package version format.

@@ -126,7 +126,7 @@ A native solid can pass while its exported mesh fails. A mesh can pass geometry 
 
 ### Release limits
 
-This release is a **bounded native preview**. It does not certify every parameter combination, printer, material, or physical use. Each dot must run fresh smoke acceptance on its own computer.
+This regular release is **ready for the three supported Linux workflows**. It does not certify every parameter combination, printer, material, or physical use. Each dot must run fresh smoke acceptance on its own computer.
 
 The optional Lane A adapter requires Blender 4.5.12 LTS. Its exact-runtime acceptance remains blocked because official retrieval returned HTTP 403. Lane A is not required for the default `dot-native` profile. The original architecture MVP remains incomplete because its Lane A requirement is unchanged. See the [acceptance map](docs/acceptance.md).
 
