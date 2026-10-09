@@ -60,7 +60,7 @@ python -m printkit check-plan examples/v2/mounting-plate/plan.json --intent exam
 python -m printkit build --intent examples/v2/mounting-plate/intent.json --plan examples/v2/mounting-plate/plan.json --output build/plate-001
 ```
 
-**This is a preview.** The native tests pass with FreeCAD 1.0.0 and OCC 7.8.1 in a Debian 13 container, but not yet on the exact Dot runtime profile. v2 does not make previews or bundles yet. See [v2: intent, plan, proof](docs/v2-intent-and-plan.md).
+**This is a preview.** The native tests passed on a Dot's exact FreeCAD 1.0.0 / OCC 7.8.1 profile at commit `f9aba35`. Later changes pass the same tests in a matching container. v2 does not make previews or bundles yet. See [v2: intent, plan, proof](docs/v2-intent-and-plan.md).
 
 ## Start with your Dot
 

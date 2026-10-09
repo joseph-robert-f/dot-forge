@@ -1,0 +1,72 @@
+{
+  "ask": "A 30 mm round knob, 16 mm tall, with a grippy edge and a 6 mm hole underneath for the shaft, about 8 mm deep. Soften the top edge.",
+  "confirmation": {
+    "by": "user",
+    "note": "Example: user accepted 12 notches and a 2 mm bevel.",
+    "status": "confirmed"
+  },
+  "envelope": {
+    "size_mm": [
+      30,
+      30,
+      16
+    ],
+    "tolerance_mm": 0.05
+  },
+  "features": [
+    {
+      "axis": "z",
+      "depth": {
+        "depth_mm": 8,
+        "open_end": "min"
+      },
+      "diameter_mm": 6,
+      "id": "shaft-hole",
+      "kind": "hole",
+      "position_mm": [
+        15,
+        15
+      ],
+      "source": "6 mm hole underneath for the shaft, about 8 mm deep",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "flat-bottom",
+      "kind": "planar_face",
+      "min_area_mm2": 600,
+      "normal": "-z",
+      "offset": "min",
+      "source": "implied: the knob sits flat on the print bed",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "top-face",
+      "kind": "planar_face",
+      "min_area_mm2": 500,
+      "normal": "+z",
+      "offset": "max",
+      "source": "16 mm tall",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "grip",
+      "kind": "note",
+      "source": "grippy edge",
+      "text": "Twelve rounded notches around the edge give grip. The ask does not set a count or size."
+    },
+    {
+      "id": "soft-top",
+      "kind": "note",
+      "source": "soften the top edge",
+      "text": "The top edge has a 2 mm bevel."
+    }
+  ],
+  "schema_version": "intent.v1",
+  "solid_count": 1,
+  "units": "mm",
+  "unknowns": [
+    "shaft shape (round or D-shaft)",
+    "fit (press or loose)",
+    "printer and material"
+  ]
+}

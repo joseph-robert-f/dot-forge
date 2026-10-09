@@ -15,7 +15,7 @@ def example(name):
 
 class IntentTests(unittest.TestCase):
     def test_examples_pass(self):
-        for name in ('stepped-block', 'mounting-plate'):
+        for name in ('stepped-block', 'mounting-plate', 'knob'):
             with self.subTest(name=name):
                 intent, _ = example(name)
                 check_intent(intent, require_confirmed=True)
@@ -82,7 +82,7 @@ class IntentTests(unittest.TestCase):
 
 class PlanTests(unittest.TestCase):
     def test_examples_bound_to_their_intent(self):
-        for name in ('stepped-block', 'mounting-plate'):
+        for name in ('stepped-block', 'mounting-plate', 'knob'):
             with self.subTest(name=name):
                 intent, plan = example(name)
                 result = check_plan(plan, intent)

@@ -22,6 +22,8 @@ ANGULAR_DEFLECTION = 0.25
 MAX_TRIANGLES = 10000  # Same budget as independent STL validation.
 PROBE_MM = 0.01
 LINEAR_TOL = 1e-6
+VOLUME_AREA_RELATIVE_TOL = 1e-4
+SPAN_TOL = 1e-3
 AXES = {'x': App.Vector(1, 0, 0), 'y': App.Vector(0, 1, 0), 'z': App.Vector(0, 0, 1)}
 PLANE_NORMAL = {'xy': 'z', 'xz': 'y', 'yz': 'x'}
 
@@ -274,6 +276,7 @@ def measure(shape):
     return {'valid': shape.isValid(), 'closed': shape.isClosed(), 'solid_count': len(shape.Solids),
             'size_mm': [box.XLength, box.YLength, box.ZLength], 'origin_mm': low,
             'volume_mm3': shape.Volume, 'area_mm2': shape.Area, 'face_count': len(shape.Faces),
+            'edge_count': len(shape.Edges),
             'cylinders': cylinders(shape, low), 'planes': planes(shape, low),
             'linear_tolerance_mm': LINEAR_TOL, 'probe_offset_mm': PROBE_MM}
 
@@ -306,6 +309,47 @@ def generate(run):
                           'angular_deflection_radians': ANGULAR_DEFLECTION, 'relative': False}})
 
 
+def same_cylinder(a, b):
+    """Exact identity and analytic values; trimmed spans within the trim-curve fit.
+
+    A span that ends on a curved intersection is bounded by an approximated
+    trim curve, which STEP can refit by a few tenths of a micrometre.
+    """
+    near = lambda x, y, tol: (x is None) == (y is None) and (x is None or all(abs(i - j) <= tol for i, j in zip(x, y)))
+    return (a['kind'] == b['kind'] and a['axis'] == b['axis'] and a['ends_open'] == b['ends_open']
+            and abs(a['radius_mm'] - b['radius_mm']) <= LINEAR_TOL and abs(a['angle_rad'] - b['angle_rad']) <= 1e-6
+            and near(a['position_mm'], b['position_mm'], 1e-5) and near(a['span_mm'], b['span_mm'], SPAN_TOL))
+
+
+def matched(native, step):
+    remaining = list(step)
+    for cylinder in native:
+        match = next((other for other in remaining if same_cylinder(cylinder, other)), None)
+        if match is None:
+            return False
+        remaining.remove(match)
+    return not remaining
+
+
+def round_trip_differences(native, step):
+    """Topology and features must match exactly; integrated properties within their accuracy.
+
+    OCC integrates volume and area numerically. On faces trimmed by B-spline
+    intersection edges, two descriptions of one solid can differ by about 1e-5
+    relative, so those use 1e-4. Counts and sizes must agree, and every cylinder
+    must match one cylinder on the other side.
+    """
+    close = lambda a, b: abs(a - b) <= max(1e-6, abs(a) * VOLUME_AREA_RELATIVE_TOL)
+    checks = {'solid_count': native['solid_count'] == step['solid_count'],
+              'face_count': native['face_count'] == step['face_count'],
+              'edge_count': native['edge_count'] == step['edge_count'],
+              'size': all(abs(a - b) <= LINEAR_TOL for a, b in zip(native['size_mm'], step['size_mm'])),
+              'volume': close(native['volume_mm3'], step['volume_mm3']),
+              'area': close(native['area_mm2'], step['area_mm2']),
+              'cylinders': matched(native['cylinders'], step['cylinders'])}
+    return [name for name, ok in checks.items() if not ok]
+
+
 def reopen(run):
     # Only our newly emitted data-only Part::Feature document is accepted.
     document = App.openDocument(str(run / 'native/model.FCStd'))
@@ -318,11 +362,9 @@ def reopen(run):
     exported = Part.Shape()
     exported.read(str(run / 'exports/model.step'))
     step = measure(exported)
-    same = (abs(native['volume_mm3'] - step['volume_mm3']) <= max(1e-6, abs(native['volume_mm3']) * 1e-8)
-            and all(abs(a - b) <= LINEAR_TOL for a, b in zip(native['size_mm'], step['size_mm']))
-            and len(native['cylinders']) == len(step['cylinders']) and native['solid_count'] == step['solid_count'])
-    if not same:
-        raise ValueError('STEP round trip differs from the native solid')
+    differences = round_trip_differences(native, step)
+    if differences:
+        raise ValueError('STEP round trip differs from the native solid: ' + ', '.join(differences))
     # The STEP reimport is the measured deliverable.
     dump(run / 'native/measure.json', step)
     dump(run / 'native/reopen.json', {'status': 'pass', 'fresh_process': True,

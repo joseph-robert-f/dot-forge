@@ -2,7 +2,7 @@
 
 v2 lets you make an open-ended part in FreeCAD. It does not limit you to the three reviewed generators. The guardrail is no longer *which shape* you can make. The guardrail is *how the shape is described and proved*.
 
-> **Status: preview.** The intent and plan contracts, the conformance checks and the CLI are tested without FreeCAD. The FreeCAD interpreter and measurer (`src/printkit/adapters/freecad_plan_scene.py`) pass the native tests (`tests/test_v2_freecad_native.py`) with conda-forge FreeCAD 1.0.0 and OCC 7.8.1 in a Debian 13 container. They have **not** run on the exact Dot runtime profile yet. Run `PRINTKIT_FREECAD_INTEGRATION=1 PYTHONPATH=src python3 -m unittest tests.test_v2_freecad_native -v` on your Dot before you trust a v2 result. Five-view previews and evidence bundles are not connected to v2 yet.
+> **Status: preview.** The intent and plan contracts, the conformance checks and the CLI are tested without FreeCAD. The FreeCAD interpreter and measurer (`src/printkit/adapters/freecad_plan_scene.py`) pass the native tests (`tests/test_v2_freecad_native.py`) with conda-forge FreeCAD 1.0.0 and OCC 7.8.1 in a Debian 13 container. They passed on a Dot's exact runtime profile at commit `f9aba35`. After a change to the helper, run `PRINTKIT_FREECAD_INTEGRATION=1 PYTHONPATH=src python3 -m unittest tests.test_v2_freecad_native -v` on your Dot before you trust a v2 result. Five-view previews and evidence bundles are not connected to v2 yet.
 
 ## The three files
 
@@ -85,6 +85,7 @@ Tips:
 See `schemas/intent.v1.json`, `schemas/plan.v1.json` and the two examples:
 - `examples/v2/stepped-block`: the v1 FreeCAD generator, written as a plan.
 - `examples/v2/mounting-plate`: an open-ended ask that v1 could not express. It has four screw holes, a flat bottom and rounded corners.
+- `examples/v2/knob`: a revolved knob with a blind shaft hole from below and twelve grip notches.
 
 ## Limits
 

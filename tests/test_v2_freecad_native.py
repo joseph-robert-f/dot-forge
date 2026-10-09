@@ -86,7 +86,7 @@ class FreeCADPlanNativeTests(unittest.TestCase):
         self.assertEqual(report['print_state'], 'needs_review')
 
     def test_examples_conform(self):
-        for name in ('stepped-block', 'mounting-plate'):
+        for name in ('stepped-block', 'mounting-plate', 'knob'):
             with self.subTest(name=name):
                 intent, plan = example(name)
                 report, run = self.build(intent, plan)
