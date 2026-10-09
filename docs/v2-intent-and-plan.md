@@ -2,7 +2,7 @@
 
 v2 lets you make an open-ended part in FreeCAD. It does not limit you to the three reviewed generators. The guardrail is no longer *which shape* you can make. The guardrail is *how the shape is described and proved*.
 
-> **Status: preview.** The intent and plan contracts, the conformance checks and the CLI are tested without FreeCAD. The FreeCAD interpreter and measurer (`src/printkit/adapters/freecad_plan_scene.py`) have **not** been run on a real FreeCAD 1.0.0 runtime yet. Run the two examples on your Dot before you trust a v2 result. Five-view previews and evidence bundles are not connected to v2 yet.
+> **Status: preview.** The intent and plan contracts, the conformance checks and the CLI are tested without FreeCAD. The FreeCAD interpreter and measurer (`src/printkit/adapters/freecad_plan_scene.py`) pass the native tests (`tests/test_v2_freecad_native.py`) with conda-forge FreeCAD 1.0.0 and OCC 7.8.1 in a Debian 13 container. They have **not** run on the exact Dot runtime profile yet. Run `PRINTKIT_FREECAD_INTEGRATION=1 PYTHONPATH=src python3 -m unittest tests.test_v2_freecad_native -v` on your Dot before you trust a v2 result. Five-view previews and evidence bundles are not connected to v2 yet.
 
 ## The three files
 
@@ -42,6 +42,7 @@ The plan is judged against the intent, not against itself. A plan can build exac
    - `geometry_state`: the independent STL checks. This answers "is the exported mesh sound?"
    - `print_state`: always `needs_review`. Dot Forge does not decide print readiness.
    - `person_checks`: the items that a person must do.
+   - If FreeCAD cannot build a step (for example, a fillet that is too large), `build` exits 4 with `plan_step_failed`. The message and `native/plan-failure.json` name the step and the FreeCAD error.
 9. If a check fails, do not edit the run. Change the plan (or, with the user, the intent) and build into a new run directory. Keep the failed run.
 
 Exit codes: `0` pass, `2` invalid input, `3` FreeCAD unavailable, `4` blocked, `5` built and conforming, but person and print review is still open.

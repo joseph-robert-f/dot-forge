@@ -5,7 +5,8 @@
 - Add the v2 intent spec (`schemas/intent.v1.json`). It records the user's ask as measurable checks, notes for a person, and unknowns. A build needs a confirmed intent.
 - Add the v2 build plan (`schemas/plan.v1.json`). It is a declarative FreeCAD feature tree with 16 operations, bound to one intent by hash.
 - Add `printkit check-intent`, `check-plan`, `build` and `conform`.
-- Add a fixed FreeCAD plan interpreter and B-rep measurer. **It has not been run on a real FreeCAD runtime yet.**
+- Add a fixed FreeCAD plan interpreter and B-rep measurer. Its native tests pass with conda-forge FreeCAD 1.0.0 and OCC 7.8.1 in a Debian 13 container. **They have not run on the exact Dot runtime profile yet.**
+- A plan step that FreeCAD cannot build exits 4 with `plan_step_failed`. The report names the step and the FreeCAD error.
 - Add conformance checks for envelope, volume, axis-aligned holes (through or blind) and flat faces. Unrequested holes go to a person.
 - Add two examples: the stepped block written as a plan, and an open-ended mounting plate.
 - v1 requests, generators and checks do not change. A report with `overall_state: blocked` now always exits 4.

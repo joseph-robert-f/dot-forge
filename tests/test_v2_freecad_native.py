@@ -146,8 +146,12 @@ class FreeCADPlanNativeTests(unittest.TestCase):
         intent, plan = example('mounting-plate')
         plan['steps'][1]['radius_mm'] = 30  # Larger than the plate can take.
         with tempfile.TemporaryDirectory() as tmp:
-            with self.assertRaises(ForgeError):
+            with self.assertRaises(ForgeError) as caught:
                 build(intent, plan, Path(tmp) / 'run')
+            self.assertEqual(caught.exception.finding, 'plan_step_failed')
+            self.assertEqual(caught.exception.code, 4)
+            self.assertIn("'plate'", str(caught.exception))
+            self.assertEqual(load_json(Path(tmp) / 'run/native/plan-failure.json')['op'], 'fillet')
             self.assertEqual(load_json(Path(tmp) / 'run/report.json')['overall_state'], 'blocked')
             self.assertTrue((Path(tmp) / 'run/logs/freecad-plan-generate.log').is_file())
 

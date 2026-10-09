@@ -172,6 +172,12 @@ OPS = {'box': op_box, 'cylinder': op_cylinder, 'cone': op_cone, 'sphere': op_sph
        'fillet': op_fillet, 'chamfer': op_chamfer}
 
 
+class StepFailed(Exception):
+    def __init__(self, step, op, cause):
+        super().__init__(f'{op} step {step!r} failed: {type(cause).__name__}: {cause}')
+        self.step, self.op, self.cause = step, op, cause
+
+
 def build(plan):
     if plan.get('schema_version') != 'plan.v1' or plan.get('units') != 'mm':
         raise ValueError('Unsupported plan')
@@ -180,7 +186,10 @@ def build(plan):
         function = OPS.get(step.get('op'))
         if function is None or step['id'] in shapes:
             raise ValueError('Unknown op or duplicate step id')
-        shapes[step['id']] = function(step, lambda name: shapes[name])
+        try:
+            shapes[step['id']] = function(step, lambda name: shapes[name])
+        except Exception as exc:
+            raise StepFailed(step['id'], step['op'], exc) from exc
     shape = shapes[plan['result']]
     if shape.isNull() or not shape.Solids:
         raise ValueError('Plan result has no solid')
@@ -325,7 +334,13 @@ def main():
     mode, target = sys.argv[1:]
     run = Path(target)
     if mode == 'generate':
-        generate(run)
+        try:
+            generate(run)
+        except StepFailed as exc:
+            # A plan FreeCAD cannot build is a plan finding, not a runtime fault.
+            dump(run / 'native/plan-failure.json', {'status': 'fail', 'step': exc.step, 'op': exc.op,
+                 'error': f'{type(exc.cause).__name__}: {exc.cause}'[:2000], 'runtime': runtime()})
+            raise
     elif mode == 'reopen':
         reopen(run)
     else:

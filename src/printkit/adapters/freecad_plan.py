@@ -7,8 +7,14 @@ passed on the command line or as an environment value.
 from pathlib import Path
 from .base import AdapterError, RuntimeUnavailable
 from . import freecad
-from ..common import load_json, sha256, safe_file
+from ..common import ForgeError, load_json, sha256, safe_file
 from ..execution import run_process
+
+
+class PlanFailed(AdapterError):
+    def __init__(self, message):
+        ForgeError.__init__(self, message, 4, 'plan_step_failed')
+
 
 SCRIPT = Path(__file__).with_name('freecad_plan_scene.py')
 LINEAR_DEFLECTION_MM = 0.05  # Must match LINEAR_DEFLECTION in the helper.
@@ -23,7 +29,7 @@ def _run(mode, run):
 
 def generate(run_dir, discover=None):
     run = Path(run_dir).resolve()
-    for name in OUTPUTS + ('logs/freecad-plan-generate.log', 'logs/freecad-plan-reopen.log'):
+    for name in OUTPUTS + ('native/plan-failure.json', 'logs/freecad-plan-generate.log', 'logs/freecad-plan-reopen.log'):
         if safe_file(run, name).exists():
             raise AdapterError('Refusing to overwrite existing FreeCAD artifacts, logs or evidence')
     capability = (discover or freecad.discover)()
@@ -31,7 +37,16 @@ def generate(run_dir, discover=None):
         raise RuntimeUnavailable(capability.get('reason', 'FreeCAD runtime unavailable'))
     for folder in ('native', 'exports', 'logs'):
         safe_file(run, folder).mkdir(exist_ok=True)
-    metrics = {'generation': _run('generate', run), 'native_reopen': _run('reopen', run)}
+    try:
+        metrics = {'generation': _run('generate', run)}
+    except ForgeError as exc:
+        failure = run / 'native/plan-failure.json'
+        if exc.finding == 'runtime_failed' and failure.is_file():
+            detail = load_json(failure)
+            raise PlanFailed(f"FreeCAD could not build {detail.get('op')} step {detail.get('step')!r}: "
+                             f"{detail.get('error')}. Change the plan and build a new attempt.") from exc
+        raise
+    metrics['native_reopen'] = _run('reopen', run)
     generated = load_json(run / 'native/generation.json')
     reopened = load_json(run / 'native/reopen.json')
     if generated.get('status') != 'pass' or reopened.get('status') != 'pass' or reopened.get('fresh_process') is not True:

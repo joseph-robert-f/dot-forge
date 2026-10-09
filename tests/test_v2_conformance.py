@@ -171,6 +171,37 @@ class BuildGuardTests(unittest.TestCase):
             self.assertEqual(load_json(run / 'plan.json'), plan)
             self.assertFalse((run / 'exports/model.stl').exists())
 
+    def test_plan_step_failure_is_a_plan_finding(self):
+        from unittest.mock import patch
+        from printkit.adapters import freecad_plan
+        intent, plan = example('stepped-block')
+        capability = {'status': 'unverified'}
+
+        def failing_run(mode, run):
+            (Path(run) / 'native/plan-failure.json').write_text(json.dumps(
+                {'status': 'fail', 'step': 'part', 'op': 'cut', 'error': 'OCCError: not done'}))
+            raise ForgeError('Runtime exited 1; see retained stage log', 3, 'runtime_failed')
+
+        with tempfile.TemporaryDirectory() as tmp, patch.object(freecad_plan, '_run', failing_run):
+            with self.assertRaises(ForgeError) as caught:
+                build(intent, plan, Path(tmp) / 'run', discover=lambda: capability)
+            self.assertEqual((caught.exception.code, caught.exception.finding), (4, 'plan_step_failed'))
+            self.assertIn("cut step 'part'", str(caught.exception))
+            self.assertEqual(load_json(Path(tmp) / 'run/report.json')['failure']['code'], 'plan_step_failed')
+
+    def test_runtime_crash_without_plan_failure_stays_runtime(self):
+        from unittest.mock import patch
+        from printkit.adapters import freecad_plan
+        intent, plan = example('stepped-block')
+
+        def crashing_run(mode, run):
+            raise ForgeError('Runtime exited 1; see retained stage log', 3, 'runtime_failed')
+
+        with tempfile.TemporaryDirectory() as tmp, patch.object(freecad_plan, '_run', crashing_run):
+            with self.assertRaises(ForgeError) as caught:
+                build(intent, plan, Path(tmp) / 'run', discover=lambda: {'status': 'unverified'})
+            self.assertEqual(caught.exception.finding, 'runtime_failed')
+
     def test_refuses_draft_mismatch_and_reused_run(self):
         intent, plan = example('stepped-block')
         with tempfile.TemporaryDirectory() as tmp:
