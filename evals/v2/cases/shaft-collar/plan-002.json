@@ -32,7 +32,7 @@
         5
       ],
       "axis": "x",
-      "height_mm": 5,
+      "height_mm": 8,
       "id": "tap",
       "op": "cylinder",
       "radius_mm": 1.25

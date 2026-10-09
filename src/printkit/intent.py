@@ -15,6 +15,9 @@ AXES = ("x", "y", "z")
 NORMALS = ("+x", "-x", "+y", "-y", "+z", "-z")
 ID = re.compile(r"^[a-z][a-z0-9-]{0,47}$")
 MAX_FEATURES = 64
+# What a hole end opens into. "void" is empty space inside the part, such as a
+# bore or cavity. "shoulder" is a filled step around a narrower coaxial hole.
+HOLE_ENDS = ("outside", "floor", "void", "shoulder")
 MAX_TEXT = 4000
 FIELDS = {"schema_version", "ask", "units", "envelope", "solid_count", "features",
           "unknowns", "confirmation"}
@@ -80,7 +83,16 @@ def check_feature(feature, envelope, index):
         for value, axis in zip(position, plane_axes(feature["axis"])):
             number(value, f"{name}.position_mm.{axis}", 0, size[axis])
         depth = feature["depth"]
-        if depth != "through":
+        if isinstance(depth, dict) and "ends" in depth:
+            exact_fields(depth, {"ends"}, {"depth_mm"}, f"{name}.depth")
+            exact_fields(depth["ends"], {"min", "max"}, set(), f"{name}.depth.ends")
+            if any(end not in HOLE_ENDS for end in depth["ends"].values()):
+                raise ForgeError(f"{name}.depth.ends values must be one of {HOLE_ENDS}")
+            if "outside" not in depth["ends"].values():
+                raise ForgeError(f"{name}.depth.ends must open to the outside at one end or more")
+            if "depth_mm" in depth:
+                number(depth["depth_mm"], f"{name}.depth.depth_mm", 0, size[feature["axis"]], low_open=True)
+        elif depth != "through":
             exact_fields(depth, {"depth_mm", "open_end"}, set(), f"{name}.depth")
             number(depth["depth_mm"], f"{name}.depth.depth_mm", 0, size[feature["axis"]], low_open=True)
             if depth["open_end"] not in ("min", "max"):

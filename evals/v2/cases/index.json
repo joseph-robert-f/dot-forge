@@ -21,6 +21,7 @@
     "person_checks": 0,
     "unknowns": 2,
     "status": "confirmed",
+    "revision": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions. Revision: the counterbore floor is a shoulder around the clearance hole, not a solid floor.",
     "mutants": {
       "counterbore-4-deep": "Counterbore 4 mm deep, not 5.",
       "counterbore-from-bottom": "Counterbore cut from the bottom."
@@ -93,6 +94,7 @@
     "person_checks": 0,
     "unknowns": 2,
     "status": "confirmed",
+    "revision": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions. Revision: the set-screw hole opens into the bore, not to the outside at both ends.",
     "mutants": {
       "short-tap": "Set-screw hole stops short of the bore."
     }
@@ -159,7 +161,7 @@
     "person_checks": 1,
     "unknowns": 2,
     "status": "confirmed",
-    "revision": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions. Revision: a sealed cavity is not supported. User accepted a 3 mm drain hole at the bottom. Attempt 3: the drain trims the bottom, so the height is 39.94 mm."
+    "revision": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions. Revision: a sealed cavity is not supported. User accepted a 3 mm drain hole at the bottom. Attempt 3: the drain trims the bottom, so the height is 39.94 mm. Attempt 4: the drain opens into the cavity, not to the outside at both ends."
   },
   {
     "case": "bottle-cap",

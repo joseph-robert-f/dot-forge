@@ -37,7 +37,7 @@ A request goes through three files. Each file has a strict schema.
 **Intent.** Your Dot writes each stated size and feature as a check that can be measured:
 
 - Envelope (overall size) and volume
-- Holes on the x, y or z axis: diameter, position, through or blind, and depth
+- Holes on the x, y or z axis: diameter, position, depth, and what each end opens into (the outside, a floor, a void such as a bore, or a counterbore shoulder)
 - Flat faces: direction, position and minimum area
 
 A requirement that cannot be measured yet, for example "rounded corners", becomes a note for a person. A value that your request does not state goes in `unknowns`. Your Dot does not invent it. You confirm the intent before any geometry is made.
@@ -46,7 +46,7 @@ A requirement that cannot be measured yet, for example "rounded corners", become
 
 **Proof.** `printkit build` runs the plan in FreeCAD and reopens the result in a fresh process. It measures the solid exactly, from its geometry, not from the mesh. Then it compares each measurement with the intent:
 
-- A hole must have the correct axis, diameter and position. Full-aperture B-rep checks establish whether it is through or blind. Partial obstructions, including a counterbore shoulder, stay unknown.
+- A hole must have the correct axis, diameter and position. Full-aperture B-rep checks establish what each end opens into. An end that cannot be proven stays unknown.
 - Each measured hole can satisfy only one check. A hole that nobody asked for goes to a person.
 - A rounded corner is a partial cylinder. It is never counted as a hole.
 - A missing or unreadable measurement is `unknown`, never a pass.

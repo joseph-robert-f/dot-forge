@@ -117,6 +117,55 @@ class FreeCADPlanNativeTests(unittest.TestCase):
         self.assertEqual(statuses(report)['feature:set-screw'], 'unknown')
         self.assertEqual(statuses(report)['unrequested_holes'], 'pass')
 
+    def test_hole_end_kinds_build_and_catch_mistakes(self):
+        # Field-test repairs: each hole names what its ends open into.
+        for name in ('counterbored-spacer', 'shaft-collar'):
+            with self.subTest(name=name):
+                report, _ = self.build(*field_case(name, '002'))
+                self.assert_conforms(report)
+        report, _ = self.build(*field_case('hollow-ball', '004'))
+        self.assert_conforms(report)
+        # A set-screw hole that stops short of the bore ends in a floor, not a void.
+        intent, _ = field_case('shaft-collar', '002')
+        short = rebind(intent, load_json(FIELD / 'shaft-collar/mutants/short-tap.json'))
+        report, _ = self.build(intent, short)
+        self.assertEqual(statuses(report)['feature:set-screw'], 'fail')
+        # A counterbore 1 mm too shallow is still a shoulder, so the depth catches it.
+        intent, _ = field_case('counterbored-spacer', '002')
+        shallow = rebind(intent, load_json(FIELD / 'counterbored-spacer/mutants/counterbore-4-deep.json'))
+        report, _ = self.build(intent, shallow)
+        self.assertEqual(statuses(report)['feature:counterbore'], 'fail')
+
+    def test_end_kinds_need_full_proof(self):
+        # A void end must be clear across the whole aperture; a shoulder ring must be completely filled.
+        script = '''
+import importlib.util
+import sys
+spec = importlib.util.spec_from_file_location('scene', sys.argv[1])
+scene = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(scene)
+A, P = scene.App, scene.Part
+def ends(shape, radius):
+    low = [shape.BoundBox.XMin, shape.BoundBox.YMin, shape.BoundBox.ZMin]
+    return next(c['ends'] for c in scene.cylinders(shape, low) if abs(c['radius_mm'] - radius) < 1e-6)
+block = P.makeBox(20, 20, 10)
+# A hole that opens into a closed pocket inside the part.
+pocket = block.cut([P.makeCylinder(2, 6, A.Vector(10, 10, -1)), P.makeBox(12, 12, 3, A.Vector(4, 4, 5))])
+assert ends(pocket, 2) == ['outside', 'void'], ends(pocket, 2)
+# A thin rib just past the end covers part of the aperture: not proven void.
+ribbed = pocket.fuse(P.makeBox(12, 1, 0.2, A.Vector(4, 10.5, 5.1))).removeSplitter()
+assert ends(ribbed, 2) == ['outside', None], ends(ribbed, 2)
+# A counterbore over a clearance hole has a shoulder.
+cbore = block.cut([P.makeCylinder(2, 12, A.Vector(10, 10, -1)), P.makeCylinder(4, 6, A.Vector(10, 10, 5))])
+assert ends(cbore, 4) == ['shoulder', 'outside'], ends(cbore, 4)
+# A notch in the shoulder ring: not completely filled, so not a shoulder.
+notched = cbore.cut(P.makeBox(1.5, 1, 1, A.Vector(12.5, 9.5, 4.5))).removeSplitter()
+assert ends(notched, 4) == [None, 'outside'], ends(notched, 4)
+'''
+        with tempfile.TemporaryDirectory() as tmp:
+            freecad.run_process([freecad.PYTHON, '-I', '-B', '-c', script, freecad_plan.SCRIPT],
+                                tmp, Path(tmp) / 'end-kind-fixtures.log', timeout=60)
+
     def test_sealed_cavity_blocks(self):
         report, run = self.build(*field_case('hollow-ball'))
         self.assertEqual(report['intent_state'], 'blocked')

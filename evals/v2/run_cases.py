@@ -19,8 +19,9 @@ def runs():
             attempt = plan.stem.split("-")[1]
             intent = folder / ("intent.json" if attempt == "001" else f"intent-{attempt}.json")
             yield f"{folder.name}-{attempt}", intent, plan
+        latest = sorted(folder.glob("intent*.json"), key=lambda p: (p.name != "intent.json", p.name))[-1]
         for plan in sorted(folder.glob("mutants/*.json")):
-            yield f"{folder.name}--{plan.stem}", folder / "intent.json", plan
+            yield f"{folder.name}--{plan.stem}", latest, plan
 
 
 def main(output):

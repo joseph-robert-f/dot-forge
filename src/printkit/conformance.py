@@ -10,7 +10,7 @@ Notes and unrequested holes go to a person as `needs_review`.
 """
 import math
 from .common import ForgeError
-from .intent import AXES, plane_axes
+from .intent import AXES, HOLE_ENDS, plane_axes
 
 FULL_TURN = 2 * math.pi - 1e-6
 SCHEMA = "conformance.v1"
@@ -66,6 +66,8 @@ def check_hole(feature, measured, claimed):
                       f"no full cylindrical void on axis {axis} at this diameter and position")
     index, hole = min(matches, key=lambda ic: distance(ic[1]))
     claimed.add(index)
+    if isinstance(feature["depth"], dict) and "ends" in feature["depth"]:
+        return check_hole_ends(feature, hole, code, expected)
     ends, span = hole.get("ends_open"), hole.get("span_mm")
     actual = {"diameter_mm": 2 * hole["radius_mm"], "position_mm": hole["position_mm"],
               "span_mm": span, "ends_open": ends}
@@ -80,6 +82,22 @@ def check_hole(feature, measured, claimed):
             and abs((span[1] - span[0]) - feature["depth"]["depth_mm"]) <= tol
     return record(code, "pass" if ok else "fail", actual, expected,
                   "analytic cylinder diameter/axis/position; full-aperture B-rep checks decide through or blind")
+
+
+def check_hole_ends(feature, hole, code, expected):
+    """Each end must be measured as exactly what the intent names; an unproven end is unknown."""
+    ends, span, depth = hole.get("ends"), hole.get("span_mm"), feature["depth"]
+    actual = {"diameter_mm": 2 * hole["radius_mm"], "position_mm": hole["position_mm"],
+              "span_mm": span, "ends": ends}
+    method = "analytic cylinder diameter/axis/position; full-aperture B-rep checks decide what each end opens into"
+    if not isinstance(ends, list) or len(ends) != 2 or not all(e is None or e in HOLE_ENDS for e in ends) \
+            or not isinstance(span, list) or len(span) != 2 or not all(map(finite, span)):
+        return record(code, "unknown", actual, expected, "hole ends were not measured")
+    if None in ends:
+        return record(code, "unknown", actual, expected, method)
+    ok = ends == [depth["ends"]["min"], depth["ends"]["max"]] \
+        and ("depth_mm" not in depth or abs((span[1] - span[0]) - depth["depth_mm"]) <= feature["tolerance_mm"])
+    return record(code, "pass" if ok else "fail", actual, expected, method)
 
 
 def check_planar(feature, m):

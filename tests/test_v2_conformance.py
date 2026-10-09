@@ -146,6 +146,39 @@ class ConformanceTests(unittest.TestCase):
         self.assertEqual(statuses(report)['feature:ledge-hole'], 'unknown')
         self.assertEqual(report['intent_state'], 'blocked')
 
+    def test_hole_ends_must_match_exactly(self):
+        intent, _ = example('stepped-block')
+        intent['features'][0]['depth'] = {'ends': {'min': 'shoulder', 'max': 'outside'}, 'depth_mm': 9}
+        cases = [
+            (['shoulder', 'outside'], (0, 9), 'pass'),
+            (['shoulder', 'outside'], (0, 8), 'fail'),  # Depth is checked when the intent states it.
+            (['floor', 'outside'], (0, 9), 'fail'),
+            (['outside', 'outside'], (0, 9), 'fail'),
+            (['void', 'outside'], (0, 9), 'fail'),
+            ([None, 'outside'], (0, 9), 'unknown'),
+            (['pocket', 'outside'], (0, 9), 'unknown'),  # Malformed measurement.
+            (None, (0, 9), 'unknown'),  # Measured before end kinds existed.
+        ]
+        for ends, span, expected in cases:
+            with self.subTest(ends=ends, span=span):
+                m = stepped_measurement()
+                m['cylinders'][0].update(span_mm=list(span), ends=ends)
+                if ends is None:
+                    del m['cylinders'][0]['ends']
+                report = conform(intent, m)
+                self.assertEqual(statuses(report)['feature:ledge-hole'], expected)
+                self.assertEqual(report['intent_state'], 'conforms' if expected == 'pass' else 'blocked')
+
+    def test_legacy_depth_ignores_end_kinds(self):
+        # A shoulder is still not a blind floor or a through end for the older depth forms.
+        intent, _ = example('stepped-block')
+        for depth in ('through', {'depth_mm': 9, 'open_end': 'max'}):
+            with self.subTest(depth=depth):
+                m = stepped_measurement()
+                m['cylinders'][0].update(ends_open=[None, True], ends=['shoulder', 'outside'])
+                intent['features'][0]['depth'] = depth
+                self.assertEqual(statuses(conform(intent, m))['feature:ledge-hole'], 'unknown')
+
     def test_partly_obstructed_aperture_is_not_through_or_blind(self):
         intent, _ = example('stepped-block')
         for ends in ([None, True], [True, None], [None, None]):

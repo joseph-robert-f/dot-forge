@@ -279,44 +279,61 @@ CASES["bottle-cap"] = (
     None)
 
 
-def revise(case, change, features, unknowns=None):
-    """A second attempt that needs a changed intent, so the user must confirm again."""
-    spec = json.loads(json.dumps(CASES[case][0][0]))
-    spec["features"] = features(spec["features"])
+def revise(spec, change, features=None, unknowns=None):
+    """A later attempt that needs a changed intent, so the user must confirm again."""
+    spec = json.loads(json.dumps(spec))
+    if features:
+        spec["features"] = features(spec["features"])
     if unknowns is not None:
         spec["unknowns"] = unknowns
-    spec["confirmation"] = dict(SIMULATED, note=SIMULATED["note"] + " Revision: " + change)
+    note_text = spec["confirmation"].get("note", SIMULATED["note"])
+    note_text = note_text if "Revision:" in note_text else note_text + " Revision:"
+    spec["confirmation"] = dict(SIMULATED, note=f"{note_text} {change}")
     return spec
 
 
-# Attempt 2 for blocked cases. The plan is unchanged unless noted.
-REVISIONS = {
-    "spur-gear": lambda: (
-        revise("spur-gear", "a D-bore is not a full cylinder, so it cannot be a measured hole. Moved to a note.",
-               lambda fs: [f for f in fs if f["id"] != "bore"] + [
-                   note("bore", "5 mm bore for the D-shaft, centred on the gear.", "5 mm D-shaft bore")]),
-        None),
-    "hollow-ball": lambda: (
-        revise("hollow-ball", "a sealed cavity is not supported. User accepted a 3 mm drain hole at the bottom.",
-               lambda fs: fs + [hole("drain", "z", 3, [20, 20],
-                                     source="user answer: add a 3 mm drain hole at the bottom")],
-               ["printer and material"]),
-        DRAIN_PLAN),
-}
-DRAIN_PLAN = {"steps": CASES["hollow-ball"][1]["steps"][:-1] + [
-    {"id": "drain", "op": "cylinder", "radius_mm": 1.5, "height_mm": 4, "at_mm": [20, 20, -1]},
-    {"id": "ball", "op": "cut", "from": "outside", "tools": ["inside", "drain"]}]}
+def set_depth(feature_id, depth):
+    """Replace one hole's depth with a new form."""
+    return lambda fs: [dict(f, depth=depth) if f["id"] == feature_id else f for f in fs]
 
 
 def drain_height(spec):
     """Attempt 2 kept 40 mm tall; the drain hole trims the bottom pole to 39.94 mm."""
+    spec = revise(spec, "Attempt 3: the drain trims the bottom, so the height is 39.94 mm.")
     spec["envelope"]["size_mm"][2] = round(20 + math.sqrt(20 ** 2 - 1.5 ** 2), 2)
-    spec["confirmation"]["note"] += " Attempt 3: the drain trims the bottom, so the height is 39.94 mm."
     return spec
 
 
-# Attempt 3, built on attempt 2.
-THIRD = {"hollow-ball": drain_height}
+DRAIN_PLAN = {"steps": CASES["hollow-ball"][1]["steps"][:-1] + [
+    {"id": "drain", "op": "cylinder", "radius_mm": 1.5, "height_mm": 4, "at_mm": [20, 20, -1]},
+    {"id": "ball", "op": "cut", "from": "outside", "tools": ["inside", "drain"]}]}
+
+# Later attempts for blocked cases, in order. Each step takes the previous intent
+# and returns the new intent and any plan changes (None keeps the plan).
+ATTEMPTS = {
+    "spur-gear": [lambda spec: (
+        revise(spec, "a D-bore is not a full cylinder, so it cannot be a measured hole. Moved to a note.",
+               lambda fs: [f for f in fs if f["id"] != "bore"] + [
+                   note("bore", "5 mm bore for the D-shaft, centred on the gear.", "5 mm D-shaft bore")]),
+        None)],
+    "hollow-ball": [
+        lambda spec: (
+            revise(spec, "a sealed cavity is not supported. User accepted a 3 mm drain hole at the bottom.",
+                   lambda fs: fs + [hole("drain", "z", 3, [20, 20],
+                                         source="user answer: add a 3 mm drain hole at the bottom")],
+                   ["printer and material"]),
+            DRAIN_PLAN),
+        lambda spec: (drain_height(spec), None),
+        lambda spec: (revise(spec, "Attempt 4: the drain opens into the cavity, not to the outside at both ends.",
+                             set_depth("drain", {"ends": {"min": "outside", "max": "void"}})), None)],
+    "counterbored-spacer": [lambda spec: (
+        revise(spec, "the counterbore floor is a shoulder around the clearance hole, not a solid floor.",
+               set_depth("counterbore", {"ends": {"min": "shoulder", "max": "outside"}, "depth_mm": 5})), None)],
+    "shaft-collar": [lambda spec: (
+        revise(spec, "the set-screw hole opens into the bore, not to the outside at both ends.",
+               set_depth("set-screw", {"ends": {"min": "outside", "max": "void"}})), None)],
+}
+
 
 def edit(case, **changes):
     """Copy of a case's first plan with some steps changed: one realistic plan mistake."""
@@ -379,31 +396,24 @@ def main():
             first_plan["intent_sha256"] = canonical_hash(spec)
             check_plan(first_plan, spec)
             (folder / "plan-001.json").write_text(json.dumps(first_plan, indent=2, sort_keys=True) + "\n")
+        spec_n, plan_n = spec, first_plan
+        for number, step in enumerate(ATTEMPTS.get(name, []), start=2):
+            spec_n, changes = step(spec_n)
+            check_intent(spec_n, require_confirmed=True)
+            plan_n = dict(json.loads(json.dumps(plan_n)), **(changes or {}))
+            plan_n["intent_sha256"] = canonical_hash(spec_n)
+            check_plan(plan_n, spec_n)
+            (folder / f"intent-{number:03}.json").write_text(json.dumps(spec_n, indent=2, sort_keys=True) + "\n")
+            (folder / f"plan-{number:03}.json").write_text(json.dumps(plan_n, indent=2, sort_keys=True) + "\n")
+            entry["revision"] = spec_n["confirmation"]["note"]
+        # Mutants are judged against the last intent, the one the correct plan is built for.
         for mutant, description, make in MUTANTS.get(name, []):
             mutated = make()
-            mutated["intent_sha256"] = canonical_hash(spec)
-            check_plan(mutated, spec)
+            mutated["intent_sha256"] = canonical_hash(spec_n)
+            check_plan(mutated, spec_n)
             (folder / "mutants").mkdir(exist_ok=True)
             (folder / "mutants" / f"{mutant}.json").write_text(json.dumps(mutated, indent=2, sort_keys=True) + "\n")
             entry.setdefault("mutants", {})[mutant] = description
-        if name in REVISIONS:
-            revised, changes = REVISIONS[name]()
-            check_intent(revised, require_confirmed=True)
-            second = json.loads(json.dumps(first_plan))
-            second.update(changes or {})
-            second["intent_sha256"] = canonical_hash(revised)
-            check_plan(second, revised)
-            (folder / "intent-002.json").write_text(json.dumps(revised, indent=2, sort_keys=True) + "\n")
-            (folder / "plan-002.json").write_text(json.dumps(second, indent=2, sort_keys=True) + "\n")
-            entry["revision"] = revised["confirmation"]["note"]
-            if name in THIRD:
-                third_intent = THIRD[name](json.loads(json.dumps(revised)))
-                check_intent(third_intent, require_confirmed=True)
-                third = dict(second, intent_sha256=canonical_hash(third_intent))
-                check_plan(third, third_intent)
-                (folder / "intent-003.json").write_text(json.dumps(third_intent, indent=2, sort_keys=True) + "\n")
-                (folder / "plan-003.json").write_text(json.dumps(third, indent=2, sort_keys=True) + "\n")
-                entry["revision"] = third_intent["confirmation"]["note"]
         index.append(entry)
     (ROOT / "index.json").write_text(json.dumps(index, indent=2) + "\n")
     for e in index:

@@ -17,6 +17,7 @@
   - A cylinder is a void when its face normal points toward its axis. Before, the outer wall of a tube was reported as a hole.
   - A blind counterbore over a clearance hole read as through. The full-aperture end checks now make that end unknown.
   - `native_solid` requires one shell for each solid, so a sealed cavity blocks. The STEP round trip compares shell counts.
+- A hole can name what each end opens into: `{"ends": {"min": ..., "max": ...}}` with `outside`, `floor`, `void` or `shoulder`. This expresses counterbores, set-screw holes into a bore and drain holes into a cavity. Each end must be proven over the full aperture, or it is unknown. `"through"` and blind depths do not change. The field test's spacer, collar and drained ball now conform, and their wrong plans are caught.
 - v1 requests, generators and checks do not change. A report with `overall_state: blocked` now always exits 4.
 
 ## 1.02

@@ -61,6 +61,12 @@ class IntentTests(unittest.TestCase):
             lambda i: i['features'][0].update(position_mm=[7.5, 99]),
             lambda i: i['features'][0].update(depth={'depth_mm': 5}),
             lambda i: i['features'][0].update(depth={'depth_mm': 5, 'open_end': 'top'}),
+            lambda i: i['features'][0].update(depth={'ends': {'min': 'outside', 'max': 'pocket'}}),
+            lambda i: i['features'][0].update(depth={'ends': {'min': 'outside'}}),
+            # One end must reach the outside; a hole between two voids or floors is not a requested feature.
+            lambda i: i['features'][0].update(depth={'ends': {'min': 'void', 'max': 'shoulder'}}),
+            lambda i: i['features'][0].update(depth={'ends': {'min': 'outside', 'max': 'void'}, 'open_end': 'max'}),
+            lambda i: i['features'][0].update(depth={'ends': {'min': 'outside', 'max': 'void'}, 'depth_mm': 0}),
             lambda i: i['features'][0].update(script='x'),
             lambda i: i['features'][1].update(normal='down'),
             lambda i: i['features'][1].update(offset=99),

@@ -148,6 +148,71 @@
                         ]
                       }
                     }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "ends"
+                    ],
+                    "description": "What each end opens into. outside: clear to the outside of the part. floor: a filled end. void: empty space inside the part, such as a bore or cavity. shoulder: a filled step around a narrower coaxial hole. One end must be outside.",
+                    "properties": {
+                      "ends": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "min",
+                          "max"
+                        ],
+                        "properties": {
+                          "min": {
+                            "enum": [
+                              "outside",
+                              "floor",
+                              "void",
+                              "shoulder"
+                            ]
+                          },
+                          "max": {
+                            "enum": [
+                              "outside",
+                              "floor",
+                              "void",
+                              "shoulder"
+                            ]
+                          }
+                        }
+                      },
+                      "depth_mm": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 500
+                      }
+                    },
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "ends": {
+                            "properties": {
+                              "min": {
+                                "const": "outside"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "properties": {
+                          "ends": {
+                            "properties": {
+                              "max": {
+                                "const": "outside"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               },

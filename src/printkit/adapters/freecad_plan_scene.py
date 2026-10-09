@@ -24,6 +24,8 @@ PROBE_MM = 0.01
 LINEAR_TOL = 1e-6
 VOLUME_AREA_RELATIVE_TOL = 1e-4
 SPAN_TOL = 1e-3
+VOID_CLEAR_MM = 0.5  # A "void" end must be clear over the full aperture for this far.
+SHOULDER_EDGE_MM = 1e-3  # Band left unproven at a shoulder's inner edge, against coincident-face Booleans.
 AXES = {'x': App.Vector(1, 0, 0), 'y': App.Vector(0, 1, 0), 'z': App.Vector(0, 0, 1)}
 PLANE_NORMAL = {'xy': 'z', 'xz': 'y', 'yz': 'x'}
 
@@ -249,6 +251,42 @@ def aperture_ends(shape, foot, direction, radius, span, bounds):
         return [None, None]
 
 
+def end_kinds(shape, foot, direction, radius, span, ends_open, inner_radii):
+    """Name what each end opens into: outside, floor, void, shoulder, or None.
+
+    Ends proven outside or floor by aperture_ends keep that answer. An end that
+    is neither is a void only when the full aperture stays clear for
+    VOID_CLEAR_MM past it, and a shoulder only when the ring around a narrower
+    coaxial hole is completely filled and that hole's aperture is clear.
+    Anything else, including an obstructed bore, stays None.
+    """
+    kinds = [{True: 'outside', False: 'floor'}.get(e) for e in ends_open]
+    if None not in kinds:
+        return kinds
+    try:
+        s0, s1 = span
+        bore = Part.makeCylinder(radius, s1 - s0, foot + direction * s0, direction)
+        if not empty_volume(shape.common(bore)):
+            return kinds
+        for i, (end, outward) in enumerate(((s0, -direction), (s1, direction))):
+            if kinds[i] is not None:
+                continue
+            base = foot + direction * end
+            if empty_volume(shape.common(Part.makeCylinder(radius, VOID_CLEAR_MM, base, outward))):
+                kinds[i] = 'void'
+                continue
+            cap = Part.makeCylinder(radius, PROBE_MM, base, outward)
+            for inner in sorted(inner_radii, reverse=True):
+                ring = cap.cut(Part.makeCylinder(inner + SHOULDER_EDGE_MM, PROBE_MM, base, outward))
+                opening = Part.makeCylinder(inner - SHOULDER_EDGE_MM, PROBE_MM, base, outward)
+                if empty_volume(ring.cut(shape)) and empty_volume(shape.common(opening)):
+                    kinds[i] = 'shoulder'
+                    break
+        return kinds
+    except Exception:
+        return [{True: 'outside', False: 'floor'}.get(e) for e in ends_open]
+
+
 def cylinders(shape, low):
     """Group analytic cylinder faces into whole cylinders and probe each one."""
     pieces = []
@@ -300,6 +338,10 @@ def cylinders(shape, low):
                 box = shape.BoundBox
                 bounds = [(box.XMin, box.XMax), (box.YMin, box.YMax), (box.ZMin, box.ZMax)][index]
                 entry['ends_open'] = aperture_ends(shape, foot, d, g['radius'], (s0, s1), bounds)
+                inner = [o['radius'] for o in groups if o['void'] and o['axis'] == g['axis']
+                         and o['angle'] >= 2 * math.pi - 1e-6 and (o['foot'] - foot).Length <= LINEAR_TOL
+                         and o['radius'] < g['radius'] - 2 * SHOULDER_EDGE_MM]
+                entry['ends'] = end_kinds(shape, foot, d, g['radius'], (s0, s1), entry['ends_open'], inner)
         result.append(entry)
     return result
 
@@ -372,6 +414,7 @@ def same_cylinder(a, b):
     """
     near = lambda x, y, tol: (x is None) == (y is None) and (x is None or all(abs(i - j) <= tol for i, j in zip(x, y)))
     return (a['kind'] == b['kind'] and a['axis'] == b['axis'] and a['ends_open'] == b['ends_open']
+            and a.get('ends') == b.get('ends')
             and abs(a['radius_mm'] - b['radius_mm']) <= LINEAR_TOL and abs(a['angle_rad'] - b['angle_rad']) <= 1e-6
             and near(a['position_mm'], b['position_mm'], 1e-5) and near(a['span_mm'], b['span_mm'], SPAN_TOL))
 
