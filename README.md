@@ -1,5 +1,7 @@
 # Dot Forge
 
+![Dot Forge overview sheet: three rendered models, labelled as candidates that are not print-ready.](docs/media/hero.png)
+
 **Make a small 3D model with your Dot. Keep the model, the source, and the check results together.**
 
 Dot Forge gives your Dot instructions and three reviewed model generators. A generator makes a fixed type of model from dimensions that you supply. Your Dot runs the tools on its Linux cloud computer. You do not need to operate Blender or FreeCAD yourself.
@@ -16,15 +18,15 @@ This repository contains source and instructions. It does not install applicatio
 
 This walkthrough is an illustration of the documented workflow, condensed for length. It is not a live recording of a run. See the [MP4 version](docs/media/demo.mp4). Run the commands below on your Dot's computer to get real evidence.
 
-| How it works | What the checks establish |
-| --- | --- |
-| ![Six steps from request.json to verify-bundle.](docs/media/workflow.png) | ![Four check layers. Printing and physical checks stay open.](docs/media/checks.png) |
+![Process sheet: six steps from request.json to verify-bundle. Printing checks stay open.](docs/media/workflow.png)
 
-![The three supported model families with example sizes.](docs/media/families.png)
+![Verification sheet: four check layers. Failed, skipped, unavailable and inconclusive checks never count as a pass.](docs/media/checks.png)
 
-![The files in a run directory, and the steps to deliver them.](docs/media/bundle.png)
+![Model families sheet: the three supported generators with example sizes.](docs/media/families.png)
 
-The media source is in [docs/media/src](docs/media/src). Regenerate it with `node docs/media/render-media.mjs` (needs Node, Playwright, and ffmpeg). The images in `docs/images` are real STL renders. The diagrams are illustrations.
+![Deliverables sheet: the files in a run directory and the delivery sequence.](docs/media/bundle.png)
+
+The sheets are illustrations. Only the model views come from real runs: they are the STL renders in `docs/images`. The source is in [docs/media/src](docs/media/src). To regenerate the media, run `node docs/media/render-media.mjs`. It needs Node, Playwright, ffmpeg, and network access to Google Fonts.
 
 ## Supported models
 

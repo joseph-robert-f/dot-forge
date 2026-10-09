@@ -1,127 +1,69 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>Dot Forge demo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=block">
 <link rel="stylesheet" href="base.css">
 <style>
-body { width: 960px; height: 540px; overflow: hidden; position: relative; }
-.win { position: absolute; inset: 14px 14px 40px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); overflow: hidden; display: grid; grid-template-columns: 536px 1fr; grid-template-rows: 34px 1fr; }
-.bar { grid-column: 1 / 3; display: flex; align-items: center; gap: 7px; padding: 0 14px; border-bottom: 1px solid var(--line); background: #12181b; font: 12px var(--mono); color: var(--muted); }
-.bar i { width: 10px; height: 10px; border-radius: 50%; background: #34434a; }
-.bar span { margin-left: 10px; }
-.term { padding: 14px 16px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; background: #0c1013; font: 12.5px/1.5 var(--mono); }
-.ln { display: none; white-space: pre-wrap; overflow-wrap: anywhere; margin-top: 2px; }
-.ln.cmd { color: #dff3f6; margin-top: 12px; }
-.ln.cmd::before { content: "$ "; color: var(--teal); }
-.ln.cmd.typing::after { content: "▌"; color: var(--teal); }
-.ln.note { color: var(--muted); }
-.ln.ok { color: var(--teal); }
-.ln.warn { color: var(--amber); }
-.pane { position: relative; background: var(--bg); border-left: 1px solid var(--line); }
-.scene { position: absolute; inset: 0; padding: 18px 20px; opacity: 0; }
-.scene h4 { margin: 0 0 12px; font: 600 11.5px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--teal); }
-.kv { display: grid; grid-template-columns: 112px 1fr; row-gap: 7px; font: 12.5px var(--mono); }
-.kv span { color: var(--muted); }
-.kv b { font-weight: 500; color: var(--text); }
-.kv b.amber { color: var(--amber); }
-.jsoncard { padding: 14px 16px; }
-.hint { margin-top: 14px; font-size: 12.5px; line-height: 1.45; color: var(--muted); }
-.chk { display: grid; gap: 8px; }
-.chk div { display: grid; grid-template-columns: 22px 1fr; gap: 8px; align-items: start; padding: 9px 11px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); font-size: 12.5px; line-height: 1.35; color: var(--muted); }
-.chk div b { display: block; color: var(--text); font-weight: 600; font-size: 13px; }
-.chk .g { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--line); margin-top: 1px; position: relative; }
-.chk div.done { border-color: var(--teal-d); }
-.chk div.done .g { background: var(--teal); border-color: var(--teal); }
-.chk div.done .g::after { content: ""; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px; border: solid #08262b; border-width: 0 2px 2px 0; transform: rotate(45deg); }
-.chk div.openrow { border-color: #5d4720; background: #1d1810; border-style: dashed; }
-.chk div.openrow .g { border-color: var(--amber); }
-.chk div.openrow b { color: var(--amber); }
-.rend { position: absolute; right: 20px; bottom: 16px; width: 150px; padding: 6px; opacity: 0; }
-.rend img { width: 100%; border-radius: 6px; display: block; }
-.rend small { display: block; margin-top: 5px; font: 10.5px var(--mono); color: var(--muted); }
-.status { display: grid; gap: 10px; }
-.pill { display: flex; justify-content: space-between; align-items: center; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--teal-d); background: #0f2226; font: 12.5px var(--mono); }
-.pill b { color: var(--teal); }
-.pill.a { border-color: #5d4720; background: #1d1810; }
-.pill.a b { color: var(--amber); }
-.big { display: flex; gap: 12px; align-items: center; margin-bottom: 14px; }
-.big img { width: 120px; border-radius: 8px; }
-.big div { font-size: 13px; line-height: 1.45; color: var(--muted); }
-.big b { display: block; color: var(--text); font-size: 15px; }
-.zip { padding: 14px 16px; display: grid; gap: 9px; font: 12.5px var(--mono); }
-.zip .row { display: flex; justify-content: space-between; color: var(--muted); }
-.zip .row b { color: var(--text); font-weight: 500; }
-.end { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 14px; }
-.end h3 { margin: 0; font-size: 26px; line-height: 1.15; letter-spacing: -.02em; }
-.end h3 em { font-style: normal; color: var(--amber); }
-.end p { margin: 0; font-size: 13.5px; line-height: 1.45; color: var(--muted); }
-.end .url { font: 12.5px var(--mono); color: var(--teal); }
-.tag { position: absolute; left: 14px; right: 14px; bottom: 11px; display: flex; justify-content: space-between; font: 11.5px var(--mono); color: var(--muted); }
-.tag b { color: var(--amber); font-weight: 600; }
-.prog { position: absolute; left: 14px; right: 14px; bottom: 33px; height: 2px; background: var(--line); border-radius: 2px; }
-.prog i { display: block; height: 100%; width: 0; background: var(--teal-d); }
+body { width: 960px; height: 540px; }
+.top { position: absolute; left: 42px; top: 38px; right: 42px; display: flex; justify-content: space-between; align-items: baseline; }
+.top h1 { font-size: 26px; line-height: 1; }
+.top .label { font-size: 10px; }
+.term { position: absolute; left: 42px; top: 76px; width: 500px; height: 380px; background: var(--ink); color: #e9e6dd; display: flex; flex-direction: column; }
+.term .bar { padding: 7px 12px 8px; border-bottom: 1px solid #3a3e42; font: 500 10px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: #a9aca8; display: flex; justify-content: space-between; }
+.term .body { flex: 1; padding: 10px 14px 12px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; font: 11px/1.5 var(--mono); }
+.ln { display: none; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ln.cmd { margin-top: 9px; color: #f4f1e8; }
+.ln.cmd::before { content: "$ "; color: #8fb0ea; }
+.ln.cmd.typing::after { content: "█"; color: #8fb0ea; }
+.ln.note { color: #9a9d99; }
+.ln.ok { color: #8fb0ea; }
+.ln.warn { color: #f08a4b; }
+.rec { position: absolute; left: 562px; top: 76px; width: 356px; height: 384px; border: 1.5px solid var(--ink); background: var(--paper); }
+.rec .hd { display: flex; justify-content: space-between; align-items: center; padding: 7px 10px 8px; border-bottom: 2px solid var(--ink); font: 600 10px var(--mono); letter-spacing: .14em; text-transform: uppercase; }
+.rec .hd span { color: var(--ink-3); font-weight: 500; letter-spacing: .06em; }
+.row { display: grid; grid-template-columns: 96px 1fr 58px; align-items: center; height: 26px; padding: 0 10px; border-bottom: 1px solid #c9c5ba; font: 11px var(--mono); }
+.row .k { font-weight: 600; letter-spacing: .06em; font-size: 10px; text-transform: uppercase; color: var(--ink-2); }
+.row .v { color: var(--ink-3); white-space: nowrap; overflow: hidden; }
+.row.on .v { color: var(--ink); }
+.row .m { justify-self: end; font: 700 11px var(--display); letter-spacing: .12em; padding: 2px 6px 2px; border: 1.5px solid transparent; color: transparent; }
+.row.on .m.ok { color: var(--blue); border-color: var(--blue); }
+.row.on .m.todo { color: var(--ink); border-color: var(--ink); }
+.row.on .m.open { color: var(--orange); border-color: var(--orange); border-width: 2px; }
+.row.on.openrow { background-image: repeating-linear-gradient(-45deg, var(--orange-tint) 0 5px, transparent 5px 10px); }
+.viewrow { display: grid; grid-template-columns: 76px 1fr; gap: 12px; align-items: center; height: 92px; padding: 0 10px; border-bottom: 2px solid var(--ink); }
+.slot { width: 76px; height: 76px; border: 1.5px dashed var(--ink-3); }
+.slot .plate { width: 76px; height: 76px; margin: -1.5px; opacity: 0; }
+.slot .tag { font-size: 8px; padding: 2px 4px 3px; letter-spacing: .06em; }
+.viewrow p { margin: 0; font-size: 12.5px; line-height: 1.4; color: var(--ink-2); }
+.st { position: absolute; left: 300px; top: 28px; opacity: 0; font-size: 16px; padding: 5px 12px 6px; }
+.cap { position: absolute; left: 42px; bottom: 40px; width: 470px; font: 10px/1.4 var(--mono); color: var(--ink-2); }
+.cap b { color: var(--orange); letter-spacing: .1em; }
+.prog { position: absolute; left: 42px; top: 462px; width: 500px; height: 2px; background: #c9c5ba; }
+.prog i { display: block; height: 100%; width: 0; background: var(--blue); }
 </style></head>
-<body>
-<div class="win">
-  <div class="bar"><i></i><i></i><i></i><span>your Dot · Linux cloud computer</span></div>
-  <div class="term" id="term"></div>
-  <div class="pane" id="pane">
-    <div class="scene" id="s-req" data-in="0.3" data-out="4.2">
-      <h4>Request</h4>
-      <div class="card jsoncard"><div class="kv">
-        <span>generator</span><b>calibration-block</b>
-        <span>backend</span><b>blender</b>
-        <span>width</span><b>20 mm</b>
-        <span>depth</span><b>20 mm</b>
-        <span>height</span><b>10 mm</b>
-        <span>tolerance</span><b>0.05 mm</b>
-        <span>printer_profile</span><b class="amber">null (unknown)</b>
-      </div></div>
-      <p class="hint">Dimensions come from you. Printer and material details stay unknown until someone supplies them.</p>
-    </div>
-    <div class="scene" id="s-run" data-in="4.3" data-out="12.4">
-      <h4>run · new directory build/calibration-001</h4>
-      <div class="chk">
-        <div id="k1"><span class="g"></span><span><b>Generate in Blender</b>native/model.blend, exports/model.stl</span></div>
-        <div id="k2"><span class="g"></span><span><b>Reopen the native model</b>native check</span></div>
-        <div id="k3"><span class="g"></span><span><b>Independent STL checks</b>topology, dimensions, volume, intersections</span></div>
-        <div id="k4"><span class="g"></span><span><b>Render five views of the STL</b>front, side, back, top, oblique</span></div>
-        <div class="openrow" id="k5"><span class="g"></span><span><b>Printer, slicer, manual, physical</b>open. Not a pass.</span></div>
-      </div>
-      <div class="card rend" id="rend1"><img src="../../images/calibration-block.png" alt=""><small>oblique.png</small></div>
-    </div>
-    <div class="scene" id="s-ins" data-in="12.5" data-out="15.4">
-      <h4>inspect · exit code 5</h4>
-      <div class="big"><img src="../../images/calibration-block.png" alt=""><div><b>Review the five views</b>Compare each with the request. A render is not user approval.</div></div>
-      <div class="status">
-        <div class="pill"><span>geometry_state</span><b>geometry_validated</b></div>
-        <div class="pill a"><span>print_state</span><b>needs_review</b></div>
-      </div>
-    </div>
-    <div class="scene" id="s-zip" data-in="15.5" data-out="22.2">
-      <h4>bundle · verify</h4>
-      <div class="card zip">
-        <div class="row"><span>file</span><b>build/calibration-001.zip</b></div>
-        <div class="row"><span>contents</span><b>model, STL, previews, evidence</b></div>
-        <div class="row"><span>step 1</span><b id="z1">bundle the finalized run</b></div>
-        <div class="row"><span>step 2</span><b id="z2">copy to a durable destination</b></div>
-        <div class="row"><span>step 3</span><b id="z3">retrieve, then verify-bundle</b></div>
-      </div>
-      <p class="hint">A temporary local path is not delivery. Verify the retrieved copy.</p>
-    </div>
-    <div class="scene end" id="s-end" data-in="22.3" data-out="99">
-      <h4>Result</h4>
-      <h3>Geometry checked.<br><em>Printing still open.</em></h3>
-      <p>Slicer, printer settings, and a physical test come next. Dot Forge never calls a model print-ready without evidence.</p>
-      <span class="url">github.com/joseph-robert-f/dot-forge</span>
-    </div>
-  </div>
+<body class="no-grain" data-title="Walkthrough" data-sheet="6 / 6">
+<div class="top"><h1>Dot Forge in one run</h1><span class="label"><span class="no">06</span> &nbsp;calibration-block · 20 × 20 × 10 mm</span></div>
+<div class="term"><div class="bar"><span>your Dot · Linux cloud computer</span><span>bash</span></div><div class="body" id="term"></div></div>
+<div class="rec">
+  <div class="hd">Check record<span>build/calibration-001</span></div>
+  <div class="viewrow"><div class="slot"><div class="plate" id="thumb"><span class="tag">OBLIQUE</span><img src="../../images/calibration-block.png" alt=""></div></div><p id="vtext">Waiting for the five-view render.</p></div>
+  <div class="row" data-at="3.3"><span class="k">Contract</span><span class="v">check-request · exit 0</span><span class="m ok">PASS</span></div>
+  <div class="row" data-at="6.4"><span class="k">Generate</span><span class="v">model.blend, model.stl</span><span class="m ok">DONE</span></div>
+  <div class="row" data-at="7.8"><span class="k">Native</span><span class="v">reopen model</span><span class="m ok">PASS</span></div>
+  <div class="row" data-at="9.2"><span class="k">STL checks</span><span class="v">topology, size, volume</span><span class="m ok">PASS</span></div>
+  <div class="row" data-at="10.5"><span class="k">Five views</span><span class="v">rendered from STL</span><span class="m ok">DONE</span></div>
+  <div class="row" data-at="11.2"><span class="k">Inspect</span><span class="v">exit 5 · needs_review</span><span class="m todo">REVIEW</span></div>
+  <div class="row" data-at="14.3"><span class="k">Person</span><span class="v">compare five views</span><span class="m todo">TO DO</span></div>
+  <div class="row" data-at="18.0"><span class="k">Bundle</span><span class="v">calibration-001.zip</span><span class="m ok">DONE</span></div>
+  <div class="row" data-at="20.6"><span class="k">Verify</span><span class="v">on retrieved copy</span><span class="m ok">PASS</span></div>
+  <div class="row openrow" data-at="21.6"><span class="k">Print</span><span class="v">slicer, printer, test</span><span class="m open">OPEN</span></div>
 </div>
+<div class="stamp st" id="stamp">Candidate · not print-ready</div>
 <div class="prog"><i id="prog"></i></div>
-<div class="tag"><span><b>Illustrated walkthrough.</b> Condensed from the documented workflow. Not a live recording.</span><span>calibration-block example</span></div>
+<div class="cap"><b>ILLUSTRATED.</b> Condensed from the documented workflow. Not a live recording. Run the commands on your Dot for real evidence.</div>
 
 <script>
 const DURATION = 26.5;
 const term = document.getElementById('term');
-// kind: cmd | note | ok | warn. start in seconds; dur = typing time for cmd.
 const lines = [
   {k:'cmd', s:0.9, d:1.8, t:'python -m printkit check-request examples/calibration-part/request.json'},
   {k:'note', s:2.9, t:'# strict contract check. No geometry generated yet.'},
@@ -136,10 +78,8 @@ const lines = [
   {k:'note', s:20.6, t:'# run this on the retrieved copy, not the local one'},
 ];
 lines.forEach(l => { const e = document.createElement('div'); e.className = 'ln ' + l.k; l.e = e; term.appendChild(e); });
-const scenes = [...document.querySelectorAll('.scene')];
+const rows = [...document.querySelectorAll('.row')];
 const ease = x => x < 0 ? 0 : x > 1 ? 1 : x * x * (3 - 2 * x);
-const ticks = {k1: 6.4, k2: 7.8, k3: 9.2, k4: 10.5};
-const zip = {z1: 17.8, z2: 19.4, z3: 21.0};
 function render(t) {
   lines.forEach(l => {
     if (t < l.s) { l.e.style.display = 'none'; return; }
@@ -147,21 +87,20 @@ function render(t) {
     if (l.k === 'cmd') {
       const f = Math.min(1, (t - l.s) / l.d);
       l.e.textContent = l.t.slice(0, Math.round(l.t.length * f));
-      l.e.classList.toggle('typing', f < 1 || t - l.s - l.d < 0.5);
+      l.e.classList.toggle('typing', t - l.s - l.d < 0.5);
     } else l.e.textContent = l.t;
   });
-  scenes.forEach(s => {
-    const i = +s.dataset.in, o = +s.dataset.out;
-    const a = ease((t - i) / 0.35) * (1 - ease((t - (o - 0.3)) / 0.3));
-    s.style.opacity = a; s.style.transform = `translateY(${(1 - ease((t - i) / 0.35)) * 8}px)`;
-  });
-  Object.entries(ticks).forEach(([id, at]) => document.getElementById(id).classList.toggle('done', t >= at));
-  Object.entries(zip).forEach(([id, at]) => { const e = document.getElementById(id); e.style.color = t >= at ? 'var(--teal)' : ''; });
-  document.getElementById('rend1').style.opacity = ease((t - 10.6) / 0.5);
+  rows.forEach(r => r.classList.toggle('on', t >= +r.dataset.at));
+  document.getElementById('thumb').style.opacity = ease((t - 10.5) / 0.4);
+  document.getElementById('vtext').textContent = t >= 10.5 ? 'Render of the exported STL. A person still compares all five views with the request.' : 'Waiting for the five-view render.';
+  const s = document.getElementById('stamp'), a = ease((t - 22.6) / 0.25);
+  s.style.opacity = a;
+  s.style.transform = `rotate(-3deg) scale(${1.25 - 0.25 * a})`;
   document.getElementById('prog').style.width = (100 * Math.min(1, t / DURATION)) + '%';
 }
 window.render = render; window.DURATION = DURATION;
 render(0);
-if (location.hash !== '#static') { let t0 = performance.now(); (function loop() { render(((performance.now() - t0) / 1000) % (DURATION + 1.5)); requestAnimationFrame(loop); })(); }
+if (location.hash !== '#static') { const t0 = performance.now(); (function loop() { render(((performance.now() - t0) / 1000) % (DURATION + 1.5)); requestAnimationFrame(loop); })(); }
 </script>
+<script src="sheet.js"></script>
 </body></html>

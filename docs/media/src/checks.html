@@ -1,55 +1,64 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>Dot Forge checks</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=block">
 <link rel="stylesheet" href="base.css">
 <style>
-body { width: 1280px; height: 700px; padding: 56px 56px 0; overflow: hidden; }
-h2 { margin: 10px 0 6px; font-size: 34px; letter-spacing: -.02em; }
-.lede { margin: 0 0 26px; font-size: 18px; color: var(--muted); }
-.layout { display: grid; grid-template-columns: 1fr 300px; gap: 24px; }
-.ladder { display: grid; gap: 12px; }
-.layer { display: grid; grid-template-columns: 64px 250px 1fr 1fr; gap: 0 20px; align-items: start; padding: 16px 20px; }
-.layer .n { font: 700 28px var(--mono); color: var(--teal); }
-.layer h3 { margin: 0 0 4px; font-size: 18px; }
-.layer .who { font: 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-.col h4 { margin: 0 0 4px; font: 600 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
-.col p { margin: 0; font-size: 14px; line-height: 1.4; color: var(--muted); }
-.yes h4 { color: var(--teal); }
-.no h4 { color: var(--amber); }
-.layer.open { border-color: #5d4720; background: #1d1810; border-style: dashed; }
-.layer.open .n { color: var(--amber); }
-.layer.open p { color: #d9cba9; }
-.rule { padding: 20px; align-self: stretch; display: flex; flex-direction: column; gap: 14px; }
-.rule h3 { margin: 0; font-size: 18px; }
-.rule ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
-.rule li { display: flex; gap: 10px; align-items: center; font-size: 15px; }
-.rule li i { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--amber); border-radius: 50%; position: relative; flex: none; }
-.rule li i::after { content: ""; position: absolute; left: 3px; right: 3px; top: 6px; height: 2px; background: var(--amber); transform: rotate(-45deg); }
-.rule .eq { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line); font-size: 15px; line-height: 1.4; color: var(--muted); }
-.rule .eq b { color: var(--text); }
+body { width: 1280px; height: 700px; }
+.head { position: absolute; left: 64px; top: 56px; width: 800px; }
+.head h2 { font-size: 42px; }
+.head h2 { margin-top: 12px; }
+.never { position: absolute; right: 64px; top: 64px; width: 330px; padding: 12px 16px 14px; border: 1.5px solid var(--ink); }
+.never small { display: block; font: 600 10px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); }
+.never div { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px 16px; font: 600 24px var(--display); }
+.never s { text-decoration-color: var(--orange-hi); text-decoration-thickness: 2.5px; }
+.never p { margin: 8px 0 0; font-size: 13px; line-height: 1.4; color: var(--ink-2); }
+table { position: absolute; left: 64px; top: 236px; width: 1152px; border-collapse: collapse; }
+th { text-align: left; font: 600 10px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); padding: 0 14px 8px 0; border-bottom: 2px solid var(--ink); }
+td { vertical-align: top; padding: 12px 14px 13px 0; border-bottom: 1px solid var(--ink-3); font-size: 14px; line-height: 1.4; color: var(--ink-2); }
+td.n { font: 600 26px var(--display); color: var(--ink); width: 44px; padding-top: 6px; }
+td.c { width: 210px; }
+td.c b { display: block; font: 600 21px var(--display); color: var(--ink); line-height: 1.1; }
+td.c span { font: 11px var(--mono); color: var(--ink-3); }
+td.s { width: 128px; padding-right: 0; }
+.chip { display: block; text-align: center; padding: 6px 0 7px; font: 700 14px var(--display); letter-spacing: .14em; text-transform: uppercase; border: 1.5px solid currentColor; }
+.chip.auto { color: var(--blue); }
+.chip.person { color: var(--ink); }
+.chip.open { color: var(--orange); border-width: 2.5px; outline: 1px solid var(--orange); outline-offset: 2px; }
+tr.last td { border-bottom: 2px solid var(--ink); }
+tr.last td.c b { color: var(--orange); }
+h5 { margin: 0 0 3px; font: 600 10px var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+.y h5 { color: var(--blue); } .x h5 { color: var(--orange); }
+.foot { position: absolute; left: 64px; top: 612px; width: 640px; font-size: 14px; line-height: 1.45; color: var(--ink-2); }
+.foot code { color: var(--ink); font-weight: 600; font-size: 13px; }
 </style></head>
-<body>
-<div class="eyebrow">What the checks establish</div>
-<h2>Geometry findings and printing decisions stay separate</h2>
-<p class="lede">A native solid can pass while its exported mesh fails. A mesh can pass while its physical use is unknown.</p>
-<div class="layout">
-  <div class="ladder">
-    <div class="card layer"><div class="n">1</div><div><h3>Native checks</h3><div class="who">Automated</div></div>
-      <div class="col yes"><h4>Establishes</h4><p>The model reopens. FreeCAD also checks the solid and a STEP round trip.</p></div>
-      <div class="col no"><h4>Does not establish</h4><p>That the exported mesh is valid.</p></div></div>
-    <div class="card layer"><div class="n">2</div><div><h3>Independent STL checks</h3><div class="who">Automated, separate code</div></div>
-      <div class="col yes"><h4>Establishes</h4><p>Topology, dimensions, volume, intersections, single-solid profile. FreeCAD adds step and hole checks.</p></div>
-      <div class="col no"><h4>Does not establish</h4><p>Strength, clearances, or print suitability.</p></div></div>
-    <div class="card layer"><div class="n">3</div><div><h3>Preview review</h3><div class="who">Person compares five views</div></div>
-      <div class="col yes"><h4>Establishes</h4><p>Whether the actual STL shows the requested features.</p></div>
-      <div class="col no"><h4>Does not establish</h4><p>Dimensions, strength, or user approval. A render alone is not approval.</p></div></div>
-    <div class="card layer open"><div class="n">4</div><div><h3>Printing and physical</h3><div class="who" style="color:#d9cba9">Open. Never auto-passed</div></div>
-      <div class="col"><h4 style="color:var(--amber)">Still to do</h4><p>Printer and material, wall thickness, clearances, orientation, supports, slicing.</p></div>
-      <div class="col"><h4 style="color:var(--amber)">And finally</h4><p>User visual approval and a physical test.</p></div></div>
-  </div>
-  <div class="card rule">
-    <h3>Never counted as a pass</h3>
-    <ul><li><i></i>Failed</li><li><i></i>Skipped</li><li><i></i>Unavailable</li><li><i></i>Inconclusive</li></ul>
-    <div class="eq"><b>geometry_state</b> and <b>print_state</b> are reported separately. A valid geometry result normally ends in <b>needs_review</b>.</div>
-  </div>
+<body data-title="Verification" data-sheet="3 / 6">
+<div class="head">
+  <div class="label"><span class="no">03</span> &nbsp;What the checks establish</div>
+  <h2>Geometry checks and print decisions stay separate</h2>
+  <p class="lede">A native solid can pass while its exported mesh fails. A mesh can pass while its physical use stays unknown.</p>
 </div>
+<div class="never">
+  <small>Never counted as a pass</small>
+  <div><s>Failed</s><s>Skipped</s><s>Unavailable</s><s>Inconclusive</s></div>
+  <p>Each one blocks the claim. None becomes a pass by default.</p>
+</div>
+<table>
+  <thead><tr><th>No.</th><th>Check</th><th>Establishes</th><th>Does not establish</th><th>Done by</th></tr></thead>
+  <tbody>
+    <tr><td class="n">1</td><td class="c"><b>Native checks</b><span>Blender · FreeCAD</span></td>
+      <td class="y"><h5>Yes</h5>The model reopens. FreeCAD also checks the solid and a STEP round trip.</td>
+      <td class="x"><h5>No</h5>That the exported mesh is valid.</td><td class="s"><span class="chip auto hatch-blue">Automated</span></td></tr>
+    <tr><td class="n">2</td><td class="c"><b>Independent STL checks</b><span>separate validator</span></td>
+      <td class="y"><h5>Yes</h5>Topology, dimensions, volume, intersections, one-solid profile. FreeCAD adds step and hole checks.</td>
+      <td class="x"><h5>No</h5>Strength, clearances, or print suitability.</td><td class="s"><span class="chip auto hatch-blue">Automated</span></td></tr>
+    <tr><td class="n">3</td><td class="c"><b>Preview review</b><span>five STL views</span></td>
+      <td class="y"><h5>Yes</h5>Whether the actual STL shows the requested features.</td>
+      <td class="x"><h5>No</h5>Dimensions or strength. A render alone is not user approval.</td><td class="s"><span class="chip person">Person</span></td></tr>
+    <tr class="last"><td class="n">4</td><td class="c"><b>Printing and physical</b><span>outside Dot Forge</span></td>
+      <td class="x" colspan="2"><h5>Still to do</h5>Printer and material settings, wall thickness, clearances, orientation, supports, slicing, user visual approval, and a physical test.</td>
+      <td class="s"><span class="chip open hatch">Open</span></td></tr>
+  </tbody>
+</table>
+<p class="foot"><code>geometry_state</code> and <code>print_state</code> are reported separately. A geometry-valid run normally exits 5 with <code>print_state: needs_review</code>.</p>
+<script src="sheet.js"></script>
 </body></html>

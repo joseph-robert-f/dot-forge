@@ -1,48 +1,56 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>Dot Forge evidence bundle</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=block">
 <link rel="stylesheet" href="base.css">
 <style>
-body { width: 1280px; height: 640px; padding: 56px 56px 0; overflow: hidden; }
-h2 { margin: 10px 0 6px; font-size: 34px; letter-spacing: -.02em; }
-.lede { margin: 0 0 26px; font-size: 18px; color: var(--muted); }
-.layout { display: grid; grid-template-columns: 1fr 420px; gap: 24px; }
-.tree { padding: 18px 22px; font: 15px/1 var(--mono); }
-.tree .r { display: grid; grid-template-columns: 300px 1fr; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
-.tree .r:last-child { border: 0; }
-.tree .f { color: #bfe6ec; }
-.tree .f i { color: var(--muted); font-style: normal; }
-.tree .d { font: 14px/1.35 var(--sans); color: var(--muted); }
-.tree .head { color: var(--text); font-weight: 700; padding-bottom: 12px; }
-.chain { padding: 22px; display: flex; flex-direction: column; gap: 14px; }
-.chain h3 { margin: 0; font-size: 18px; }
-.node { display: flex; gap: 12px; align-items: center; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel-2); font-size: 15px; }
-.node b { font: 700 13px var(--mono); color: var(--teal); width: 22px; }
-.arr { height: 14px; width: 2px; background: var(--teal-d); margin-left: 24px; }
-.warn { margin-top: auto; padding: 12px 14px; border: 1px solid #5d4720; background: #1d1810; border-radius: 10px; font-size: 14px; line-height: 1.4; color: #e9dcc2; }
-.warn b { color: var(--amber); }
+body { width: 1280px; height: 640px; }
+.head { position: absolute; left: 64px; top: 56px; }
+.head h2 { margin-top: 12px; }
+.bom { position: absolute; left: 64px; top: 200px; width: 700px; border-collapse: collapse; }
+.bom caption { text-align: left; font: 600 10px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); padding-bottom: 6px; }
+.bom th { text-align: left; font: 600 10px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); padding: 6px 10px; border: 1px solid var(--ink); border-bottom-width: 2px; background: var(--paper-2); }
+.bom td { padding: 7px 10px 8px; border: 1px solid var(--ink); font-size: 13.5px; line-height: 1.3; color: var(--ink-2); }
+.bom td:first-child { width: 44px; text-align: center; font: 600 15px var(--display); color: var(--ink); }
+.bom td.f { font: 500 13px var(--mono); color: var(--ink); white-space: nowrap; }
+.bom td.f i { font-style: normal; color: var(--ink-3); }
+.seq { position: absolute; left: 812px; top: 200px; width: 404px; }
+.seq h3 { margin: 0 0 14px; font: 600 10px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); }
+.step { position: relative; display: grid; grid-template-columns: 36px 1fr; gap: 12px; align-items: center; min-height: 52px; }
+.step .bal { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--blue); display: grid; place-items: center; font: 600 13px var(--mono); color: var(--blue); background: var(--paper); position: relative; z-index: 1; }
+.step p { margin: 0; font-size: 15px; line-height: 1.35; }
+.step p code { font-size: 13.5px; font-weight: 600; }
+.rail { position: absolute; left: 17px; top: 46px; height: 158px; width: 1px; background: var(--blue); }
+.warn { margin-top: 18px; padding: 10px 14px 12px; border: 2px solid var(--orange-hi); }
+.warn b { display: block; font: 700 15px var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--orange); }
+.warn span { font-size: 13.5px; line-height: 1.4; }
 </style></head>
-<body>
-<div class="eyebrow">What you receive</div>
-<h2>The model, its source, and its evidence in one bundle</h2>
-<p class="lede">Keep failed attempts. Repair in a new attempt and repeat every downstream check.</p>
-<div class="layout">
-  <div class="card tree">
-    <div class="head">build/&lt;run&gt;/</div>
-    <div class="r"><span class="f">native/model.<i>blend | FCStd</i></span><span class="d">Editable native model</span></div>
-    <div class="r"><span class="f">exports/model.stl</span><span class="d">Mesh candidate that the independent checks inspect</span></div>
-    <div class="r"><span class="f">exports/model.step</span><span class="d">Solid exchange file, FreeCAD family only</span></div>
-    <div class="r"><span class="f">previews/</span><span class="d">Five STL views and a labeled contact sheet</span></div>
-    <div class="r"><span class="f">validation.json, metrics.json</span><span class="d">Findings, measurements, unresolved checks</span></div>
-    <div class="r"><span class="f">request.json, source/, logs/</span><span class="d">Inputs, source used, execution records</span></div>
-    <div class="r"><span class="f">manifest.json, journal.json</span><span class="d">Artifact hashes and stage records</span></div>
-  </div>
-  <div class="card chain">
-    <h3>Delivery is more than a file path</h3>
-    <div class="node"><b>1</b>Bundle the finalized run to a ZIP</div><div class="arr"></div>
-    <div class="node"><b>2</b>Copy to an authorized durable destination</div><div class="arr"></div>
-    <div class="node"><b>3</b>Retrieve it from there</div><div class="arr"></div>
-    <div class="node"><b>4</b>Run verify-bundle on the retrieved copy</div>
-    <div class="warn"><b>Bundle integrity is not print suitability.</b> A valid bundle can still hold a blocked model.</div>
-  </div>
+<body data-title="Deliverables" data-sheet="5 / 6">
+<div class="head">
+  <div class="label"><span class="no">05</span> &nbsp;What you receive</div>
+  <h2>The model, its source and its evidence</h2>
+  <p class="lede">Keep failed attempts. Make repairs in a new attempt and repeat every downstream check.</p>
 </div>
+<table class="bom">
+  <caption>Parts list · build/&lt;run&gt;/</caption>
+  <thead><tr><th>Item</th><th>File</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td class="f">native/model.<i>blend | FCStd</i></td><td>Editable native model</td></tr>
+    <tr><td>2</td><td class="f">exports/model.stl</td><td>Mesh that the independent checks inspect</td></tr>
+    <tr><td>3</td><td class="f">exports/model.step</td><td>Solid exchange file, FreeCAD family only</td></tr>
+    <tr><td>4</td><td class="f">previews/</td><td>Five STL views and a labeled contact sheet</td></tr>
+    <tr><td>5</td><td class="f">validation.json, metrics.json</td><td>Findings, measurements, unresolved checks</td></tr>
+    <tr><td>6</td><td class="f">request.json, source/, logs/</td><td>Inputs, source used, execution records</td></tr>
+    <tr><td>7</td><td class="f">manifest.json, journal.json</td><td>Artifact hashes and stage records</td></tr>
+  </tbody>
+</table>
+<div class="seq">
+  <h3>Delivery sequence</h3>
+  <div class="rail"></div>
+  <div class="step"><span class="bal">1</span><p><code>bundle</code> the finalized run to a ZIP</p></div>
+  <div class="step"><span class="bal">2</span><p>Copy it to an authorized durable destination</p></div>
+  <div class="step"><span class="bal">3</span><p>Retrieve it from that destination</p></div>
+  <div class="step"><span class="bal">4</span><p><code>verify-bundle</code> on the retrieved copy</p></div>
+  <div class="warn hatch"><b>Integrity ≠ print suitability</b><span>A valid bundle can hold a blocked model. A temporary path is not delivery.</span></div>
+</div>
+<script src="sheet.js"></script>
 </body></html>

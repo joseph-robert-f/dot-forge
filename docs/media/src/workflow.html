@@ -1,39 +1,58 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>Dot Forge workflow</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=block">
 <link rel="stylesheet" href="base.css">
 <style>
-body { width: 1280px; height: 600px; padding: 56px 56px 0; overflow: hidden; }
-h2 { margin: 10px 0 6px; font-size: 34px; letter-spacing: -.02em; }
-.lede { margin: 0 0 34px; font-size: 18px; color: var(--muted); }
-.row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 18px; position: relative; }
-.step { padding: 18px 16px 18px; min-height: 236px; position: relative; display: flex; flex-direction: column; }
-.step .n { font: 600 13px var(--mono); color: var(--teal); }
-.step h3 { margin: 8px 0 10px; font: 600 15px var(--mono); color: var(--text); word-break: break-word; }
-.step p { margin: 0; font-size: 14.5px; line-height: 1.45; color: var(--muted); }
-.step:not(:last-child)::after { content: ""; position: absolute; right: -19px; top: 34px; width: 18px; height: 2px; background: var(--teal-d); }
-.step.open { border-color: #5d4720; background: #1d1810; }
-.step.open .n { color: var(--amber); }
-.code { margin-top: auto; white-space: nowrap; overflow: hidden; font: 12.5px var(--mono); color: #bfe6ec; background: #0d1114; border: 1px solid var(--line); border-radius: 8px; padding: 8px 9px; line-height: 1.4; }
-.band { margin-top: 26px; display: flex; gap: 18px; }
-.band > div { flex: 1; padding: 14px 18px; font-size: 15px; line-height: 1.4; color: var(--muted); }
-.band b { color: var(--text); }
-.band .a { border-color: #5d4720; background: #1d1810; color: #e9dcc2; }
-.band .a b { color: var(--amber); }
+body { width: 1280px; height: 600px; }
+.head { position: absolute; left: 64px; top: 56px; }
+.head h2 { margin-top: 12px; }
+.line { position: absolute; top: 330px; left: 120px; width: 800px; height: 2px; background: var(--ink); }
+.open-line { position: absolute; top: 330px; left: 920px; width: 80px; height: 0; border-top: 2px dashed var(--orange-hi); }
+.node { position: absolute; top: 310px; width: 42px; height: 42px; margin-left: -21px; }
+.node svg { width: 42px; height: 42px; overflow: visible; }
+.node circle { fill: var(--paper); stroke: var(--ink); stroke-width: 2; }
+.node line { stroke: var(--blue); stroke-width: 1; stroke-dasharray: 5 2 1 2; }
+.node b { position: absolute; inset: 0; display: grid; place-items: center; font: 600 13px var(--mono); }
+.cmd { position: absolute; top: 272px; width: 170px; margin-left: -85px; text-align: center; font: 600 13.5px var(--mono); }
+.desc { position: absolute; top: 368px; width: 156px; margin-left: -78px; text-align: center; font-size: 13.5px; line-height: 1.4; color: var(--ink-2); }
+.brk { position: absolute; top: 234px; left: 120px; width: 800px; height: 12px; border: 1px solid var(--blue); border-bottom: 0; }
+.brk span { position: absolute; left: 50%; top: -9px; transform: translateX(-50%); padding: 0 10px; background: var(--paper); font: 500 11px var(--mono); letter-spacing: .08em; color: var(--blue); white-space: nowrap; }
+.dia { position: absolute; top: 323px; left: 673px; width: 14px; height: 14px; background: var(--paper); border: 2px solid var(--blue); transform: rotate(45deg); }
+.leader { position: absolute; left: 680px; top: 345px; width: 1px; height: 110px; background: var(--blue); }
+.callout { position: absolute; left: 535px; top: 455px; width: 290px; padding: 8px 12px 9px; border: 1.5px solid var(--blue); background: var(--paper); font-size: 13.5px; line-height: 1.4; }
+.callout small { display: block; font: 600 10px var(--mono); letter-spacing: .14em; color: var(--blue); margin-bottom: 2px; }
+.openbox { position: absolute; left: 1000px; top: 280px; width: 222px; padding: 10px 12px 12px; border: 2px solid var(--orange-hi); }
+.openbox small { display: block; font: 700 15px var(--display); letter-spacing: .14em; color: var(--orange); }
+.openbox p { margin: 4px 0 0; font-size: 13px; line-height: 1.4; color: var(--ink); }
 </style></head>
-<body>
-<div class="eyebrow">How it works</div>
-<h2>From request to verified evidence bundle</h2>
-<p class="lede">Your Dot runs these public CLI commands on its Linux cloud computer. Every attempt gets a new output directory.</p>
-<div class="row">
-  <div class="card step"><div class="n">01</div><h3>request.json</h3><p>Pick a family. Supply width, depth, and height from 5 to 100 mm.</p><div class="code">request.json</div></div>
-  <div class="card step"><div class="n">02</div><h3>check-request</h3><p>Checks the strict contract. No geometry yet.</p><div class="code">check-request</div></div>
-  <div class="card step"><div class="n">03</div><h3>run</h3><p>Generate. Reopen the native model. Validate the exported STL. Render five views.</p><div class="code">run --output …</div></div>
-  <div class="card step"><div class="n">04</div><h3>inspect</h3><p>Verifies integrity. Exit code 5 means manual or printing review is required.</p><div class="code">inspect --run …</div></div>
-  <div class="card step"><div class="n">05</div><h3>bundle</h3><p>Packs the finalized evidence into a ZIP outside the run directory.</p><div class="code">bundle --run …</div></div>
-  <div class="card step"><div class="n">06</div><h3>verify-bundle</h3><p>Run it on the copy you retrieve from the durable destination.</p><div class="code">verify-bundle ….zip</div></div>
+<body data-title="Process" data-sheet="2 / 6">
+<div class="head">
+  <div class="label"><span class="no">02</span> &nbsp;How it works</div>
+  <h2>From request to a verified bundle</h2>
+  <p class="lede">Your Dot runs these steps on its Linux cloud computer. Every attempt gets a new output directory.</p>
 </div>
-<div class="band">
-  <div class="card">Between steps 03 and 04, <b>a person compares the front, side, back, top, and oblique renders</b> with the request.</div>
-  <div class="card a"><b>Still open after step 06:</b> printer and material settings, slicing, orientation, supports, and a physical test.</div>
-</div>
+<div class="brk"><span>python -m printkit … &nbsp;·&nbsp; public CLI</span></div>
+<div class="line"></div>
+<div class="open-line"></div>
+<div class="dia"></div><div class="leader"></div>
+<div class="callout"><small>Person · after 04</small>Open the contact sheet. Compare front, side, back, top and oblique views with the request.</div>
+<div class="openbox hatch"><small>Still open</small><p>Printer and material, slicing, orientation, supports, physical test.</p></div>
+<script>
+const steps = [
+  ['request.json', 'Choose a family. Each axis 5 to 100 mm.'],
+  ['check-request', 'Checks the strict contract. No geometry.'],
+  ['run', 'Generate, reopen, validate the STL, render five views.'],
+  ['inspect', 'Verifies integrity. Exit 5: review required.'],
+  ['bundle', 'ZIP outside the run directory.'],
+  ['verify-bundle', 'On the copy retrieved from durable storage.'],
+];
+steps.forEach(([c, d], i) => {
+  const x = 120 + i * 160;
+  document.body.insertAdjacentHTML('beforeend',
+    `<div class="cmd" style="left:${x}px">${c}</div>` +
+    `<div class="node" style="left:${x}px"><svg viewBox="0 0 42 42"><line x1="21" y1="-8" x2="21" y2="50"/><line x1="-8" y1="21" x2="50" y2="21"/><circle cx="21" cy="21" r="16"/></svg><b>0${i + 1}</b></div>` +
+    `<div class="desc" style="left:${x}px">${d}</div>`);
+});
+</script>
+<script src="sheet.js"></script>
 </body></html>
