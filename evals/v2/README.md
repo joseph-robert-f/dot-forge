@@ -2,7 +2,9 @@
 
 This test gives Dot Forge v2 thirteen requests that it has not seen before. It records how far each request goes through intent, plan and proof, and where the checker is wrong or blind.
 
-Run on 2026-10-09 in a Debian 13 container with conda-forge FreeCAD 1.0.0 and Open CASCADE 7.8.1. The runtime gate was not changed. The results are not yet confirmed on a Dot.
+Run on 2026-10-09 in a Debian 13 container with conda-forge FreeCAD 1.0.0 and Open CASCADE 7.8.1. The runtime gate was not changed.
+
+A Dot ran the same test at commit `2ef6f33` on 2026-10-09 (Debian 13, FreeCAD 1.0.0, Open CASCADE 7.8.1). All 34 build outcomes match the tables below: 18 blocked and 16 conform. Twelve of the thirteen wrong plans are caught. The 16 native tests pass on the Dot.
 
 The results below use the checker after the field-test fixes and after commit `450095d` (full-aperture hole ends). That commit decides that a hole which opens into another void, not to the outside, is neither through nor blind. Such a hole is `unknown`, and it blocks. The `ends` hole depth (see [the v2 guide](../../docs/v2-intent-and-plan.md#intent-features)) lets an intent ask for these holes. The repairs below use it.
 
@@ -58,7 +60,7 @@ Three correct parts block on their first attempt: the spacer, the collar and the
 | Case | Attempt | Change | Result |
 | --- | --- | --- | --- |
 | spur-gear | 002 | A D-bore is not a full cylinder, so it moved from a measured hole to a person check | conforms |
-| hollow-ball | 002 | The user accepted a 3 mm drain hole, so the part has one shell | blocked: the drain trims the bottom, and the intent still said 40 mm tall |
+| hollow-ball | 002 | The user accepted a 3 mm drain hole, so the part has one shell | blocked: `envelope` fails, because the drain trims the bottom and the intent still said 40 mm tall. `drain` is also unknown (opens into the cavity) |
 | hollow-ball | 003 | The intent height is 39.94 mm | blocked: `drain` is unknown (opens into the cavity) |
 | hollow-ball | 004 | `drain` ends: `outside` and `void` | conforms |
 | counterbored-spacer | 002 | `counterbore` ends: `shoulder` and `outside`, 5 mm deep | conforms |
@@ -88,7 +90,7 @@ A wrong plan is caught only if the correct plan passes. Each mutant is judged ag
 | cable-clip: channel without its opening | caught by `cable-channel`; the closed channel also goes to a person as an unrequested hole |
 | spur-gear: plain round bore, no flat | caught by `bore` and `d-flat` |
 | shelf-bracket: no brace | **not caught** |
-| slotted-plate: slot 25 mm long, not 20 mm | caught by `slot-wall-low` and `slot-wall-high` (60 mm², maximum 46) |
+| slotted-plate: slot 25 mm long, not 20 mm | caught by `slot-wall-low` and `slot-wall-high` (60 mm², maximum 46), and by `slot-end-2` |
 
 The remaining miss, the brace, is a requirement that only a person check covers. The report still sends the note to a person, so a careful person can find the mistake in the views. The phone-stand angle was caught only because the Dot's proposed envelope came from the 60 degree shape.
 

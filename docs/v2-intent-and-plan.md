@@ -36,7 +36,7 @@ The plan is judged against the intent, not against itself. A plan can build exac
    python -m printkit preview --intent intent.json --plan plan.json --output build/plate-preview-001
    ```
    The preview builds the part and writes:
-   - `views/sheet.png` (or `views/sheet.svg` when FreeCAD has no Qt): front, right, back, top and iso views with the measured overall sizes and labelled holes
+   - `views/sheet.png` (or only `views/sheet.svg` when FreeCAD's Python cannot import Qt SVG through `PySide`, `PySide2` or `PySide6`; `views/raster.json` gives the reason): front, right, back, top and iso views with the measured overall sizes and labelled holes
    - `preview.md`: in plain words, what will be measured, what the user judges, and what was not stated, with the draft result of each check
    Show both to the user. The preview is not for delivery.
 6. If the user asks for a change, change the intent or the plan and make a new preview. Keep the old previews.

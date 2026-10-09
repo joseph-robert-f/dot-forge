@@ -20,4 +20,6 @@ Run on 2026-10-09 with FreeCAD 1.0.0 in a Debian 13 container. Each mesh has 13,
 | Exit code | 5 | 4 |
 | Time | 0.3 s | 0.4 s |
 
+A Dot ran the same check at commit `2ef6f33` on 2026-10-09. Every check result, exit code and triangle count matches the table. The times were 0.28 s and 0.29 s.
+
 The thinnest points in `figure.stl` are on the 0.6 mm sword, as built. A synthetic sphere of 295,680 triangles took 42 seconds and 411 MB.

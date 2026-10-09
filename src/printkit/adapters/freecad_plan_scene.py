@@ -522,24 +522,34 @@ def raster(run):
     """PNG of the composed sheet through Qt, when FreeCAD ships it; otherwise say so."""
     import os
     os.environ['QT_QPA_PLATFORM'] = 'offscreen'
-    try:
-        from PySide import QtCore, QtGui, QtSvg
-    except Exception as exc:
-        dump(run / 'views/raster.json', {'status': 'unavailable', 'reason': f'{type(exc).__name__}: {exc}'[:300]})
+    import importlib
+    # FreeCAD's own `PySide` shim is not on every build's path; Debian's FreeCAD 1.0 has PySide2 only.
+    errors = []
+    for binding in ('PySide', 'PySide2', 'PySide6'):
+        try:
+            QtGui = importlib.import_module(f'{binding}.QtGui')
+            QtSvg = importlib.import_module(f'{binding}.QtSvg')
+            break
+        except Exception as exc:
+            errors.append(f'{binding}: {type(exc).__name__}: {exc}')
+    else:
+        dump(run / 'views/raster.json', {'status': 'unavailable', 'reason': '; '.join(errors)[:600]})
         return
     app = QtGui.QGuiApplication.instance() or QtGui.QGuiApplication([])
     renderer = QtSvg.QSvgRenderer(str(run / 'views/sheet.svg'))
     size = renderer.defaultSize() * 2
-    image = QtGui.QImage(size, QtGui.QImage.Format_ARGB32)
+    argb = getattr(QtGui.QImage, 'Format_ARGB32', None) or QtGui.QImage.Format.Format_ARGB32
+    smooth = getattr(QtGui.QPainter, 'Antialiasing', None) or QtGui.QPainter.RenderHint.Antialiasing
+    image = QtGui.QImage(size, argb)
     image.fill(QtGui.QColor('#ffffff'))
     painter = QtGui.QPainter(image)
-    painter.setRenderHint(QtGui.QPainter.Antialiasing)
+    painter.setRenderHint(smooth)
     renderer.render(painter)
     painter.end()
     if not image.save(str(run / 'views/sheet.png')):
         raise ValueError('Could not write the preview PNG')
     del app
-    dump(run / 'views/raster.json', {'status': 'pass', 'width_px': size.width(), 'height_px': size.height()})
+    dump(run / 'views/raster.json', {'status': 'pass', 'binding': binding, 'width_px': size.width(), 'height_px': size.height()})
 
 
 def main():
