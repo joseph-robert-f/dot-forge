@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Dot Forge model families</title>
+<link rel="stylesheet" href="base.css">
+<style>
+body { width: 1280px; height: 640px; padding: 56px 56px 0; overflow: hidden; }
+h2 { margin: 10px 0 6px; font-size: 34px; letter-spacing: -.02em; }
+.lede { margin: 0 0 28px; font-size: 18px; color: var(--muted); }
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.fam { padding: 14px 14px 18px; }
+.fam .render { aspect-ratio: 16 / 10; object-fit: contain; }
+.fam .top { display: flex; justify-content: space-between; align-items: center; margin: 16px 4px 6px; }
+.fam h3 { margin: 0; font: 600 16px var(--mono); }
+.be { font: 600 12px var(--mono); color: var(--teal); border: 1px solid var(--teal-d); border-radius: 999px; padding: 3px 9px; }
+.dims { display: flex; gap: 8px; margin: 10px 4px; }
+.dims span { flex: 1; text-align: center; padding: 8px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--panel-2); font: 13px var(--mono); color: var(--muted); }
+.dims b { display: block; font-size: 20px; color: var(--text); font-weight: 600; }
+.fam p { margin: 12px 4px 0; font-size: 14.5px; line-height: 1.45; color: var(--muted); }
+</style></head>
+<body>
+<div class="eyebrow">Supported models</div>
+<h2>Three reviewed generators, one solid part each</h2>
+<p class="lede">Width, depth, and height must each be 5 to 100 mm. Example sizes shown.</p>
+<div class="cards">
+  <div class="card fam"><img class="render" src="../../images/calibration-block.png" alt=""><div class="top"><h3>calibration-block</h3><span class="be">Blender</span></div>
+    <div class="dims"><span><b>20</b>width</span><span><b>20</b>depth</span><span><b>10</b>height</span></div>
+    <p>A rectangular block. Try the model and evidence workflow with it.</p></div>
+  <div class="card fam"><img class="render" src="../../images/geometric-mascot.png" alt=""><div class="top"><h3>geometric-mascot</h3><span class="be">Blender</span></div>
+    <div class="dims"><span><b>40</b>width</span><span><b>12</b>depth</span><span><b>60</b>height</span></div>
+    <p>The supplied flat robot outline at constant depth. Dimensions scale it. They do not redefine the character.</p></div>
+  <div class="card fam"><img class="render" src="../../images/freecad-stepped-block.png" alt=""><div class="top"><h3>freecad-stepped-block</h3><span class="be">FreeCAD</span></div>
+    <div class="dims"><span><b>30</b>width</span><span><b>24</b>depth</span><span><b>18</b>height</span></div>
+    <p>Half-height base, raised half-width step, and a vertical through-hole. The generator sets the proportions.</p></div>
+</div>
+</body></html>

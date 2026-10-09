@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Dot Forge evidence bundle</title>
+<link rel="stylesheet" href="base.css">
+<style>
+body { width: 1280px; height: 640px; padding: 56px 56px 0; overflow: hidden; }
+h2 { margin: 10px 0 6px; font-size: 34px; letter-spacing: -.02em; }
+.lede { margin: 0 0 26px; font-size: 18px; color: var(--muted); }
+.layout { display: grid; grid-template-columns: 1fr 420px; gap: 24px; }
+.tree { padding: 18px 22px; font: 15px/1 var(--mono); }
+.tree .r { display: grid; grid-template-columns: 300px 1fr; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
+.tree .r:last-child { border: 0; }
+.tree .f { color: #bfe6ec; }
+.tree .f i { color: var(--muted); font-style: normal; }
+.tree .d { font: 14px/1.35 var(--sans); color: var(--muted); }
+.tree .head { color: var(--text); font-weight: 700; padding-bottom: 12px; }
+.chain { padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+.chain h3 { margin: 0; font-size: 18px; }
+.node { display: flex; gap: 12px; align-items: center; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel-2); font-size: 15px; }
+.node b { font: 700 13px var(--mono); color: var(--teal); width: 22px; }
+.arr { height: 14px; width: 2px; background: var(--teal-d); margin-left: 24px; }
+.warn { margin-top: auto; padding: 12px 14px; border: 1px solid #5d4720; background: #1d1810; border-radius: 10px; font-size: 14px; line-height: 1.4; color: #e9dcc2; }
+.warn b { color: var(--amber); }
+</style></head>
+<body>
+<div class="eyebrow">What you receive</div>
+<h2>The model, its source, and its evidence in one bundle</h2>
+<p class="lede">Keep failed attempts. Repair in a new attempt and repeat every downstream check.</p>
+<div class="layout">
+  <div class="card tree">
+    <div class="head">build/&lt;run&gt;/</div>
+    <div class="r"><span class="f">native/model.<i>blend | FCStd</i></span><span class="d">Editable native model</span></div>
+    <div class="r"><span class="f">exports/model.stl</span><span class="d">Mesh candidate that the independent checks inspect</span></div>
+    <div class="r"><span class="f">exports/model.step</span><span class="d">Solid exchange file, FreeCAD family only</span></div>
+    <div class="r"><span class="f">previews/</span><span class="d">Five STL views and a labeled contact sheet</span></div>
+    <div class="r"><span class="f">validation.json, metrics.json</span><span class="d">Findings, measurements, unresolved checks</span></div>
+    <div class="r"><span class="f">request.json, source/, logs/</span><span class="d">Inputs, source used, execution records</span></div>
+    <div class="r"><span class="f">manifest.json, journal.json</span><span class="d">Artifact hashes and stage records</span></div>
+  </div>
+  <div class="card chain">
+    <h3>Delivery is more than a file path</h3>
+    <div class="node"><b>1</b>Bundle the finalized run to a ZIP</div><div class="arr"></div>
+    <div class="node"><b>2</b>Copy to an authorized durable destination</div><div class="arr"></div>
+    <div class="node"><b>3</b>Retrieve it from there</div><div class="arr"></div>
+    <div class="node"><b>4</b>Run verify-bundle on the retrieved copy</div>
+    <div class="warn"><b>Bundle integrity is not print suitability.</b> A valid bundle can still hold a blocked model.</div>
+  </div>
+</div>
+</body></html>

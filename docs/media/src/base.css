@@ -1,0 +1,28 @@
+:root {
+  --bg: #0f1316;
+  --panel: #161c20;
+  --panel-2: #1c2429;
+  --line: #2b373d;
+  --text: #eaf0f2;
+  --muted: #9fb0b7;
+  --teal: #5cc0cf;
+  --teal-d: #2f7f8c;
+  --amber: #f2b552;
+  --amber-d: #4a3714;
+  --sans: "Inter", "Liberation Sans", sans-serif;
+  --mono: "DejaVu Sans Mono", "Liberation Mono", monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+.mono { font-family: var(--mono); }
+.eyebrow { font-family: var(--mono); font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--teal); }
+.chip { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); color: var(--muted); font-size: 14px; }
+.chip b { color: var(--text); font-weight: 600; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; }
+.render { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; background: #4a4a4a; }
+.note { color: var(--muted); font-size: 14px; line-height: 1.45; }
+.grid-bg {
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+svg.i { width: 1em; height: 1em; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: -0.12em; }

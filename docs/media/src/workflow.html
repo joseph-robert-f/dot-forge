@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Dot Forge workflow</title>
+<link rel="stylesheet" href="base.css">
+<style>
+body { width: 1280px; height: 600px; padding: 56px 56px 0; overflow: hidden; }
+h2 { margin: 10px 0 6px; font-size: 34px; letter-spacing: -.02em; }
+.lede { margin: 0 0 34px; font-size: 18px; color: var(--muted); }
+.row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 18px; position: relative; }
+.step { padding: 18px 16px 18px; min-height: 236px; position: relative; display: flex; flex-direction: column; }
+.step .n { font: 600 13px var(--mono); color: var(--teal); }
+.step h3 { margin: 8px 0 10px; font: 600 15px var(--mono); color: var(--text); word-break: break-word; }
+.step p { margin: 0; font-size: 14.5px; line-height: 1.45; color: var(--muted); }
+.step:not(:last-child)::after { content: ""; position: absolute; right: -19px; top: 34px; width: 18px; height: 2px; background: var(--teal-d); }
+.step.open { border-color: #5d4720; background: #1d1810; }
+.step.open .n { color: var(--amber); }
+.code { margin-top: auto; white-space: nowrap; overflow: hidden; font: 12.5px var(--mono); color: #bfe6ec; background: #0d1114; border: 1px solid var(--line); border-radius: 8px; padding: 8px 9px; line-height: 1.4; }
+.band { margin-top: 26px; display: flex; gap: 18px; }
+.band > div { flex: 1; padding: 14px 18px; font-size: 15px; line-height: 1.4; color: var(--muted); }
+.band b { color: var(--text); }
+.band .a { border-color: #5d4720; background: #1d1810; color: #e9dcc2; }
+.band .a b { color: var(--amber); }
+</style></head>
+<body>
+<div class="eyebrow">How it works</div>
+<h2>From request to verified evidence bundle</h2>
+<p class="lede">Your dot runs these public CLI commands on its Linux cloud computer. Every attempt gets a new output directory.</p>
+<div class="row">
+  <div class="card step"><div class="n">01</div><h3>request.json</h3><p>Pick a family. Supply width, depth, and height from 5 to 100 mm.</p><div class="code">request.json</div></div>
+  <div class="card step"><div class="n">02</div><h3>check-request</h3><p>Checks the strict contract. No geometry yet.</p><div class="code">check-request</div></div>
+  <div class="card step"><div class="n">03</div><h3>run</h3><p>Generate. Reopen the native model. Validate the exported STL. Render five views.</p><div class="code">run --output …</div></div>
+  <div class="card step"><div class="n">04</div><h3>inspect</h3><p>Verifies integrity. Exit code 5 means manual or printing review is required.</p><div class="code">inspect --run …</div></div>
+  <div class="card step"><div class="n">05</div><h3>bundle</h3><p>Packs the finalized evidence into a ZIP outside the run directory.</p><div class="code">bundle --run …</div></div>
+  <div class="card step"><div class="n">06</div><h3>verify-bundle</h3><p>Run it on the copy you retrieve from the durable destination.</p><div class="code">verify-bundle ….zip</div></div>
+</div>
+<div class="band">
+  <div class="card">Between steps 03 and 04, <b>a person compares the front, side, back, top, and oblique renders</b> with the request.</div>
+  <div class="card a"><b>Still open after step 06:</b> printer and material settings, slicing, orientation, supports, and a physical test.</div>
+</div>
+</body></html>

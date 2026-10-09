@@ -10,6 +10,22 @@ This repository contains source and instructions. It does not install applicatio
 
 [Start with your dot](#start-with-your-dot) · [See the examples](#supported-models) · [Run the commands](#run-from-a-source-checkout) · [Understand the checks](#what-the-checks-establish)
 
+## See it in action
+
+![Animated walkthrough of check-request, run, inspect, bundle, and verify-bundle for the calibration block example.](docs/media/demo.gif)
+
+This walkthrough is an illustration of the documented workflow, condensed for length. It is not a live recording of a run. See the [MP4 version](docs/media/demo.mp4). Run the commands below on your dot's computer to get real evidence.
+
+| How it works | What the checks establish |
+| --- | --- |
+| ![Six steps from request.json to verify-bundle.](docs/media/workflow.png) | ![Four check layers. Printing and physical checks stay open.](docs/media/checks.png) |
+
+![The three supported model families with example sizes.](docs/media/families.png)
+
+![The files in a run directory, and the steps to deliver them.](docs/media/bundle.png)
+
+The media source is in [docs/media/src](docs/media/src). Regenerate it with `node docs/media/render-media.mjs` (needs Node, Playwright, and ffmpeg). The images in `docs/images` are real STL renders. The diagrams are illustrations.
+
 ## Supported models
 
 The default profile is `dot-native`. It supports these three model families. Each request produces one solid part. Width, depth, and height must each be 5–100 millimeters (mm).

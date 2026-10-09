@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Dot Forge checks</title>
+<link rel="stylesheet" href="base.css">
+<style>
+body { width: 1280px; height: 700px; padding: 56px 56px 0; overflow: hidden; }
+h2 { margin: 10px 0 6px; font-size: 34px; letter-spacing: -.02em; }
+.lede { margin: 0 0 26px; font-size: 18px; color: var(--muted); }
+.layout { display: grid; grid-template-columns: 1fr 300px; gap: 24px; }
+.ladder { display: grid; gap: 12px; }
+.layer { display: grid; grid-template-columns: 64px 250px 1fr 1fr; gap: 0 20px; align-items: start; padding: 16px 20px; }
+.layer .n { font: 700 28px var(--mono); color: var(--teal); }
+.layer h3 { margin: 0 0 4px; font-size: 18px; }
+.layer .who { font: 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.col h4 { margin: 0 0 4px; font: 600 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.col p { margin: 0; font-size: 14px; line-height: 1.4; color: var(--muted); }
+.yes h4 { color: var(--teal); }
+.no h4 { color: var(--amber); }
+.layer.open { border-color: #5d4720; background: #1d1810; border-style: dashed; }
+.layer.open .n { color: var(--amber); }
+.layer.open p { color: #d9cba9; }
+.rule { padding: 20px; align-self: stretch; display: flex; flex-direction: column; gap: 14px; }
+.rule h3 { margin: 0; font-size: 18px; }
+.rule ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.rule li { display: flex; gap: 10px; align-items: center; font-size: 15px; }
+.rule li i { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--amber); border-radius: 50%; position: relative; flex: none; }
+.rule li i::after { content: ""; position: absolute; left: 3px; right: 3px; top: 6px; height: 2px; background: var(--amber); transform: rotate(-45deg); }
+.rule .eq { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line); font-size: 15px; line-height: 1.4; color: var(--muted); }
+.rule .eq b { color: var(--text); }
+</style></head>
+<body>
+<div class="eyebrow">What the checks establish</div>
+<h2>Geometry findings and printing decisions stay separate</h2>
+<p class="lede">A native solid can pass while its exported mesh fails. A mesh can pass while its physical use is unknown.</p>
+<div class="layout">
+  <div class="ladder">
+    <div class="card layer"><div class="n">1</div><div><h3>Native checks</h3><div class="who">Automated</div></div>
+      <div class="col yes"><h4>Establishes</h4><p>The model reopens. FreeCAD also checks the solid and a STEP round trip.</p></div>
+      <div class="col no"><h4>Does not establish</h4><p>That the exported mesh is valid.</p></div></div>
+    <div class="card layer"><div class="n">2</div><div><h3>Independent STL checks</h3><div class="who">Automated, separate code</div></div>
+      <div class="col yes"><h4>Establishes</h4><p>Topology, dimensions, volume, intersections, single-solid profile. FreeCAD adds step and hole checks.</p></div>
+      <div class="col no"><h4>Does not establish</h4><p>Strength, clearances, or print suitability.</p></div></div>
+    <div class="card layer"><div class="n">3</div><div><h3>Preview review</h3><div class="who">Person compares five views</div></div>
+      <div class="col yes"><h4>Establishes</h4><p>Whether the actual STL shows the requested features.</p></div>
+      <div class="col no"><h4>Does not establish</h4><p>Dimensions, strength, or user approval. A render alone is not approval.</p></div></div>
+    <div class="card layer open"><div class="n">4</div><div><h3>Printing and physical</h3><div class="who" style="color:#d9cba9">Open. Never auto-passed</div></div>
+      <div class="col"><h4 style="color:var(--amber)">Still to do</h4><p>Printer and material, wall thickness, clearances, orientation, supports, slicing.</p></div>
+      <div class="col"><h4 style="color:var(--amber)">And finally</h4><p>User visual approval and a physical test.</p></div></div>
+  </div>
+  <div class="card rule">
+    <h3>Never counted as a pass</h3>
+    <ul><li><i></i>Failed</li><li><i></i>Skipped</li><li><i></i>Unavailable</li><li><i></i>Inconclusive</li></ul>
+    <div class="eq"><b>geometry_state</b> and <b>print_state</b> are reported separately. A valid geometry result normally ends in <b>needs_review</b>.</div>
+  </div>
+</div>
+</body></html>
