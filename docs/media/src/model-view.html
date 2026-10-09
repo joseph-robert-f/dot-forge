@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Dot Forge model view</title>
+<style>html,body{margin:0;background:transparent;overflow:hidden}</style>
+<script type="importmap">{"imports":{"three":"https://local.three/build/three.module.js","three/addons/":"https://local.three/examples/jsm/"}}</script>
+</head><body>
+<script type="module">
+// Renders one real exported STL with optional hole rings taken from its
+// native/measure.json. render-models.mjs passes a config and serves three.js.
+import * as THREE from 'three';
+import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+import { toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
+
+const cfg = window.CONFIG;
+const W = cfg.width, H = cfg.height;
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(cfg.scale || 2);
+renderer.setSize(W, H);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.VSMShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const geometry = new STLLoader().parse(cfg.stl);
+geometry.computeBoundingBox();
+const box = geometry.boundingBox, center = box.getCenter(new THREE.Vector3()), size = box.getSize(new THREE.Vector3());
+geometry.translate(-center.x, -center.y, -box.min.z);  // Centered, resting on z = 0.
+const shaded = toCreasedNormals(geometry, THREE.MathUtils.degToRad(32));  // Smooth curves, crisp edges.
+
+const tone = cfg.tone || '#dcd6cb';
+const mesh = new THREE.Mesh(shaded, new THREE.MeshStandardMaterial({ color: tone, roughness: .78, metalness: 0 }));
+mesh.castShadow = true; mesh.receiveShadow = true;
+scene.add(mesh);
+const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geometry, 24),
+  new THREE.LineBasicMaterial({ color: cfg.ink || '#2b2a27', transparent: true, opacity: cfg.edgeOpacity ?? .55 }));
+scene.add(edges);
+
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.ShadowMaterial({ opacity: cfg.shadow ?? .13 }));
+ground.receiveShadow = true; ground.position.z = -0.01;
+scene.add(ground);
+
+scene.add(new THREE.HemisphereLight('#fffaf2', '#b9b2a6', 1.55));
+const sun = new THREE.DirectionalLight('#ffffff', 1.9);
+const reach = Math.max(size.x, size.y, size.z);
+sun.position.set(-reach * 1.0, reach * .45, reach * 2.4);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.radius = 14; sun.shadow.blurSamples = 25;
+Object.assign(sun.shadow.camera, { left: -reach * 5, right: reach * 5, top: reach * 5, bottom: -reach * 5, near: .1, far: reach * 10 });
+scene.add(sun);
+const fill = new THREE.DirectionalLight('#f3efe7', .55);
+fill.position.set(reach * 2, reach * .5, reach);
+scene.add(fill);
+
+// Rings sit 0.05 mm above the given z, in measure.json coordinates (from the bounding-box minimum).
+const toScene = (x, y, z) => new THREE.Vector3(x - size.x / 2, y - size.y / 2, z);
+// WebGL lines are 1 px, so rings are thin tubes; a dashed ring is a set of short arcs.
+const arc = (ring, a0, a1) => {
+  const points = [];
+  for (let i = 0; i <= 24; i++) {
+    const a = a0 + (a1 - a0) * i / 24;
+    points.push(toScene(ring.x + Math.cos(a) * ring.r, ring.y + Math.sin(a) * ring.r, ring.z + .05));
+  }
+  const tube = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points), 32, ring.weight || .16, 8, false),
+    new THREE.MeshBasicMaterial({ color: ring.color, depthTest: false }));
+  tube.renderOrder = 10;
+  scene.add(tube);
+};
+for (const ring of cfg.rings || []) {
+  if (!ring.dashed) { arc(ring, 0, Math.PI); arc(ring, Math.PI, Math.PI * 2); continue; }
+  const dashes = 12, step = Math.PI * 2 / dashes;
+  for (let i = 0; i < dashes; i++) arc(ring, i * step, i * step + step * .55);
+}
+
+const view = new THREE.Vector3(...(cfg.view || [1, -1.3, 1])).normalize();
+const camera = new THREE.PerspectiveCamera(cfg.fov || 24, W / H, 1, 5000);
+camera.up.set(0, 0, 1);
+const target = new THREE.Vector3(0, 0, size.z * (cfg.targetZ ?? .4));
+const radius = Math.sqrt(size.x ** 2 + size.y ** 2 + size.z ** 2) / 2;
+const distance = radius / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2)) * (cfg.zoom || 1.05);
+camera.position.copy(target).addScaledVector(view, distance);
+camera.lookAt(target);
+renderer.render(scene, camera);
+
+// Projected anchors let a layout page place labels next to real features.
+const project = ([x, y, z]) => {
+  const p = toScene(x, y, z).project(camera);
+  return [Math.round((p.x + 1) / 2 * W * 10) / 10, Math.round((1 - p.y) / 2 * H * 10) / 10];
+};
+window.ANCHORS = Object.fromEntries(Object.entries(cfg.anchors || {}).map(([k, v]) => [k, project(v)]));
+window.READY = true;
+</script>
+</body></html>

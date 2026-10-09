@@ -1,0 +1,60 @@
+{
+  "intent_sha256": "742196da73763aa117dfd0fa4af8b6dee095fa0779e2700576dd3757d10d229a",
+  "notes": "The hole tool overshoots both ledge faces by 1 mm so the cut never leaves a coplanar skin.",
+  "result": "part",
+  "schema_version": "plan.v1",
+  "steps": [
+    {
+      "id": "base",
+      "op": "box",
+      "size_mm": [
+        30,
+        24,
+        9
+      ]
+    },
+    {
+      "at_mm": [
+        15,
+        0,
+        9
+      ],
+      "id": "step",
+      "op": "box",
+      "size_mm": [
+        15,
+        24,
+        9
+      ]
+    },
+    {
+      "id": "body",
+      "of": [
+        "base",
+        "step"
+      ],
+      "op": "union"
+    },
+    {
+      "at_mm": [
+        7.5,
+        12,
+        -1
+      ],
+      "axis": "z",
+      "height_mm": 11,
+      "id": "hole-tool",
+      "op": "cylinder",
+      "radius_mm": 3.75
+    },
+    {
+      "from": "body",
+      "id": "part",
+      "op": "cut",
+      "tools": [
+        "hole-tool"
+      ]
+    }
+  ],
+  "units": "mm"
+}

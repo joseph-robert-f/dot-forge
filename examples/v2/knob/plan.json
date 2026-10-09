@@ -1,0 +1,83 @@
+{
+  "intent_sha256": "9248ac6d2eb68663dbd6d4f03b9db415d7dd51fee3338898dec0ca722ad0011e",
+  "notes": "Notches start at 15 degrees so none of them trims the bounding box at 0, 90, 180 or 270 degrees.",
+  "result": "knob",
+  "schema_version": "plan.v1",
+  "steps": [
+    {
+      "at_mm": [
+        15,
+        15,
+        0
+      ],
+      "id": "body",
+      "op": "revolve",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          15,
+          14
+        ],
+        [
+          13,
+          16
+        ],
+        [
+          0,
+          16
+        ]
+      ]
+    },
+    {
+      "at_mm": [
+        29.4889,
+        18.8823,
+        -1
+      ],
+      "height_mm": 18,
+      "id": "notch",
+      "op": "cylinder",
+      "radius_mm": 1.6
+    },
+    {
+      "about_mm": [
+        15,
+        15,
+        0
+      ],
+      "axis": "z",
+      "count": 12,
+      "id": "notches",
+      "op": "polar_pattern",
+      "target": "notch"
+    },
+    {
+      "at_mm": [
+        15,
+        15,
+        -1
+      ],
+      "height_mm": 9,
+      "id": "shaft",
+      "op": "cylinder",
+      "radius_mm": 3
+    },
+    {
+      "from": "body",
+      "id": "knob",
+      "op": "cut",
+      "tools": [
+        "notches",
+        "shaft"
+      ]
+    }
+  ],
+  "units": "mm"
+}

@@ -1,0 +1,707 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/joseph-robert-f/dot-forge/schemas/plan.v1.json",
+  "title": "Dot Forge build plan v1",
+  "description": "Declarative FreeCAD feature tree. Steps refer only to earlier steps. src/printkit/plan.py is authoritative and also checks references, polygons and pattern budgets.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "units",
+    "intent_sha256",
+    "steps",
+    "result"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "plan.v1"
+    },
+    "units": {
+      "const": "mm"
+    },
+    "intent_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 2000
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 128,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Box with its minimum corner at at_mm.",
+            "required": [
+              "id",
+              "op",
+              "size_mm"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "op": {
+                "const": "box"
+              },
+              "size_mm": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 500
+                }
+              },
+              "at_mm": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": {
+                  "type": "number",
+                  "minimum": -1000,
+                  "maximum": 1000
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Cylinder; at_mm is the base center.",
+            "required": [
+              "id",
+              "op",
+              "radius_mm",
+              "height_mm"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "op": {
+                "const": "cylinder"
+              },
+              "radius_mm": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 500
+              },
+              "height_mm": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 500
+              },
+              "at_mm": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": {
+                  "type": "number",
+                  "minimum": -1000,
+                  "maximum": 1000
+                }
+              },
+              "axis": {
+                "enum": [
+                  "x",
+                  "y",
+                  "z"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Cone or frustum.",
+            "required": [
+              "id",
+              "op",
+              "radius1_mm",
+              "radius2_mm",
+              "height_mm"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "op": {
+                "const": "cone"
+              },
+              "radius1_mm": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 500
+              },
+              "radius2_mm": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 500
+              },
+              "height_mm": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 500
+              },
+              "at_mm": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": {
+                  "type": "number",
+                  "minimum": -1000,
+                  "maximum": 1000
+                }
+              },
+              "axis": {
+                "enum": [
+                  "x",
+                  "y",
+                  "z"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Sphere; at_mm is the center.",
+            "required": [
+              "id",
+              "op",
+              "radius_mm"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "op": {
+                "const": "sphere"
+              },
+              "radius_mm": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 500
+              },
+              "at_mm": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": {
+                  "type": "number",
+                  "minimum": -1000,
+                  "maximum": 1000
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Polygon in a plane, extruded along +normal (xy:+z, xz:+y, yz:+x).",
+            "required": [
+              "id",
+              "op",
+              "plane",
+              "points",
+              "height_mm"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "op": {
+                "const": "extrude"
+              },
+              "plane": {
+                "enum": [
+                  "xy",
+                  "xz",
+                  "yz"
+                ]
+              },
+              "points": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 256,
+                "items": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "number",
+                    "minimum": -1000,
+                    "maximum": 1000
+                  }
+                },
+                "description": "Closed simple polygon; the last point joins the first."
+              },
+              "height_mm": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 500
+              },
+              "offset_mm": {
+                "type": "number",
+                "minimum": -1000,
+                "maximum": 1000
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Profile of [radius, z] points revolved about a z axis through at_mm.",
+            "required": [
+              "id",
+              "op",
+              "points"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "op": {
+                "const": "revolve"
+              },
+              "points": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 256,
+                "items": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "number",
+                    "minimum": -1000,
+                    "maximum": 1000
+                  }
+                },
+                "description": "Closed simple polygon; the last point joins the first."
+              },
+              "angle_deg": {
+                "type": "number",
+                "minimum": -360,
+                "maximum": 360,
+                "not": {
+                  "const": 0
+                }
+              },
+              "at_mm": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": {
+                  "type": "number",
+                  "minimum": -1000,
+                  "maximum": 1000
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Boolean union.",
+            "required": [
+              "id",
+              "op",
+              "of"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "op": {
+                "const": "union"
+              },
+              "of": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 64,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9-]{0,47}$"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Boolean intersection.",
+            "required": [
+              "id",
+              "op",
+              "of"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "op": {
+                "const": "intersect"
+              },
+              "of": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 64,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9-]{0,47}$"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Subtract tools from a body.",
+            "required": [
+              "id",
+              "op",
+              "from",
+              "tools"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "op": {
+                "const": "cut"
+              },
+              "from": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "tools": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 64,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9-]{0,47}$"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Move a copy.",
+            "required": [
+              "id",
+              "op",
+              "target",
+              "by_mm"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "op": {
+                "const": "translate"
+              },
+              "target": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "by_mm": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": {
+                  "type": "number",
+                  "minimum": -1000,
+                  "maximum": 1000
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Rotate a copy.",
+            "required": [
+              "id",
+              "op",
+              "target",
+              "axis",
+              "angle_deg"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "op": {
+                "const": "rotate"
+              },
+              "target": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "axis": {
+                "enum": [
+                  "x",
+                  "y",
+                  "z"
+                ]
+              },
+              "angle_deg": {
+                "type": "number",
+                "minimum": -360,
+                "maximum": 360,
+                "not": {
+                  "const": 0
+                }
+              },
+              "about_mm": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": {
+                  "type": "number",
+                  "minimum": -1000,
+                  "maximum": 1000
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Mirror a copy across an axis plane.",
+            "required": [
+              "id",
+              "op",
+              "target",
+              "plane"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "op": {
+                "const": "mirror"
+              },
+              "target": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "plane": {
+                "enum": [
+                  "xy",
+                  "xz",
+                  "yz"
+                ]
+              },
+              "through_mm": {
+                "type": "number",
+                "minimum": -1000,
+                "maximum": 1000
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Union of count copies, each moved by step_mm.",
+            "required": [
+              "id",
+              "op",
+              "target",
+              "step_mm",
+              "count"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "op": {
+                "const": "linear_pattern"
+              },
+              "target": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "step_mm": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": {
+                  "type": "number",
+                  "minimum": -1000,
+                  "maximum": 1000
+                }
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 2,
+                "maximum": 64
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Union of count rotated copies.",
+            "required": [
+              "id",
+              "op",
+              "target",
+              "axis",
+              "count"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "op": {
+                "const": "polar_pattern"
+              },
+              "target": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "axis": {
+                "enum": [
+                  "x",
+                  "y",
+                  "z"
+                ]
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 2,
+                "maximum": 64
+              },
+              "angle_deg": {
+                "type": "number",
+                "minimum": -360,
+                "maximum": 360,
+                "not": {
+                  "const": 0
+                }
+              },
+              "about_mm": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": {
+                  "type": "number",
+                  "minimum": -1000,
+                  "maximum": 1000
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Round the selected straight edges (or all edges).",
+            "required": [
+              "id",
+              "op",
+              "target",
+              "radius_mm",
+              "edges"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "op": {
+                "const": "fillet"
+              },
+              "target": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "radius_mm": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 500
+              },
+              "edges": {
+                "enum": [
+                  "all",
+                  "parallel_x",
+                  "parallel_y",
+                  "parallel_z"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Bevel the selected straight edges (or all edges).",
+            "required": [
+              "id",
+              "op",
+              "target",
+              "size_mm",
+              "edges"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "op": {
+                "const": "chamfer"
+              },
+              "target": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,47}$"
+              },
+              "size_mm": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 500
+              },
+              "edges": {
+                "enum": [
+                  "all",
+                  "parallel_x",
+                  "parallel_y",
+                  "parallel_z"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "result": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,47}$"
+    }
+  }
+}

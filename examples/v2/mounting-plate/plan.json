@@ -1,0 +1,66 @@
+{
+  "intent_sha256": "8e2f269ffde09fb08a3af9f14601b185efb336dd31ffed36480c64c67a6d9d0a",
+  "notes": "Round the corners on the blank first, so the fillet selector sees only the four corner edges.",
+  "result": "part",
+  "schema_version": "plan.v1",
+  "steps": [
+    {
+      "id": "blank",
+      "op": "box",
+      "size_mm": [
+        60,
+        40,
+        5
+      ]
+    },
+    {
+      "edges": "parallel_z",
+      "id": "plate",
+      "op": "fillet",
+      "radius_mm": 4,
+      "target": "blank"
+    },
+    {
+      "at_mm": [
+        6,
+        6,
+        -1
+      ],
+      "height_mm": 7,
+      "id": "drill",
+      "op": "cylinder",
+      "radius_mm": 2
+    },
+    {
+      "count": 2,
+      "id": "drill-row",
+      "op": "linear_pattern",
+      "step_mm": [
+        48,
+        0,
+        0
+      ],
+      "target": "drill"
+    },
+    {
+      "count": 2,
+      "id": "drills",
+      "op": "linear_pattern",
+      "step_mm": [
+        0,
+        28,
+        0
+      ],
+      "target": "drill-row"
+    },
+    {
+      "from": "plate",
+      "id": "part",
+      "op": "cut",
+      "tools": [
+        "drills"
+      ]
+    }
+  ],
+  "units": "mm"
+}

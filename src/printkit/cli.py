@@ -11,6 +11,10 @@ def parser():
     commands=root.add_subparsers(dest="command",required=True)
     cmd=commands.add_parser("doctor");cmd.add_argument("--json",action="store_true");smokes=cmd.add_mutually_exclusive_group();smokes.add_argument("--smoke",metavar="NEW_RUN");smokes.add_argument("--all-smoke",metavar="NEW_DIR");cmd.add_argument("--backend",choices=["blender","freecad"],default="blender")
     cmd=commands.add_parser("check-request");cmd.add_argument("request")
+    cmd=commands.add_parser("check-intent",help="v2: validate an intent spec");cmd.add_argument("intent")
+    cmd=commands.add_parser("check-plan",help="v2: validate a build plan");cmd.add_argument("plan");cmd.add_argument("--intent")
+    cmd=commands.add_parser("build",help="v2: build a plan in FreeCAD and check it against its intent");cmd.add_argument("--intent",required=True);cmd.add_argument("--plan",required=True);cmd.add_argument("--output",required=True)
+    cmd=commands.add_parser("conform",help="v2: recheck a measurement against an intent");cmd.add_argument("--intent",required=True);cmd.add_argument("--measurement",required=True)
     for name in ("run","generate"):
         cmd=commands.add_parser(name);cmd.add_argument("--request",required=True);cmd.add_argument("--output",required=True)
     for name in ("validate","render","inspect","resume","bundle"):
@@ -24,6 +28,7 @@ def parser():
 def report_exit(report):
     if report.get("geometry_state")=="blocked":return 4
     if report.get("print_assessment",{}).get("state")=="blocked":return 4
+    if report.get("overall_state")=="blocked":return 4
     if report.get("overall_state")=="needs_review":return 5
     return 0
 
@@ -40,6 +45,21 @@ def main(argv=None):
             if args.all_smoke and result["default_profile"]["smoke_status"]!="pass":code=4
         elif args.command=="check-request":
             check_request(load_json(args.request));result={"schema_version":"1","status":"pass"}
+        elif args.command=="check-intent":
+            from .intent import check_intent,summarize
+            result=summarize(check_intent(load_json(args.intent)))
+        elif args.command=="check-plan":
+            from .intent import check_intent
+            from .plan import check_plan
+            result=check_plan(load_json(args.plan),check_intent(load_json(args.intent)) if args.intent else None)
+        elif args.command=="build":
+            from .forge import build
+            result=build(load_json(args.intent),load_json(args.plan),Path(args.output));code=report_exit(result)
+        elif args.command=="conform":
+            from .intent import check_intent
+            from .conformance import conform
+            result=conform(check_intent(load_json(args.intent)),load_json(args.measurement))
+            code=4 if result["intent_state"]=="blocked" else 0
         elif args.command in ("run","generate"):
             request=check_request(load_json(args.request))
             result=(workflow.run_all if args.command=="run" else workflow.generate)(request,Path(args.output))
