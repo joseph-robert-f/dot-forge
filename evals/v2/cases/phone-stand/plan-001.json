@@ -1,0 +1,49 @@
+{
+  "intent_sha256": "47c0f1ca20fa696f91a67e25d592bd1bc717dca93ad4268231d8ad08284f972b",
+  "notes": "Support face runs from (16, 5) at 60 degrees: 80 mm long, so the top is at x 56, z 74.28.",
+  "result": "stand",
+  "schema_version": "plan.v1",
+  "steps": [
+    {
+      "height_mm": 80,
+      "id": "stand",
+      "op": "extrude",
+      "plane": "xz",
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          75,
+          0
+        ],
+        [
+          61.2,
+          71.28
+        ],
+        [
+          56,
+          74.28
+        ],
+        [
+          16,
+          5
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          4,
+          14
+        ],
+        [
+          0,
+          14
+        ]
+      ]
+    }
+  ],
+  "units": "mm"
+}

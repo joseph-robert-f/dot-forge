@@ -2,7 +2,9 @@
 
 ![Dot Forge: a mounting plate built in FreeCAD, labelled with its measured size and holes, and a conforms status.](docs/media/hero.png)
 
-**Describe a part to your Dot. Dot Forge turns the description into measurable checks, builds the part in FreeCAD, and measures the result against those checks.**
+**Describe a functional part to your Dot. Dot Forge turns the description into measurable checks, builds the part in FreeCAD, and measures the result against those checks.**
+
+Dot Forge is for parts with sizes that matter: brackets, mounts, spacers, clips, lids and knobs. For a character or a figure, use the [printability check](#characters-and-figures). It checks whether any STL will print and survive. It does not judge the look.
 
 Your Dot runs the tools on its Linux cloud computer. You do not need to operate FreeCAD yourself. Each result is a **3D-printing candidate**: a model that still needs printing and physical checks. A conforming part is not approved for printing or for any use.
 
@@ -10,7 +12,7 @@ This repository contains source and instructions. It does not install applicatio
 
 [See it in action](#see-it-in-action) · [How it works](#how-it-works) · [Start with your Dot](#start-with-your-dot) · [Run the commands](#run-the-commands) · [Read the report](#read-the-report)
 
-> **Status: preview.** The native tests pass on a Dot's FreeCAD 1.0.0 / Open CASCADE 7.8.1 profile (commit `09128ea`). Five-view previews and evidence bundles are not connected to this workflow yet.
+> **Status: preview.** The native tests passed on a Dot's FreeCAD 1.0.0 / Open CASCADE 7.8.1 profile at commit `09128ea`. The measurer changed after that, from a [field test](evals/v2/README.md) with thirteen new requests. Run the native tests again on your Dot. Evidence bundles are not connected to this workflow yet.
 
 ## See it in action
 
@@ -37,8 +39,9 @@ A request goes through three files. Each file has a strict schema.
 **Intent.** Your Dot writes each stated size and feature as a check that can be measured:
 
 - Envelope (overall size) and volume
-- Holes on the x, y or z axis: diameter, position, through or blind, and depth
-- Flat faces: direction, position and minimum area
+- Holes on the x, y or z axis: diameter, position, depth, and what each end opens into (the outside, a floor, a void such as a bore, or a counterbore shoulder)
+- Partial holes, such as channels, slot ends and D-bores: diameter, position, arc and length
+- Flat faces: direction, position, and minimum and maximum area
 
 A requirement that cannot be measured yet, for example "rounded corners", becomes a note for a person. A value that your request does not state goes in `unknowns`. Your Dot does not invent it. You confirm the intent before any geometry is made.
 
@@ -46,7 +49,7 @@ A requirement that cannot be measured yet, for example "rounded corners", become
 
 **Proof.** `printkit build` runs the plan in FreeCAD and reopens the result in a fresh process. It measures the solid exactly, from its geometry, not from the mesh. Then it compares each measurement with the intent:
 
-- A hole must have the correct axis, diameter and position. Full-aperture B-rep checks establish whether it is through or blind. Partial obstructions, including a counterbore shoulder, stay unknown.
+- A hole must have the correct axis, diameter and position. Full-aperture B-rep checks establish what each end opens into. An end that cannot be proven stays unknown.
 - Each measured hole can satisfy only one check. A hole that nobody asked for goes to a person.
 - A rounded corner is a partial cylinder. It is never counted as a hole.
 - A missing or unreadable measurement is `unknown`, never a pass.
@@ -59,7 +62,7 @@ A plan can be valid and still produce the wrong part. The [demo](#see-it-in-acti
 
 Give your Dot this repository URL and branch: <https://github.com/joseph-robert-f/dot-forge>, branch `dot-forge-v2`. Then copy this instruction:
 
-> Use Dot Forge on your Linux cloud computer. Read README.md, AGENTS.md and docs/v2-intent-and-plan.md. Check that FreeCAD 1.0.0 is installed, and run the native tests. Do not download or install software without permission. Write my request as a draft intent. Put each value that I did not state in unknowns, and ask me about the unknowns that change the part. Show me the intent and wait for my confirmation. Then write a plan, build it in a new run directory, and show me the report. If a check fails, change the plan and build a new attempt. Keep the failed attempt. Show me the checks that remain for a person. Do not call the part print-ready.
+> Use Dot Forge on your Linux cloud computer. Read README.md, AGENTS.md and docs/v2-intent-and-plan.md. Check that FreeCAD 1.0.0 is installed, and run the native tests. Do not download or install software without permission. Write my request as a draft intent. Put each value that I did not state in unknowns, and ask me about the unknowns that change the part. Write a plan and make a preview. Show me the views and the summary, and wait for my approval or changes. After I approve, build it with the approved preview in a new run directory, and show me the report. If a check fails, change the plan and build a new attempt. Keep the failed attempt. Show me the checks that remain for a person. Do not call the part print-ready.
 
 Then describe your part, for example:
 
@@ -148,12 +151,24 @@ jq -r '.conformance.checks[] | "\(.status)\t\(.code)"' build/plate-001/report.js
 
 To check a measurement against an intent again, run `python -m printkit conform --intent intent.json --measurement build/plate-001/native/measure.json`.
 
+## Characters and figures
+
+A character or figure is right when it looks right, and only a person can decide that. Dot Forge does not judge likeness. It can check whether the mesh will print and survive, for any STL from any tool:
+
+```sh
+PYTHONPATH=src python3 -m printkit printability figure.stl --bed 220 220 250
+```
+
+The report covers a closed mesh, loose parts, bed size, a flat base, whether it stands up, overhangs and thin parts such as swords or ears. It never says "print-ready". See [printability.md](docs/printability.md).
+
+For a figure with a functional part, such as a magnet pocket or a keychain loop, use v2 for the measured part and write the look as a note.
+
 ## Limits
 
-- One solid only. Assemblies and hollow or nested shells are not supported.
-- Measured today: envelope, volume, holes on the x, y or z axis, and flat faces on those axes. Fillet radius, wall thickness, angled holes, threads and text are notes for a person. They are never a pass.
+- One solid only. Assemblies and sealed cavities are not supported. A part with a cavity fails `native_solid`.
+- Measured today: envelope, volume, holes on the x, y or z axis, and flat faces on those axes. Fillet radius, wall thickness, angled faces, threads and text are notes for a person. They are never a pass. The [field test](evals/v2/README.md) lists the gaps it found.
 - A confirmed intent is a process record, not a signature. The tool cannot prove that you saw it.
-- Five-view previews and evidence ZIP bundles are not connected to this workflow yet. Compare the part with your request yourself before you use it.
+- Evidence ZIP bundles are not connected to this workflow yet. The preview views are line drawings of the solid, not photographs or renders of a print.
 - Printer and material settings, clearances, orientation, supports, slicing and a physical test remain open.
 
 ## More instructions

@@ -2,7 +2,7 @@
 
 v2 lets you make an open-ended part in FreeCAD. It does not limit you to the three reviewed generators. Instead, it controls how a part is described and how the result is checked.
 
-> **Status: preview.** The intent and plan contracts, the conformance checks and the CLI are tested without FreeCAD. The FreeCAD interpreter and measurer (`src/printkit/adapters/freecad_plan_scene.py`) pass the native tests (`tests/test_v2_freecad_native.py`) with conda-forge FreeCAD 1.0.0 and OCC 7.8.1 in a Debian 13 container. They passed on a Dot's exact runtime profile at commit `09128ea`. After a change to the helper, run `PRINTKIT_FREECAD_INTEGRATION=1 PYTHONPATH=src python3 -m unittest tests.test_v2_freecad_native -v` on your Dot before you trust a v2 result. Five-view previews and evidence bundles are not connected to v2 yet.
+> **Status: preview.** The intent and plan contracts, the conformance checks and the CLI are tested without FreeCAD. The FreeCAD interpreter and measurer (`src/printkit/adapters/freecad_plan_scene.py`) pass the native tests (`tests/test_v2_freecad_native.py`) with conda-forge FreeCAD 1.0.0 and OCC 7.8.1 in a Debian 13 container. They passed on a Dot's exact runtime profile at commit `09128ea`. The measurer changed after that (see the [field test](../evals/v2/README.md)), so run the native tests again on your Dot. After a change to the helper, run `PRINTKIT_FREECAD_INTEGRATION=1 PYTHONPATH=src python3 -m unittest tests.test_v2_freecad_native -v` on your Dot before you trust a v2 result. Evidence bundles are not connected to v2 yet.
 
 ## The three files
 
@@ -25,18 +25,27 @@ The plan is judged against the intent, not against itself. A plan can build exac
    python -m printkit check-intent intent.json
    ```
    The result lists the measured checks, the person checks and the unknowns.
-3. Show the intent to the user. Ask about each unknown that changes the part.
-4. When the user agrees, set `"confirmation": {"status": "confirmed", "by": "user"}`. Do not confirm for the user.
-5. Write `plan.json`. Set `intent_sha256` to the `intent_sha256` value from step 2. Run `check-intent` again after any change to the intent, because the hash changes.
-6. Check the plan:
+3. Ask the user about each unknown that changes the part. Update the draft.
+4. Write `plan.json`. Set `intent_sha256` to the `intent_sha256` value from step 2. Check the plan:
    ```sh
    python -m printkit check-plan plan.json --intent intent.json
    ```
    A warning means that a step does not contribute to the result.
-7. Build into a new run directory:
+5. Make a preview into a new directory. The intent can still be a draft:
    ```sh
-   python -m printkit build --intent intent.json --plan plan.json --output build/plate-001
+   python -m printkit preview --intent intent.json --plan plan.json --output build/plate-preview-001
    ```
+   The preview builds the part and writes:
+   - `views/sheet.png` (or `views/sheet.svg` when FreeCAD has no Qt): front, right, back, top and iso views with the measured overall sizes and labelled holes
+   - `preview.md`: in plain words, what will be measured, what the user judges, and what was not stated, with the draft result of each check
+   Show both to the user. The preview is not for delivery.
+6. If the user asks for a change, change the intent or the plan and make a new preview. Keep the old previews.
+7. When the user approves the views and the checks, set `"confirmation": {"status": "confirmed", "by": "user"}`. Do not confirm for the user. Set the plan's `intent_sha256` again, because the hash changes. Then build into a new run directory with the approved preview:
+   ```sh
+   python -m printkit build --intent intent.json --plan plan.json --output build/plate-001 \
+     --approved-preview build/plate-preview-001
+   ```
+   The build refuses a preview of a different intent or plan, or a preview whose files changed. The report records the preview and whether the final solid is the same solid. When it is, the five-view review is no longer an open person check.
 8. Read `build/plate-001/report.json`:
    - `intent_state`: `conforms` or `blocked`. This answers "is it the part the user asked for?"
    - `geometry_state`: the independent STL checks. This answers "is the exported mesh sound?"
@@ -55,14 +64,32 @@ All positions are in mm from the **minimum corner of the part's bounding box**. 
 | --- | --- | --- |
 | `envelope` (top level) | Bounding box of the solid | `size_mm` [x, y, z], `tolerance_mm` |
 | `volume_mm3` (top level, optional) | Solid volume | `min`, `max` |
-| `hole` | A full cylindrical void on an axis. Full-aperture B-rep checks decide through or blind. | `axis`, `diameter_mm`, `position_mm`, `depth`, `tolerance_mm` |
-| `planar_face` | Sum of flat face areas with this outward normal at this offset | `normal`, `offset` (`min`, `max` or mm), `min_area_mm2`, `tolerance_mm` |
+| `hole` | A full cylindrical void on an axis. Full-aperture B-rep checks decide what each end opens into. | `axis`, `diameter_mm`, `position_mm`, `depth`, `tolerance_mm` |
+| `partial_hole` | A cylindrical void that does not go all the way around, on an axis. An exact section at the middle of its length gives the arc. | `axis`, `diameter_mm`, `position_mm`, `min_arc_deg`, optional `max_arc_deg` and `length_mm`, `tolerance_mm` |
+| `planar_face` | Sum of flat face areas with this outward normal at this offset | `normal`, `offset` (`min`, `max` or mm), `min_area_mm2`, optional `max_area_mm2`, `tolerance_mm` |
 | `note` | Not measured. A person compares the views with the text. | `text` |
 
 Hole position: for axis `z`, use `[x, y]`. For axis `y`, use `[x, z]`. For axis `x`, use `[y, z]`.
-Hole depth: `"through"`, or `{"depth_mm": 8, "open_end": "max"}` for a blind hole that opens on the high side of the axis.
+Partial hole: use it for a channel, a round slot end or a D-bore. Position and diameter work as for a hole. The arc is the part of the circle that is wall, in degrees, measured at the middle of the length: a half-round slot end is 180, and a 5 mm D-bore with a flat 4.5 mm from the far side is 286. Set `min_arc_deg` and `max_arc_deg` around the arc you expect. A full circle is never a partial hole, so a channel cut without its opening fails, and the full hole goes to `unrequested_holes`. A cross hole at the middle of the length reduces the measured arc.
 
-Hole tolerance applies to the **diameter**, each position coordinate, and blind depth in mm. A through hole requires the whole measured cylindrical aperture to be clear, including its continuation to the outside of the part on both ends. A blind end requires a completely filled end cap. Partial obstruction (such as a wide counterbore above a narrower through-hole), interrupted apertures, or unsuccessful B-rep checks remain `unknown` and block conformance; they do not count as a blind floor. This is conservative and does not add support for counterbore or countersink intent features.
+Face area: the check adds up every flat face with the same outward normal at the same offset. `min_area_mm2` catches a face that is missing or too small. `max_area_mm2` catches a face that is too big, for example the wall of a slot that is too long. Set the maximum from all the faces at that offset, not from one face.
+
+Hole depth has three forms:
+
+- `"through"`: both ends open to the outside of the part.
+- `{"depth_mm": 8, "open_end": "max"}`: a blind hole that opens on the high side of the axis and has a filled floor.
+- `{"ends": {"min": "outside", "max": "void"}}`: name what each end opens into. Use this form for a counterbore, a set-screw hole into a bore, or a drain hole into a cavity. Add `"depth_mm"` to check the hole length.
+
+| End | Meaning | Proof |
+| --- | --- | --- |
+| `outside` | Clear to the outside of the part | The full aperture is clear from the end to beyond the part |
+| `floor` | A filled end | A thin cap of the full aperture past the end is all material |
+| `void` | Empty space inside the part, such as a bore or a cavity | The full aperture is clear for 0.5 mm past the end, but not to the outside |
+| `shoulder` | A filled step around a narrower coaxial hole, such as a counterbore floor | The ring between the narrower hole and the wall is all material, and the narrower opening is clear |
+
+One end must be `outside`. Each end must match exactly. An end that has no proof is `unknown` and blocks. A counterbore is two features: the narrow hole (`"through"`) and the wide hole (`{"ends": {"min": "shoulder", "max": "outside"}, "depth_mm": 5}`). Where a hole meets a curved face, its length is measured to the farthest point of the edge, so leave out `depth_mm` for a `void` end.
+
+Hole tolerance applies to the **diameter**, each position coordinate, and blind depth in mm. A through hole requires the whole measured cylindrical aperture to be clear, including its continuation to the outside of the part on both ends. A blind end requires a completely filled end cap. Partial obstruction (such as a wide counterbore above a narrower through-hole), interrupted apertures, or unsuccessful B-rep checks remain `unknown` and block conformance; they do not count as a blind floor. This applies to `"through"` and blind depths. Use the `ends` form to ask for a counterbore or a hole into a void. Countersinks (conical) are not measured.
 
 Each measured hole can satisfy only one feature. A full hole that no feature asked for goes to `person_checks` as `unrequested_holes`. A partial cylinder (for example, a fillet) is never counted as a hole.
 
@@ -91,8 +118,8 @@ See `schemas/intent.v1.json`, `schemas/plan.v1.json` and the two examples:
 
 ## Limits
 
-- One solid only. Assemblies and hollow or nested shells are not supported.
-- Features measured today: envelope, volume, axis-aligned cylindrical holes and axis-aligned flat faces. Other requirements (fillet radius, wall thickness, text, threads, angled holes) are notes for a person. They are never a pass.
+- One solid only. Assemblies and sealed cavities are not supported. `native_solid` requires one shell for each solid.
+- Features measured today: envelope, volume, axis-aligned cylindrical holes, axis-aligned partial holes and axis-aligned flat faces. Other requirements (fillet radius, wall thickness, text, threads, angled holes and faces) are notes for a person. They are never a pass. A partial cylinder is never a full hole.
 - A confirmed intent is a process record, not a signature. The tool cannot prove that the user saw it.
 - The STL check allows the envelope tolerance plus 0.05 mm, because mesh vertices on curved faces can sit inside the true surface.
 - The plan is interpreted by fixed code, but FreeCAD still runs without network or filesystem isolation. See [SECURITY.md](../SECURITY.md).

@@ -28,7 +28,7 @@ def hole(position, radius=3.75, span=(0, 9), ends=(True, True), angle=2 * math.p
 
 def stepped_measurement():
     """What the helper reports for the stepped-block example built as planned."""
-    return {'valid': True, 'closed': True, 'solid_count': 1, 'size_mm': [30, 24, 18],
+    return {'valid': True, 'closed': True, 'solid_count': 1, 'shell_count': 1, 'size_mm': [30, 24, 18],
             'volume_mm3': .75 * 30 * 24 * 18 - HOLE_AREA * 9,
             'cylinders': [hole((7.5, 12))],
             'planes': [{'normal': '-z', 'offset_mm': 0, 'area_mm2': 720 - HOLE_AREA},
@@ -42,7 +42,7 @@ def plate_measurement():
     corners = [hole(p, radius=4, span=(0, 5), angle=math.pi / 2, kind='boss') for p in ((4, 4), (56, 4), (4, 36), (56, 36))]
     holes = [hole(p, radius=2, span=(0, 5)) for p in ((6, 6), (54, 6), (6, 34), (54, 34))]
     area = 2400 - 4 * (16 - 4 * math.pi) - 4 * 4 * math.pi
-    return {'valid': True, 'closed': True, 'solid_count': 1, 'size_mm': [60, 40, 5], 'volume_mm3': area * 5,
+    return {'valid': True, 'closed': True, 'solid_count': 1, 'shell_count': 1, 'size_mm': [60, 40, 5], 'volume_mm3': area * 5,
             'cylinders': corners + holes, 'planes': [{'normal': '-z', 'offset_mm': 0, 'area_mm2': area}]}
 
 
@@ -91,15 +91,17 @@ class ConformanceTests(unittest.TestCase):
 
     def test_wrong_geometry_blocks(self):
         intent, _ = example('stepped-block')
-        cases = {
-            'envelope': lambda m: m.update(size_mm=[30, 24, 18.5]),
-            'native_solid': lambda m: m.update(solid_count=2),
-            'volume': lambda m: m.update(volume_mm3=9000),
-            'feature:ledge-hole': lambda m: m['cylinders'][0].update(radius_mm=3.5),
-            'feature:flat-bottom': lambda m: m['planes'][0].update(area_mm2=600),
-        }
-        for code, edit in cases.items():
-            with self.subTest(code=code):
+        cases = [
+            ('envelope', lambda m: m.update(size_mm=[30, 24, 18.5])),
+            ('native_solid', lambda m: m.update(solid_count=2)),
+            # A sealed cavity is a second shell in one solid.
+            ('native_solid', lambda m: m.update(shell_count=2)),
+            ('volume', lambda m: m.update(volume_mm3=9000)),
+            ('feature:ledge-hole', lambda m: m['cylinders'][0].update(radius_mm=3.5)),
+            ('feature:flat-bottom', lambda m: m['planes'][0].update(area_mm2=600)),
+        ]
+        for index, (code, edit) in enumerate(cases):
+            with self.subTest(code=code, index=index):
                 m = stepped_measurement()
                 edit(m)
                 report = conform(intent, m)
@@ -143,6 +145,82 @@ class ConformanceTests(unittest.TestCase):
         report = conform(intent, m)
         self.assertEqual(statuses(report)['feature:ledge-hole'], 'unknown')
         self.assertEqual(report['intent_state'], 'blocked')
+
+    def test_face_area_has_optional_upper_bound(self):
+        intent, _ = example('stepped-block')
+        face = next(f for f in intent['features'] if f['kind'] == 'planar_face')
+        area = next(p['area_mm2'] for p in stepped_measurement()['planes'] if p['normal'] == face['normal'])
+        for bound, expected in ((None, 'pass'), (area, 'pass'), (area + 1, 'pass'), (area - 1, 'fail')):
+            with self.subTest(bound=bound):
+                face.pop('max_area_mm2', None)
+                if bound is not None:
+                    face['max_area_mm2'] = bound
+                self.assertEqual(statuses(conform(intent, stepped_measurement()))['feature:' + face['id']], expected)
+
+    def test_partial_hole_checks_arc_position_and_length(self):
+        intent, _ = example('stepped-block')
+        intent['features'].append({'id': 'channel', 'kind': 'partial_hole', 'axis': 'y', 'diameter_mm': 6,
+                                   'position_mm': [10, 9], 'min_arc_deg': 250, 'max_arc_deg': 270,
+                                   'length_mm': 24, 'tolerance_mm': 0.05})
+        channel = {'axis': 'y', 'radius_mm': 3, 'angle_rad': math.radians(259), 'kind': 'void',
+                   'position_mm': [10, 9], 'span_mm': [0, 24], 'ends_open': None, 'arc_rad': math.radians(259)}
+        cases = [
+            ({}, 'pass'),
+            ({'arc_rad': math.radians(240)}, 'fail'),
+            ({'arc_rad': math.radians(280)}, 'fail'),
+            ({'span_mm': [0, 20]}, 'fail'),
+            ({'position_mm': [12, 9]}, 'fail'),
+            ({'radius_mm': 3.5}, 'fail'),
+            ({'kind': 'boss'}, 'fail'),  # A convex round is not a channel.
+            # The parameter range can say more than the section; only the section counts.
+            ({'angle_rad': math.radians(300), 'arc_rad': math.radians(200)}, 'fail'),
+            ({'arc_rad': None}, 'unknown'),
+            ({'arc_rad': float('nan')}, 'unknown'),
+        ]
+        for change, expected in cases:
+            with self.subTest(change=change):
+                m = stepped_measurement()
+                m['cylinders'].append(dict(channel, **change))
+                report = conform(intent, m)
+                self.assertEqual(statuses(report)['feature:channel'], expected)
+                self.assertEqual(report['intent_state'], 'conforms' if expected == 'pass' else 'blocked')
+        # A full hole is never a partial hole, and a partial hole is never an unrequested full hole.
+        m = stepped_measurement()
+        m['cylinders'].append(dict(channel, angle_rad=2 * math.pi, arc_rad=None))
+        self.assertEqual(statuses(conform(intent, m))['feature:channel'], 'fail')
+
+    def test_hole_ends_must_match_exactly(self):
+        intent, _ = example('stepped-block')
+        intent['features'][0]['depth'] = {'ends': {'min': 'shoulder', 'max': 'outside'}, 'depth_mm': 9}
+        cases = [
+            (['shoulder', 'outside'], (0, 9), 'pass'),
+            (['shoulder', 'outside'], (0, 8), 'fail'),  # Depth is checked when the intent states it.
+            (['floor', 'outside'], (0, 9), 'fail'),
+            (['outside', 'outside'], (0, 9), 'fail'),
+            (['void', 'outside'], (0, 9), 'fail'),
+            ([None, 'outside'], (0, 9), 'unknown'),
+            (['pocket', 'outside'], (0, 9), 'unknown'),  # Malformed measurement.
+            (None, (0, 9), 'unknown'),  # Measured before end kinds existed.
+        ]
+        for ends, span, expected in cases:
+            with self.subTest(ends=ends, span=span):
+                m = stepped_measurement()
+                m['cylinders'][0].update(span_mm=list(span), ends=ends)
+                if ends is None:
+                    del m['cylinders'][0]['ends']
+                report = conform(intent, m)
+                self.assertEqual(statuses(report)['feature:ledge-hole'], expected)
+                self.assertEqual(report['intent_state'], 'conforms' if expected == 'pass' else 'blocked')
+
+    def test_legacy_depth_ignores_end_kinds(self):
+        # A shoulder is still not a blind floor or a through end for the older depth forms.
+        intent, _ = example('stepped-block')
+        for depth in ('through', {'depth_mm': 9, 'open_end': 'max'}):
+            with self.subTest(depth=depth):
+                m = stepped_measurement()
+                m['cylinders'][0].update(ends_open=[None, True], ends=['shoulder', 'outside'])
+                intent['features'][0]['depth'] = depth
+                self.assertEqual(statuses(conform(intent, m))['feature:ledge-hole'], 'unknown')
 
     def test_partly_obstructed_aperture_is_not_through_or_blind(self):
         intent, _ = example('stepped-block')

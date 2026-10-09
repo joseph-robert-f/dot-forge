@@ -1,0 +1,75 @@
+{
+  "ask": "Mounting plate 50 x 20 x 3 with an adjustment slot in the middle, 5 mm wide and 20 mm long, and a 4 mm hole 6 mm in from each end.",
+  "confirmation": {
+    "by": "user",
+    "note": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions.",
+    "status": "confirmed"
+  },
+  "envelope": {
+    "size_mm": [
+      50,
+      20,
+      3
+    ],
+    "tolerance_mm": 0.05
+  },
+  "features": [
+    {
+      "axis": "z",
+      "depth": "through",
+      "diameter_mm": 4,
+      "id": "hole-left",
+      "kind": "hole",
+      "position_mm": [
+        6,
+        10
+      ],
+      "source": "a 4 mm hole 6 mm in from each end",
+      "tolerance_mm": 0.05
+    },
+    {
+      "axis": "z",
+      "depth": "through",
+      "diameter_mm": 4,
+      "id": "hole-right",
+      "kind": "hole",
+      "position_mm": [
+        44,
+        10
+      ],
+      "source": "a 4 mm hole 6 mm in from each end",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "slot-wall-low",
+      "kind": "planar_face",
+      "min_area_mm2": 44,
+      "normal": "+y",
+      "offset": 7.5,
+      "source": "slot 5 mm wide",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "slot-wall-high",
+      "kind": "planar_face",
+      "min_area_mm2": 44,
+      "normal": "-y",
+      "offset": 12.5,
+      "source": "slot 5 mm wide",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "slot-ends",
+      "kind": "note",
+      "source": "20 mm long",
+      "text": "The slot ends are round. The slot is 20 mm long overall."
+    }
+  ],
+  "schema_version": "intent.v1",
+  "solid_count": 1,
+  "units": "mm",
+  "unknowns": [
+    "screw size for the slot",
+    "printer and material"
+  ]
+}

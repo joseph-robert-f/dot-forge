@@ -1,0 +1,51 @@
+{
+  "intent_sha256": "5bb40758e2afcbaf0bb14864c8b7758cb246d47035ac331bddd5ae2f52da7e13",
+  "result": "collar",
+  "schema_version": "plan.v1",
+  "steps": [
+    {
+      "at_mm": [
+        10,
+        10,
+        0
+      ],
+      "height_mm": 10,
+      "id": "ring",
+      "op": "cylinder",
+      "radius_mm": 10
+    },
+    {
+      "at_mm": [
+        10,
+        10,
+        -1
+      ],
+      "height_mm": 12,
+      "id": "bore",
+      "op": "cylinder",
+      "radius_mm": 4.1
+    },
+    {
+      "at_mm": [
+        -1,
+        10,
+        5
+      ],
+      "axis": "x",
+      "height_mm": 8,
+      "id": "tap",
+      "op": "cylinder",
+      "radius_mm": 1.25
+    },
+    {
+      "from": "ring",
+      "id": "collar",
+      "op": "cut",
+      "tools": [
+        "bore",
+        "tap"
+      ]
+    }
+  ],
+  "units": "mm"
+}

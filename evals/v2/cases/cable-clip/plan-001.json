@@ -1,0 +1,64 @@
+{
+  "intent_sha256": "963c4b46d7776ba0fea9711de359be258f792b1ca7205c5016235e06aca5cf9c",
+  "result": "clip",
+  "schema_version": "plan.v1",
+  "steps": [
+    {
+      "id": "block",
+      "op": "box",
+      "size_mm": [
+        24,
+        12,
+        10
+      ]
+    },
+    {
+      "at_mm": [
+        16,
+        -1,
+        5
+      ],
+      "axis": "y",
+      "height_mm": 14,
+      "id": "channel",
+      "op": "cylinder",
+      "radius_mm": 3.25
+    },
+    {
+      "at_mm": [
+        13.5,
+        -1,
+        -1
+      ],
+      "id": "mouth",
+      "op": "box",
+      "size_mm": [
+        5,
+        14,
+        6
+      ]
+    },
+    {
+      "at_mm": [
+        6,
+        6,
+        -1
+      ],
+      "height_mm": 12,
+      "id": "screw",
+      "op": "cylinder",
+      "radius_mm": 2
+    },
+    {
+      "from": "block",
+      "id": "clip",
+      "op": "cut",
+      "tools": [
+        "channel",
+        "mouth",
+        "screw"
+      ]
+    }
+  ],
+  "units": "mm"
+}

@@ -1,0 +1,71 @@
+{
+  "ask": "I need an L bracket to screw a shelf support into a corner. Both legs 30 mm long, 20 mm wide, 3 mm thick. One 4.5 mm screw hole in the middle of each leg.",
+  "confirmation": {
+    "by": "user",
+    "note": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions.",
+    "status": "confirmed"
+  },
+  "envelope": {
+    "size_mm": [
+      30,
+      20,
+      30
+    ],
+    "tolerance_mm": 0.05
+  },
+  "features": [
+    {
+      "axis": "z",
+      "depth": "through",
+      "diameter_mm": 4.5,
+      "id": "base-hole",
+      "kind": "hole",
+      "position_mm": [
+        16.5,
+        10
+      ],
+      "source": "one 4.5 mm screw hole in the middle of each leg",
+      "tolerance_mm": 0.05
+    },
+    {
+      "axis": "x",
+      "depth": "through",
+      "diameter_mm": 4.5,
+      "id": "wall-hole",
+      "kind": "hole",
+      "position_mm": [
+        10,
+        16.5
+      ],
+      "source": "one 4.5 mm screw hole in the middle of each leg",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "base-bottom",
+      "kind": "planar_face",
+      "min_area_mm2": 550,
+      "normal": "-z",
+      "offset": "min",
+      "source": "legs 30 mm long, 20 mm wide",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "wall-back",
+      "kind": "planar_face",
+      "min_area_mm2": 550,
+      "normal": "-x",
+      "offset": "min",
+      "source": "legs 30 mm long, 20 mm wide",
+      "tolerance_mm": 0.05
+    }
+  ],
+  "schema_version": "intent.v1",
+  "solid_count": 1,
+  "units": "mm",
+  "unknowns": [
+    "screw head type",
+    "load on the bracket",
+    "inside corner fillet",
+    "printer and material"
+  ]
+}

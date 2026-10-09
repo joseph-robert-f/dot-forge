@@ -24,6 +24,8 @@ PROBE_MM = 0.01
 LINEAR_TOL = 1e-6
 VOLUME_AREA_RELATIVE_TOL = 1e-4
 SPAN_TOL = 1e-3
+VOID_CLEAR_MM = 0.5  # A "void" end must be clear over the full aperture for this far.
+SHOULDER_EDGE_MM = 1e-3  # Band left unproven at a shoulder's inner edge, against coincident-face Booleans.
 AXES = {'x': App.Vector(1, 0, 0), 'y': App.Vector(0, 1, 0), 'z': App.Vector(0, 0, 1)}
 PLANE_NORMAL = {'xy': 'z', 'xz': 'y', 'yz': 'x'}
 
@@ -205,6 +207,16 @@ def named_axis(direction):
     return None
 
 
+def faces_axis(face, surface, direction):
+    """A void's outward (material) normal points toward the axis; a boss's points away."""
+    u0, u1, v0, v1 = face.ParameterRange
+    u, v = (u0 + u1) / 2, (v0 + v1) / 2
+    point, normal = face.valueAt(u, v), face.normalAt(u, v)
+    radial = point - surface.Center
+    radial = radial - direction * radial.dot(direction)
+    return normal.dot(radial) < 0
+
+
 def empty_volume(shape):
     """Only a valid, exactly empty solid intersection establishes clearance."""
     if not shape.isValid() or not math.isfinite(shape.Volume):
@@ -239,6 +251,55 @@ def aperture_ends(shape, foot, direction, radius, span, bounds):
         return [None, None]
 
 
+def end_kinds(shape, foot, direction, radius, span, ends_open, inner_radii):
+    """Name what each end opens into: outside, floor, void, shoulder, or None.
+
+    Ends proven outside or floor by aperture_ends keep that answer. An end that
+    is neither is a void only when the full aperture stays clear for
+    VOID_CLEAR_MM past it, and a shoulder only when the ring around a narrower
+    coaxial hole is completely filled and that hole's aperture is clear.
+    Anything else, including an obstructed bore, stays None.
+    """
+    kinds = [{True: 'outside', False: 'floor'}.get(e) for e in ends_open]
+    if None not in kinds:
+        return kinds
+    try:
+        s0, s1 = span
+        bore = Part.makeCylinder(radius, s1 - s0, foot + direction * s0, direction)
+        if not empty_volume(shape.common(bore)):
+            return kinds
+        for i, (end, outward) in enumerate(((s0, -direction), (s1, direction))):
+            if kinds[i] is not None:
+                continue
+            base = foot + direction * end
+            if empty_volume(shape.common(Part.makeCylinder(radius, VOID_CLEAR_MM, base, outward))):
+                kinds[i] = 'void'
+                continue
+            cap = Part.makeCylinder(radius, PROBE_MM, base, outward)
+            for inner in sorted(inner_radii, reverse=True):
+                ring = cap.cut(Part.makeCylinder(inner + SHOULDER_EDGE_MM, PROBE_MM, base, outward))
+                opening = Part.makeCylinder(inner - SHOULDER_EDGE_MM, PROBE_MM, base, outward)
+                if empty_volume(ring.cut(shape)) and empty_volume(shape.common(opening)):
+                    kinds[i] = 'shoulder'
+                    break
+        return kinds
+    except Exception:
+        return [{True: 'outside', False: 'floor'}.get(e) for e in ends_open]
+
+
+def mid_arc(faces, direction, radius, at):
+    """Arc a partial cylinder covers at the middle of its length, from the exact section.
+
+    The parameter range can follow an approximated trim curve, so it is not used.
+    Returns None if the section fails.
+    """
+    try:
+        length = sum(edge.Length for face in faces for wire in face.slice(direction, at) for edge in wire.Edges)
+        return length / radius if length > 0 and math.isfinite(length) else None
+    except Exception:
+        return None
+
+
 def cylinders(shape, low):
     """Group analytic cylinder faces into whole cylinders and probe each one."""
     pieces = []
@@ -252,12 +313,19 @@ def cylinders(shape, low):
         u0, u1, v0, v1 = face.ParameterRange
         along = surface.Center.dot(direction)
         foot = surface.Center - direction * along
+        span = sorted([along + sign * v0, along + sign * v1])
+        if axis:
+            # The parameter range follows the approximated trim curve; the exact extent does not.
+            box = face.optimalBoundingBox(False, False)
+            i = 'xyz'.index(axis)
+            span = [(box.XMin, box.YMin, box.ZMin)[i], (box.XMax, box.YMax, box.ZMax)[i]]
         pieces.append({'axis': axis, 'direction': direction, 'foot': foot, 'radius': surface.Radius,
-                       'span': sorted([along + sign * v0, along + sign * v1]), 'angle': u1 - u0})
+                       'span': span, 'angle': u1 - u0,
+                       'void': faces_axis(face, surface, direction), 'faces': [face]})
     groups = []
     for piece in sorted(pieces, key=lambda p: p['span'][0]):
         for group in groups:
-            if (abs(abs(group['direction'].dot(piece['direction'])) - 1) <= 1e-9
+            if (group['void'] == piece['void'] and abs(abs(group['direction'].dot(piece['direction'])) - 1) <= 1e-9
                     and abs(group['radius'] - piece['radius']) <= LINEAR_TOL
                     and (group['foot'] - piece['foot']).Length <= LINEAR_TOL
                     and piece['span'][0] <= group['span'][1] + LINEAR_TOL):
@@ -265,26 +333,31 @@ def cylinders(shape, low):
                 group['span'][1] = max(group['span'][1], piece['span'][1])
                 # Split faces of one cylinder share a span and add up their angles.
                 group['angle'] = group['angle'] + piece['angle'] if same else max(group['angle'], piece['angle'])
+                group['faces'] += piece['faces']
                 break
         else:
-            groups.append(dict(piece, span=list(piece['span'])))
-    inside = lambda point: shape.isInside(point, 1e-7, False)
+            groups.append(dict(piece, span=list(piece['span']), faces=list(piece['faces'])))
     result = []
     for g in groups:
         d, foot, (s0, s1) = g['direction'], g['foot'], g['span']
-        void = not inside(foot + d * ((s0 + s1) / 2))
         entry = {'axis': g['axis'], 'radius_mm': g['radius'], 'angle_rad': g['angle'],
-                 'kind': 'void' if void else 'boss', 'position_mm': None, 'span_mm': None, 'ends_open': None}
+                 'kind': 'void' if g['void'] else 'boss', 'position_mm': None, 'span_mm': None, 'ends_open': None}
         if g['axis']:
             index = 'xyz'.index(g['axis'])
             plane = [i for i in range(3) if i != index]
             point = [foot.x, foot.y, foot.z]
             entry['position_mm'] = [point[i] - low[i] for i in plane]
             entry['span_mm'] = [s0 - low[index], s1 - low[index]]
-            if void:
+            if g['void']:
                 box = shape.BoundBox
                 bounds = [(box.XMin, box.XMax), (box.YMin, box.YMax), (box.ZMin, box.ZMax)][index]
                 entry['ends_open'] = aperture_ends(shape, foot, d, g['radius'], (s0, s1), bounds)
+                inner = [o['radius'] for o in groups if o['void'] and o['axis'] == g['axis']
+                         and o['angle'] >= 2 * math.pi - 1e-6 and (o['foot'] - foot).Length <= LINEAR_TOL
+                         and o['radius'] < g['radius'] - 2 * SHOULDER_EDGE_MM]
+                entry['ends'] = end_kinds(shape, foot, d, g['radius'], (s0, s1), entry['ends_open'], inner)
+                if g['angle'] < 2 * math.pi - 1e-6:
+                    entry['arc_rad'] = mid_arc(g['faces'], d, g['radius'], (s0 + s1) / 2)
         result.append(entry)
     return result
 
@@ -308,9 +381,12 @@ def planes(shape, low):
 
 
 def measure(shape):
-    box = shape.BoundBox
+    # The plain BoundBox includes trim-curve tolerance and can sit a few micrometres
+    # outside the surface; the optimal box is computed from the exact geometry.
+    box = shape.optimalBoundingBox(False, False)
     low = [box.XMin, box.YMin, box.ZMin]
     return {'valid': shape.isValid(), 'closed': shape.isClosed(), 'solid_count': len(shape.Solids),
+            'shell_count': len(shape.Shells),
             'size_mm': [box.XLength, box.YLength, box.ZLength], 'origin_mm': low,
             'volume_mm3': shape.Volume, 'area_mm2': shape.Area, 'face_count': len(shape.Faces),
             'edge_count': len(shape.Edges),
@@ -354,6 +430,9 @@ def same_cylinder(a, b):
     """
     near = lambda x, y, tol: (x is None) == (y is None) and (x is None or all(abs(i - j) <= tol for i, j in zip(x, y)))
     return (a['kind'] == b['kind'] and a['axis'] == b['axis'] and a['ends_open'] == b['ends_open']
+            and a.get('ends') == b.get('ends')
+            and (a.get('arc_rad') is None) == (b.get('arc_rad') is None)
+            and (a.get('arc_rad') is None or abs(a['arc_rad'] - b['arc_rad']) <= 1e-6)
             and abs(a['radius_mm'] - b['radius_mm']) <= LINEAR_TOL and abs(a['angle_rad'] - b['angle_rad']) <= 1e-6
             and near(a['position_mm'], b['position_mm'], 1e-5) and near(a['span_mm'], b['span_mm'], SPAN_TOL))
 
@@ -378,6 +457,7 @@ def round_trip_differences(native, step):
     """
     close = lambda a, b: abs(a - b) <= max(1e-6, abs(a) * VOLUME_AREA_RELATIVE_TOL)
     checks = {'solid_count': native['solid_count'] == step['solid_count'],
+              'shell_count': native['shell_count'] == step['shell_count'],
               'face_count': native['face_count'] == step['face_count'],
               'edge_count': native['edge_count'] == step['edge_count'],
               'size': all(abs(a - b) <= LINEAR_TOL for a, b in zip(native['size_mm'], step['size_mm'])),
@@ -409,6 +489,59 @@ def reopen(run):
          'native': native, 'step': step, 'runtime': runtime()})
 
 
+# Each view: rows of a rotation that turn it into a plain top-down projection
+# (screen right, screen up, toward the viewer). Third-angle names.
+S2, S3, S6 = math.sqrt(2), math.sqrt(3), math.sqrt(6)
+VIEWS = {
+    'front': ((1, 0, 0), (0, 0, 1), (0, -1, 0)),
+    'right': ((0, 1, 0), (0, 0, 1), (1, 0, 0)),
+    'back': ((-1, 0, 0), (0, 0, 1), (0, 1, 0)),
+    'top': ((1, 0, 0), (0, 1, 0), (0, 0, 1)),
+    'iso': ((1 / S2, 1 / S2, 0), (-1 / S6, 1 / S6, 2 / S6), (1 / S3, -1 / S3, 1 / S3)),
+}
+VISIBLE, HIDDEN = (0, 1, 3), (5, 6, 8)  # projectEx: sharp, smooth and outline edges.
+
+
+def views(run):
+    """Exact hidden-line projections of the exported solid, as 2D polylines in mm."""
+    import TechDraw
+    shape = Part.Shape()
+    shape.read(str(run / 'exports/model.step'))
+    out = {}
+    for name, (r, u, t) in VIEWS.items():
+        turned = shape.copy()
+        turned.transformShape(App.Matrix(*r, 0, *u, 0, *t, 0, 0, 0, 0, 1))
+        groups = TechDraw.projectEx(turned, App.Vector(0, 0, 1))
+        lines = lambda indices: [[[round(p.x, 4), round(p.y, 4)] for p in edge.discretize(Deflection=0.01)]
+                                 for i in indices if not groups[i].isNull() for edge in groups[i].Edges]
+        out[name] = {'axes': [r, u, t], 'visible': lines(VISIBLE), 'hidden': lines(HIDDEN)}
+    dump(run / 'views/lines.json', {'status': 'pass', 'views': out, 'runtime': runtime()})
+
+
+def raster(run):
+    """PNG of the composed sheet through Qt, when FreeCAD ships it; otherwise say so."""
+    import os
+    os.environ['QT_QPA_PLATFORM'] = 'offscreen'
+    try:
+        from PySide import QtCore, QtGui, QtSvg
+    except Exception as exc:
+        dump(run / 'views/raster.json', {'status': 'unavailable', 'reason': f'{type(exc).__name__}: {exc}'[:300]})
+        return
+    app = QtGui.QGuiApplication.instance() or QtGui.QGuiApplication([])
+    renderer = QtSvg.QSvgRenderer(str(run / 'views/sheet.svg'))
+    size = renderer.defaultSize() * 2
+    image = QtGui.QImage(size, QtGui.QImage.Format_ARGB32)
+    image.fill(QtGui.QColor('#ffffff'))
+    painter = QtGui.QPainter(image)
+    painter.setRenderHint(QtGui.QPainter.Antialiasing)
+    renderer.render(painter)
+    painter.end()
+    if not image.save(str(run / 'views/sheet.png')):
+        raise ValueError('Could not write the preview PNG')
+    del app
+    dump(run / 'views/raster.json', {'status': 'pass', 'width_px': size.width(), 'height_px': size.height()})
+
+
 def main():
     mode, target = sys.argv[1:]
     run = Path(target)
@@ -422,6 +555,10 @@ def main():
             raise
     elif mode == 'reopen':
         reopen(run)
+    elif mode == 'views':
+        views(run)
+    elif mode == 'raster':
+        raster(run)
     else:
         raise ValueError('Unknown helper mode')
 

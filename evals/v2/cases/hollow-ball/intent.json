@@ -1,0 +1,35 @@
+{
+  "ask": "A hollow ball, 40 mm across, with 2 mm walls.",
+  "confirmation": {
+    "by": "user",
+    "note": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions.",
+    "status": "confirmed"
+  },
+  "envelope": {
+    "size_mm": [
+      40,
+      40,
+      40
+    ],
+    "tolerance_mm": 0.05
+  },
+  "features": [
+    {
+      "id": "hollow",
+      "kind": "note",
+      "source": "hollow ... with 2 mm walls",
+      "text": "Hollow inside, with a 2 mm wall."
+    }
+  ],
+  "schema_version": "intent.v1",
+  "solid_count": 1,
+  "units": "mm",
+  "unknowns": [
+    "printer and material",
+    "drain hole for resin or powder"
+  ],
+  "volume_mm3": {
+    "max": 9110,
+    "min": 9050
+  }
+}

@@ -10,7 +10,7 @@ Notes and unrequested holes go to a person as `needs_review`.
 """
 import math
 from .common import ForgeError
-from .intent import AXES, plane_axes
+from .intent import AXES, HOLE_ENDS, plane_axes
 
 FULL_TURN = 2 * math.pi - 1e-6
 SCHEMA = "conformance.v1"
@@ -24,7 +24,8 @@ def check_measurement(m):
     """Reject malformed measurements instead of letting them pass by omission."""
     try:
         ok = (isinstance(m, dict) and type(m["valid"]) is bool and type(m["closed"]) is bool
-              and type(m["solid_count"]) is int and len(m["size_mm"]) == 3 and all(map(finite, m["size_mm"]))
+              and type(m["solid_count"]) is int and type(m["shell_count"]) is int
+              and len(m["size_mm"]) == 3 and all(map(finite, m["size_mm"]))
               and finite(m["volume_mm3"]) and isinstance(m["cylinders"], list) and isinstance(m["planes"], list))
         for c in m["cylinders"]:
             ok = ok and c["axis"] in (*AXES, None) and finite(c["radius_mm"]) and finite(c["angle_rad"]) \
@@ -65,6 +66,8 @@ def check_hole(feature, measured, claimed):
                       f"no full cylindrical void on axis {axis} at this diameter and position")
     index, hole = min(matches, key=lambda ic: distance(ic[1]))
     claimed.add(index)
+    if isinstance(feature["depth"], dict) and "ends" in feature["depth"]:
+        return check_hole_ends(feature, hole, code, expected)
     ends, span = hole.get("ends_open"), hole.get("span_mm")
     actual = {"diameter_mm": 2 * hole["radius_mm"], "position_mm": hole["position_mm"],
               "span_mm": span, "ends_open": ends}
@@ -81,6 +84,52 @@ def check_hole(feature, measured, claimed):
                   "analytic cylinder diameter/axis/position; full-aperture B-rep checks decide through or blind")
 
 
+def check_hole_ends(feature, hole, code, expected):
+    """Each end must be measured as exactly what the intent names; an unproven end is unknown."""
+    ends, span, depth = hole.get("ends"), hole.get("span_mm"), feature["depth"]
+    actual = {"diameter_mm": 2 * hole["radius_mm"], "position_mm": hole["position_mm"],
+              "span_mm": span, "ends": ends}
+    method = "analytic cylinder diameter/axis/position; full-aperture B-rep checks decide what each end opens into"
+    if not isinstance(ends, list) or len(ends) != 2 or not all(e is None or e in HOLE_ENDS for e in ends) \
+            or not isinstance(span, list) or len(span) != 2 or not all(map(finite, span)):
+        return record(code, "unknown", actual, expected, "hole ends were not measured")
+    if None in ends:
+        return record(code, "unknown", actual, expected, method)
+    ok = ends == [depth["ends"]["min"], depth["ends"]["max"]] \
+        and ("depth_mm" not in depth or abs((span[1] - span[0]) - depth["depth_mm"]) <= feature["tolerance_mm"])
+    return record(code, "pass" if ok else "fail", actual, expected, method)
+
+
+def partial_holes(m):
+    return [c for c in m["cylinders"] if c["kind"] == "void" and c["angle_rad"] < FULL_TURN
+            and c["axis"] is not None and c.get("position_mm") is not None]
+
+
+def check_partial(feature, measured, claimed):
+    """A partial cylindrical void at this axis, diameter and position, with its arc at mid-length."""
+    axis, tol, want_d = feature["axis"], feature["tolerance_mm"], feature["diameter_mm"]
+    code = f"feature:{feature['id']}"
+    expected = {k: feature[k] for k in ("axis", "diameter_mm", "position_mm", "min_arc_deg", "max_arc_deg",
+                                        "length_mm", "tolerance_mm") if k in feature}
+    matches = [(i, c) for i, c in enumerate(measured) if c["axis"] == axis and i not in claimed
+               and want_d - tol <= 2 * c["radius_mm"] <= want_d + tol
+               and all(abs(a - b) <= tol for a, b in zip(c["position_mm"], feature["position_mm"]))]
+    method = "partial analytic cylinder diameter/axis/position; exact section at mid-length gives the arc"
+    if not matches:
+        return record(code, "fail", None, expected,
+                      f"no partial cylindrical void on axis {axis} at this diameter and position")
+    index, part = min(matches, key=lambda ic: math.dist(ic[1]["position_mm"], feature["position_mm"]))
+    claimed.add(index)
+    arc, span = part.get("arc_rad"), part.get("span_mm")
+    actual = {"diameter_mm": 2 * part["radius_mm"], "position_mm": part["position_mm"], "span_mm": span,
+              "arc_deg": math.degrees(arc) if finite(arc) else None}
+    if not finite(arc) or not isinstance(span, list) or len(span) != 2 or not all(map(finite, span)):
+        return record(code, "unknown", actual, expected, "the arc could not be measured")
+    ok = feature["min_arc_deg"] <= actual["arc_deg"] <= feature.get("max_arc_deg", 360) \
+        and ("length_mm" not in feature or abs((span[1] - span[0]) - feature["length_mm"]) <= tol)
+    return record(code, "pass" if ok else "fail", actual, expected, method)
+
+
 def check_planar(feature, m):
     axis = feature["normal"][1]
     size = dict(zip(AXES, m["size_mm"]))[axis]
@@ -88,16 +137,22 @@ def check_planar(feature, m):
     tol = feature["tolerance_mm"]
     area = sum(p["area_mm2"] for p in m["planes"] if p.get("normal") == feature["normal"]
                and finite(p.get("offset_mm")) and abs(p["offset_mm"] - want) <= tol)
-    return record(f"feature:{feature['id']}", "pass" if area >= feature["min_area_mm2"] else "fail",
-                  {"area_mm2": area}, {k: feature[k] for k in ("normal", "offset", "min_area_mm2", "tolerance_mm")},
+    ok = feature["min_area_mm2"] <= area <= feature.get("max_area_mm2", math.inf)
+    return record(f"feature:{feature['id']}", "pass" if ok else "fail",
+                  {"area_mm2": area}, {k: feature[k] for k in ("normal", "offset", "min_area_mm2", "max_area_mm2",
+                                                               "tolerance_mm") if k in feature},
                   "sum of planar face areas with this outward normal at this offset")
 
 
 def conform(intent, measurement):
     m = check_measurement(measurement)
-    checks = [record("native_solid", "pass" if m["valid"] and m["closed"] and m["solid_count"] == intent["solid_count"] else "fail",
-                     {"valid": m["valid"], "closed": m["closed"], "solid_count": m["solid_count"]},
-                     {"valid": True, "closed": True, "solid_count": intent["solid_count"]})]
+    # One shell per solid: an inner shell is a sealed cavity, which v2 does not support.
+    whole = m["valid"] and m["closed"] and m["solid_count"] == intent["solid_count"] == m["shell_count"]
+    checks = [record("native_solid", "pass" if whole else "fail",
+                     {"valid": m["valid"], "closed": m["closed"], "solid_count": m["solid_count"],
+                      "shell_count": m["shell_count"]},
+                     {"valid": True, "closed": True, "solid_count": intent["solid_count"],
+                      "shell_count": intent["solid_count"]})]
     envelope = intent["envelope"]
     checks.append(record("envelope", "pass" if all(abs(a - b) <= envelope["tolerance_mm"]
                                                    for a, b in zip(m["size_mm"], envelope["size_mm"])) else "fail",
@@ -107,10 +162,13 @@ def conform(intent, measurement):
         checks.append(record("volume", "pass" if v["min"] <= m["volume_mm3"] <= v["max"] else "fail",
                              m["volume_mm3"], v))
     measured, claimed = holes(m), set()
+    partial, partial_claimed = partial_holes(m), set()
     # Exact intent features claim holes first; each measured hole satisfies at most one feature.
     for feature in intent["features"]:
         if feature["kind"] == "hole":
             checks.append(check_hole(feature, measured, claimed))
+        elif feature["kind"] == "partial_hole":
+            checks.append(check_partial(feature, partial, partial_claimed))
         elif feature["kind"] == "planar_face":
             checks.append(check_planar(feature, m))
         else:

@@ -1,0 +1,30 @@
+{
+  "ask": "A cap that screws onto a standard 28 mm soda bottle.",
+  "confirmation": {
+    "status": "draft"
+  },
+  "envelope": {
+    "size_mm": [
+      1,
+      1,
+      1
+    ],
+    "tolerance_mm": 0.05
+  },
+  "features": [
+    {
+      "id": "thread",
+      "kind": "note",
+      "source": "screws onto a 28 mm soda bottle",
+      "text": "Internal thread that fits a 28 mm PCO 1881 bottle neck."
+    }
+  ],
+  "schema_version": "intent.v1",
+  "solid_count": 1,
+  "units": "mm",
+  "unknowns": [
+    "thread profile",
+    "seal",
+    "printer and material"
+  ]
+}

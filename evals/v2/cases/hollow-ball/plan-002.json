@@ -1,0 +1,48 @@
+{
+  "intent_sha256": "5db0b78045aaf8a9d731401705f384640620693375a1b1a265f51d804d78e145",
+  "result": "ball",
+  "schema_version": "plan.v1",
+  "steps": [
+    {
+      "at_mm": [
+        20,
+        20,
+        20
+      ],
+      "id": "outside",
+      "op": "sphere",
+      "radius_mm": 20
+    },
+    {
+      "at_mm": [
+        20,
+        20,
+        20
+      ],
+      "id": "inside",
+      "op": "sphere",
+      "radius_mm": 18
+    },
+    {
+      "at_mm": [
+        20,
+        20,
+        -1
+      ],
+      "height_mm": 4,
+      "id": "drain",
+      "op": "cylinder",
+      "radius_mm": 1.5
+    },
+    {
+      "from": "outside",
+      "id": "ball",
+      "op": "cut",
+      "tools": [
+        "inside",
+        "drain"
+      ]
+    }
+  ],
+  "units": "mm"
+}

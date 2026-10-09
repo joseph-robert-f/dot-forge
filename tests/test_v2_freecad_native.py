@@ -15,10 +15,16 @@ from printkit.conformance import conform
 from printkit.adapters import freecad, freecad_plan
 
 EXAMPLES = Path(__file__).parents[1] / 'examples/v2'
+FIELD = Path(__file__).parents[1] / 'evals/v2/cases'
 
 
 def example(name):
     return load_json(EXAMPLES / name / 'intent.json'), load_json(EXAMPLES / name / 'plan.json')
+
+
+def field_case(name, attempt='001'):
+    intent = 'intent.json' if attempt == '001' else f'intent-{attempt}.json'
+    return load_json(FIELD / name / intent), load_json(FIELD / name / f'plan-{attempt}.json')
 
 
 def rebind(intent, plan):
@@ -96,6 +102,127 @@ class FreeCADPlanNativeTests(unittest.TestCase):
                 reopened = load_json(run / 'native/reopen.json')
                 self.assertTrue(reopened['fresh_process'])
                 self.assertEqual(len(report['generation']['provenance']['script_sha256']), 64)
+
+    def test_field_cases_measure_bores_and_curved_trims(self):
+        """Regressions found by the field test in evals/v2."""
+        # An outer wall around a bore is a boss, never an unrequested hole.
+        report, _ = self.build(*field_case('tube'))
+        self.assert_conforms(report)
+        self.assertEqual(statuses(report)['unrequested_holes'], 'pass')
+        # A side hole trimmed by two curved faces survives the STEP round trip.
+        # It opens into the bore, not outside, so it is neither through nor blind.
+        report, run = self.build(*field_case('shaft-collar'))
+        self.assertTrue(load_json(run / 'native/reopen.json')['fresh_process'])
+        self.assertEqual(statuses(report)['feature:bore'], 'pass')
+        self.assertEqual(statuses(report)['feature:set-screw'], 'unknown')
+        self.assertEqual(statuses(report)['unrequested_holes'], 'pass')
+
+    def test_hole_end_kinds_build_and_catch_mistakes(self):
+        # Field-test repairs: each hole names what its ends open into.
+        for name in ('counterbored-spacer', 'shaft-collar'):
+            with self.subTest(name=name):
+                report, _ = self.build(*field_case(name, '002'))
+                self.assert_conforms(report)
+        report, _ = self.build(*field_case('hollow-ball', '004'))
+        self.assert_conforms(report)
+        # A set-screw hole that stops short of the bore ends in a floor, not a void.
+        intent, _ = field_case('shaft-collar', '002')
+        short = rebind(intent, load_json(FIELD / 'shaft-collar/mutants/short-tap.json'))
+        report, _ = self.build(intent, short)
+        self.assertEqual(statuses(report)['feature:set-screw'], 'fail')
+        # A counterbore 1 mm too shallow is still a shoulder, so the depth catches it.
+        intent, _ = field_case('counterbored-spacer', '002')
+        shallow = rebind(intent, load_json(FIELD / 'counterbored-spacer/mutants/counterbore-4-deep.json'))
+        report, _ = self.build(intent, shallow)
+        self.assertEqual(statuses(report)['feature:counterbore'], 'fail')
+
+    def test_face_area_upper_bound_catches_long_slot(self):
+        intent, plan = field_case('slotted-plate', '002')
+        report, _ = self.build(intent, plan)
+        self.assert_conforms(report)
+        long_slot = rebind(intent, load_json(FIELD / 'slotted-plate/mutants/long-slot.json'))
+        report, _ = self.build(intent, long_slot)
+        self.assertEqual(statuses(report)['feature:slot-wall-low'], 'fail')
+        self.assertEqual(statuses(report)['feature:slot-wall-high'], 'fail')
+
+    def test_partial_holes_measure_channels_slots_and_d_bores(self):
+        for name, attempt in (('cable-clip', '002'), ('slotted-plate', '003'), ('spur-gear', '003')):
+            with self.subTest(name=name):
+                report, _ = self.build(*field_case(name, attempt))
+                self.assert_conforms(report)
+        # No mouth: the channel is a full hole, so it is not the requested partial hole.
+        intent, _ = field_case('cable-clip', '002')
+        report, _ = self.build(intent, rebind(intent, load_json(FIELD / 'cable-clip/mutants/no-mouth.json')))
+        self.assertEqual(statuses(report)['feature:cable-channel'], 'fail')
+        self.assertEqual(statuses(report)['unrequested_holes'], 'needs_review')
+        intent, _ = field_case('spur-gear', '003')
+        report, _ = self.build(intent, rebind(intent, load_json(FIELD / 'spur-gear/mutants/round-bore.json')))
+        self.assertEqual(statuses(report)['feature:bore'], 'fail')
+
+    def test_preview_then_approved_build(self):
+        from printkit.preview import preview
+        intent, plan = example('mounting-plate')
+        draft = dict(intent, confirmation={'status': 'draft'})
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        shown = Path(tmp.name) / 'preview'
+        record = preview(draft, rebind(draft, plan), shown)
+        self.assertEqual(record['state'], 'conforms')
+        self.assertEqual(record['delivery'], 'not_for_delivery')
+        lines = load_json(shown / 'views/lines.json')['views']
+        self.assertEqual(set(lines), {'front', 'right', 'back', 'top', 'iso'})
+        # The top view looks down z: its outline spans the plate, 60 x 40.
+        top = [p for line in lines['top']['visible'] for p in line]
+        self.assertAlmostEqual(max(p[0] for p in top) - min(p[0] for p in top), 60, places=3)
+        self.assertAlmostEqual(max(p[1] for p in top) - min(p[1] for p in top), 40, places=3)
+        self.assertIn('screw-hole-1', (shown / 'views/sheet.svg').read_text())
+        self.assertIn('I will measure', (shown / 'preview.md').read_text())
+        # The person approves; the confirmed intent and rebound plan build with that preview.
+        report = build(intent, plan, Path(tmp.name) / 'final', approved_preview=shown)
+        self.assert_conforms(report)
+        self.assertTrue(report['approved_preview']['matches'])
+        self.assertNotIn('five_view_review', report['person_checks'])
+        changed = copy.deepcopy(plan)
+        changed['steps'][1]['radius_mm'] = 3
+        with self.assertRaises(ForgeError) as caught:
+            build(intent, changed, Path(tmp.name) / 'other', approved_preview=shown)
+        self.assertEqual(caught.exception.finding, 'preview_mismatch')
+
+    def test_end_kinds_need_full_proof(self):
+        # A void end must be clear across the whole aperture; a shoulder ring must be completely filled.
+        script = '''
+import importlib.util
+import sys
+spec = importlib.util.spec_from_file_location('scene', sys.argv[1])
+scene = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(scene)
+A, P = scene.App, scene.Part
+def ends(shape, radius):
+    low = [shape.BoundBox.XMin, shape.BoundBox.YMin, shape.BoundBox.ZMin]
+    return next(c['ends'] for c in scene.cylinders(shape, low) if abs(c['radius_mm'] - radius) < 1e-6)
+block = P.makeBox(20, 20, 10)
+# A hole that opens into a closed pocket inside the part.
+pocket = block.cut([P.makeCylinder(2, 6, A.Vector(10, 10, -1)), P.makeBox(12, 12, 3, A.Vector(4, 4, 5))])
+assert ends(pocket, 2) == ['outside', 'void'], ends(pocket, 2)
+# A thin rib just past the end covers part of the aperture: not proven void.
+ribbed = pocket.fuse(P.makeBox(12, 1, 0.2, A.Vector(4, 10.5, 5.1))).removeSplitter()
+assert ends(ribbed, 2) == ['outside', None], ends(ribbed, 2)
+# A counterbore over a clearance hole has a shoulder.
+cbore = block.cut([P.makeCylinder(2, 12, A.Vector(10, 10, -1)), P.makeCylinder(4, 6, A.Vector(10, 10, 5))])
+assert ends(cbore, 4) == ['shoulder', 'outside'], ends(cbore, 4)
+# A notch in the shoulder ring: not completely filled, so not a shoulder.
+notched = cbore.cut(P.makeBox(1.5, 1, 1, A.Vector(12.5, 9.5, 4.5))).removeSplitter()
+assert ends(notched, 4) == [None, 'outside'], ends(notched, 4)
+'''
+        with tempfile.TemporaryDirectory() as tmp:
+            freecad.run_process([freecad.PYTHON, '-I', '-B', '-c', script, freecad_plan.SCRIPT],
+                                tmp, Path(tmp) / 'end-kind-fixtures.log', timeout=60)
+
+    def test_sealed_cavity_blocks(self):
+        report, run = self.build(*field_case('hollow-ball'))
+        self.assertEqual(report['intent_state'], 'blocked')
+        self.assertEqual(statuses(report)['native_solid'], 'fail')
+        self.assertEqual(load_json(run / 'native/measure.json')['shell_count'], 2)
 
     def test_stepped_block_matches_v1_measurements(self):
         intent, plan = example('stepped-block')

@@ -1,0 +1,54 @@
+{
+  "ask": "A clip that screws to the underside of my desk and holds one 6 mm cable. I'll use a 3.5 mm wood screw.",
+  "confirmation": {
+    "by": "user",
+    "note": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions.",
+    "status": "confirmed"
+  },
+  "envelope": {
+    "size_mm": [
+      24,
+      12,
+      10
+    ],
+    "tolerance_mm": 0.05
+  },
+  "features": [
+    {
+      "axis": "z",
+      "depth": "through",
+      "diameter_mm": 4,
+      "id": "screw",
+      "kind": "hole",
+      "position_mm": [
+        6,
+        6
+      ],
+      "source": "3.5 mm wood screw",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "desk-face",
+      "kind": "planar_face",
+      "min_area_mm2": 260,
+      "normal": "+z",
+      "offset": "max",
+      "source": "screws to the underside of my desk",
+      "tolerance_mm": 0.05
+    },
+    {
+      "id": "cable-channel",
+      "kind": "note",
+      "source": "holds one 6 mm cable",
+      "text": "A 6.5 mm channel along y holds the 6 mm cable. A 5 mm opening at the bottom lets the cable snap in."
+    }
+  ],
+  "schema_version": "intent.v1",
+  "solid_count": 1,
+  "units": "mm",
+  "unknowns": [
+    "countersink for the screw head",
+    "how tight the cable should be held",
+    "printer and material"
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "intent_sha256": "7b142011e0ac3044c3db13558af46e9363302bed529744728912b8b2f717a6e3",
+  "result": "spacer",
+  "schema_version": "plan.v1",
+  "steps": [
+    {
+      "at_mm": [
+        8,
+        8,
+        0
+      ],
+      "height_mm": 12,
+      "id": "round",
+      "op": "cylinder",
+      "radius_mm": 8
+    },
+    {
+      "at_mm": [
+        8,
+        8,
+        -1
+      ],
+      "height_mm": 14,
+      "id": "bore",
+      "op": "cylinder",
+      "radius_mm": 2.75
+    },
+    {
+      "at_mm": [
+        8,
+        8,
+        8
+      ],
+      "height_mm": 6,
+      "id": "cbore",
+      "op": "cylinder",
+      "radius_mm": 4.5
+    },
+    {
+      "from": "round",
+      "id": "spacer",
+      "op": "cut",
+      "tools": [
+        "bore",
+        "cbore"
+      ]
+    }
+  ],
+  "units": "mm"
+}

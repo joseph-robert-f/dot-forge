@@ -1,0 +1,38 @@
+{
+  "intent_sha256": "12e6d49e38fad93c8909eddc621817bceae66ab77e93024c4f6e09bdcd43ca26",
+  "result": "tube",
+  "schema_version": "plan.v1",
+  "steps": [
+    {
+      "at_mm": [
+        12.5,
+        12.5,
+        0
+      ],
+      "height_mm": 50,
+      "id": "outside",
+      "op": "cylinder",
+      "radius_mm": 12.5
+    },
+    {
+      "at_mm": [
+        12.5,
+        12.5,
+        -1
+      ],
+      "height_mm": 52,
+      "id": "inside",
+      "op": "cylinder",
+      "radius_mm": 10.5
+    },
+    {
+      "from": "outside",
+      "id": "tube",
+      "op": "cut",
+      "tools": [
+        "inside"
+      ]
+    }
+  ],
+  "units": "mm"
+}

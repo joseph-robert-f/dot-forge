@@ -15,13 +15,19 @@ AXES = ("x", "y", "z")
 NORMALS = ("+x", "-x", "+y", "-y", "+z", "-z")
 ID = re.compile(r"^[a-z][a-z0-9-]{0,47}$")
 MAX_FEATURES = 64
+# What a hole end opens into. "void" is empty space inside the part, such as a
+# bore or cavity. "shoulder" is a filled step around a narrower coaxial hole.
+HOLE_ENDS = ("outside", "floor", "void", "shoulder")
 MAX_TEXT = 4000
 FIELDS = {"schema_version", "ask", "units", "envelope", "solid_count", "features",
           "unknowns", "confirmation"}
 OPTIONAL = {"volume_mm3"}
 FEATURE_FIELDS = {
     "hole": ({"id", "kind", "axis", "diameter_mm", "position_mm", "depth", "tolerance_mm"}, {"source"}),
-    "planar_face": ({"id", "kind", "normal", "offset", "min_area_mm2", "tolerance_mm"}, {"source"}),
+    "planar_face": ({"id", "kind", "normal", "offset", "min_area_mm2", "tolerance_mm"}, {"source", "max_area_mm2"}),
+    # A cylindrical void that does not go all the way around: a channel, a slot end, a D-bore.
+    "partial_hole": ({"id", "kind", "axis", "diameter_mm", "position_mm", "min_arc_deg", "tolerance_mm"},
+                     {"source", "max_arc_deg", "length_mm"}),
     "note": ({"id", "kind", "text"}, {"source"}),
 }
 
@@ -69,7 +75,7 @@ def check_feature(feature, envelope, index):
         text(feature["text"], f"{name}.text", 500)
         return
     number(feature["tolerance_mm"], f"{name}.tolerance_mm", 0.001, 5)
-    if feature["kind"] == "hole":
+    if feature["kind"] in ("hole", "partial_hole"):
         if feature["axis"] not in AXES:
             raise ForgeError(f"{name}.axis must be one of {AXES}")
         number(feature["diameter_mm"], f"{name}.diameter_mm", 0, 500, low_open=True)
@@ -79,8 +85,28 @@ def check_feature(feature, envelope, index):
                              "from the envelope minimum corner")
         for value, axis in zip(position, plane_axes(feature["axis"])):
             number(value, f"{name}.position_mm.{axis}", 0, size[axis])
+        if feature["kind"] == "partial_hole":
+            number(feature["min_arc_deg"], f"{name}.min_arc_deg", 0, 360, low_open=True)
+            if feature["min_arc_deg"] == 360:
+                raise ForgeError(f"{name}.min_arc_deg must be less than 360; a full circle is a hole")
+            if "max_arc_deg" in feature:
+                number(feature["max_arc_deg"], f"{name}.max_arc_deg", feature["min_arc_deg"], 360)
+                if feature["max_arc_deg"] == 360:
+                    raise ForgeError(f"{name}.max_arc_deg must be less than 360; a full circle is a hole")
+            if "length_mm" in feature:
+                number(feature["length_mm"], f"{name}.length_mm", 0, size[feature["axis"]], low_open=True)
+            return
         depth = feature["depth"]
-        if depth != "through":
+        if isinstance(depth, dict) and "ends" in depth:
+            exact_fields(depth, {"ends"}, {"depth_mm"}, f"{name}.depth")
+            exact_fields(depth["ends"], {"min", "max"}, set(), f"{name}.depth.ends")
+            if any(end not in HOLE_ENDS for end in depth["ends"].values()):
+                raise ForgeError(f"{name}.depth.ends values must be one of {HOLE_ENDS}")
+            if "outside" not in depth["ends"].values():
+                raise ForgeError(f"{name}.depth.ends must open to the outside at one end or more")
+            if "depth_mm" in depth:
+                number(depth["depth_mm"], f"{name}.depth.depth_mm", 0, size[feature["axis"]], low_open=True)
+        elif depth != "through":
             exact_fields(depth, {"depth_mm", "open_end"}, set(), f"{name}.depth")
             number(depth["depth_mm"], f"{name}.depth.depth_mm", 0, size[feature["axis"]], low_open=True)
             if depth["open_end"] not in ("min", "max"):
@@ -92,6 +118,9 @@ def check_feature(feature, envelope, index):
         if offset not in ("min", "max"):
             number(offset, f"{name}.offset", 0, size[axis])
         number(feature["min_area_mm2"], f"{name}.min_area_mm2", 0, 250000, low_open=True)
+        if "max_area_mm2" in feature:
+            # An upper bound catches a face that is too big, such as an overlong slot wall.
+            number(feature["max_area_mm2"], f"{name}.max_area_mm2", feature["min_area_mm2"], 250000)
 
 
 def check_intent(intent, *, require_confirmed=False):

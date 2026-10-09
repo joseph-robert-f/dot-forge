@@ -64,3 +64,27 @@ def generate(run_dir, discover=None):
                            'native_module_sha256': capability['native_module_sha256'],
                            'native_library_sha256': capability['native_library_sha256'],
                            'script_sha256': sha256(SCRIPT)}}
+
+
+def views(run_dir):
+    """Five exact projections of the exported solid; the run must already hold a build."""
+    run = Path(run_dir).resolve()
+    if safe_file(run, 'views').exists():
+        raise AdapterError('Refusing to overwrite existing preview views')
+    safe_file(run, 'views').mkdir()
+    _run('views', run)
+    lines = load_json(run / 'views/lines.json')
+    if lines.get('status') != 'pass' or set(lines.get('views', {})) != {'front', 'right', 'back', 'top', 'iso'}:
+        raise AdapterError('FreeCAD did not produce all five preview views')
+    return lines['views']
+
+
+def raster(run_dir):
+    """PNG of views/sheet.svg when FreeCAD's Qt can render it. False means SVG only."""
+    run = Path(run_dir).resolve()
+    try:
+        _run('raster', run)
+    except ForgeError:
+        return False
+    result = load_json(run / 'views/raster.json') if (run / 'views/raster.json').is_file() else {}
+    return result.get('status') == 'pass' and (run / 'views/sheet.png').is_file()

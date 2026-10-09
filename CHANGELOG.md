@@ -11,6 +11,19 @@
 - A plan step that FreeCAD cannot build exits 4 with `plan_step_failed`. The report names the step and the FreeCAD error.
 - Add conformance checks for envelope, volume, axis-aligned holes (through or blind) and flat faces. Unrequested holes go to a person.
 - Add two examples: the stepped block written as a plan, and an open-ended mounting plate.
+- Add a field test (`evals/v2`) with thirteen new requests and eleven wrong plans. It found five measurer faults:
+  - Envelopes and positions use the exact bounding box. The plain box included trim tolerance and failed the STEP round trip of a side hole.
+  - Hole spans use the exact face extent, not the trim-curve parameter range.
+  - A cylinder is a void when its face normal points toward its axis. Before, the outer wall of a tube was reported as a hole.
+  - A blind counterbore over a clearance hole read as through. The full-aperture end checks now make that end unknown.
+  - `native_solid` requires one shell for each solid, so a sealed cavity blocks. The STEP round trip compares shell counts.
+- A hole can name what each end opens into: `{"ends": {"min": ..., "max": ...}}` with `outside`, `floor`, `void` or `shoulder`. This expresses counterbores, set-screw holes into a bore and drain holes into a cavity. Each end must be proven over the full aperture, or it is unknown. `"through"` and blind depths do not change. The field test's spacer, collar and drained ball now conform, and their wrong plans are caught.
+- `planar_face` takes an optional `max_area_mm2`. It must not be less than `min_area_mm2`. The field test's overlong slot is now caught.
+- Add the `partial_hole` intent feature for channels, slot ends and D-bores: axis, diameter, position, an arc range in degrees and an optional length. The measurer takes the arc from an exact section at mid-length. The field test's cable channel, slot ends and D-bore are now measured, and three more wrong plans are caught.
+- Add `printkit printability` for any STL, such as a character or a figure. It reports a closed mesh, loose parts, bed size, flat base, stability, overhangs and sampled thin parts. It never judges likeness and never claims print readiness. See `docs/printability.md`.
+- The README leads with functional parts. The publishing guide covers characters and designs that belong to someone else.
+- Add `printkit preview`: a draft build with five exact line views (front, right, back, top, iso) from FreeCAD's hidden-line projection, measured overall sizes, labelled holes, and a plain summary of what will be measured, judged and not assumed. PNG through FreeCAD's Qt when present, SVG otherwise. Never a deliverable.
+- `build --approved-preview` binds the build to the preview the user approved. It refuses a different intent or plan or changed preview files, and records whether the final solid matches the preview.
 - v1 requests, generators and checks do not change. A report with `overall_state: blocked` now always exits 4.
 
 ## 1.02

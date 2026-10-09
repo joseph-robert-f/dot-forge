@@ -1,0 +1,36 @@
+{
+  "intent_sha256": "4e2eaf80309bacab9a1f686e5f3f82ff7c474a1e4ab196d6fd3f55a64eea8db7",
+  "result": "ball",
+  "schema_version": "plan.v1",
+  "steps": [
+    {
+      "at_mm": [
+        20,
+        20,
+        20
+      ],
+      "id": "outside",
+      "op": "sphere",
+      "radius_mm": 20
+    },
+    {
+      "at_mm": [
+        20,
+        20,
+        20
+      ],
+      "id": "inside",
+      "op": "sphere",
+      "radius_mm": 18
+    },
+    {
+      "from": "outside",
+      "id": "ball",
+      "op": "cut",
+      "tools": [
+        "inside"
+      ]
+    }
+  ],
+  "units": "mm"
+}

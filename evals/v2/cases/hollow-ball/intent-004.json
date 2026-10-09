@@ -1,0 +1,52 @@
+{
+  "ask": "A hollow ball, 40 mm across, with 2 mm walls.",
+  "confirmation": {
+    "by": "user",
+    "note": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions. Revision: a sealed cavity is not supported. User accepted a 3 mm drain hole at the bottom. Attempt 3: the drain trims the bottom, so the height is 39.94 mm. Attempt 4: the drain opens into the cavity, not to the outside at both ends.",
+    "status": "confirmed"
+  },
+  "envelope": {
+    "size_mm": [
+      40,
+      40,
+      39.94
+    ],
+    "tolerance_mm": 0.05
+  },
+  "features": [
+    {
+      "id": "hollow",
+      "kind": "note",
+      "source": "hollow ... with 2 mm walls",
+      "text": "Hollow inside, with a 2 mm wall."
+    },
+    {
+      "axis": "z",
+      "depth": {
+        "ends": {
+          "max": "void",
+          "min": "outside"
+        }
+      },
+      "diameter_mm": 3,
+      "id": "drain",
+      "kind": "hole",
+      "position_mm": [
+        20,
+        20
+      ],
+      "source": "user answer: add a 3 mm drain hole at the bottom",
+      "tolerance_mm": 0.05
+    }
+  ],
+  "schema_version": "intent.v1",
+  "solid_count": 1,
+  "units": "mm",
+  "unknowns": [
+    "printer and material"
+  ],
+  "volume_mm3": {
+    "max": 9110,
+    "min": 9050
+  }
+}

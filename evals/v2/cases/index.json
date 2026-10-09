@@ -1,0 +1,183 @@
+[
+  {
+    "case": "l-bracket",
+    "ask": "I need an L bracket to screw a shelf support into a corner. Both legs 30 mm long, 20 mm wide, 3 mm thick. One 4.5 mm screw hole in the middle of each leg.",
+    "questions": [
+      "Middle of the whole leg (15 mm) or middle of the flat part past the other leg (16.5 mm)? Simulated answer: the flat part."
+    ],
+    "measured_checks": 6,
+    "person_checks": 0,
+    "unknowns": 4,
+    "status": "confirmed",
+    "mutants": {
+      "hole-mid-whole-leg": "Wall hole at the middle of the whole leg (15 mm), not the flat part."
+    }
+  },
+  {
+    "case": "counterbored-spacer",
+    "ask": "Spacer for an M5 bolt: 16 mm round, 12 mm tall, with a 5.5 mm clearance hole. Counterbore it from the top, 9 mm wide and 5 mm deep, so the bolt head sits below the surface.",
+    "questions": [],
+    "measured_checks": 6,
+    "person_checks": 0,
+    "unknowns": 2,
+    "status": "confirmed",
+    "revision": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions. Revision: the counterbore floor is a shoulder around the clearance hole, not a solid floor.",
+    "mutants": {
+      "counterbore-4-deep": "Counterbore 4 mm deep, not 5.",
+      "counterbore-from-bottom": "Counterbore cut from the bottom."
+    }
+  },
+  {
+    "case": "cable-clip",
+    "ask": "A clip that screws to the underside of my desk and holds one 6 mm cable. I'll use a 3.5 mm wood screw.",
+    "questions": [
+      "Clip size is not stated. Proposed 24 x 12 x 10 mm. Simulated answer: yes.",
+      "Clearance or pilot hole for the 3.5 mm screw? Simulated answer: 4 mm clearance."
+    ],
+    "measured_checks": 4,
+    "person_checks": 1,
+    "unknowns": 3,
+    "status": "confirmed",
+    "revision": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions. Revision: the cable channel is measured as a partial hole: 6.5 mm across, open at the bottom through a 5 mm mouth, so about 259 degrees.",
+    "mutants": {
+      "no-channel": "Cable channel and its opening left out.",
+      "no-mouth": "Channel cut without the opening, so the cable cannot snap in."
+    }
+  },
+  {
+    "case": "box-lid",
+    "ask": "Lid for a project box. The opening is 80 x 50 mm inside and the walls are 2 mm thick. Make the lid 2 mm thick with a lip that drops 4 mm into the opening so it press-fits.",
+    "questions": [
+      "Clearance per side for the press fit? Simulated answer: 0.15 mm.",
+      "Lip wall thickness? Simulated answer: 1.6 mm."
+    ],
+    "measured_checks": 8,
+    "person_checks": 1,
+    "unknowns": 2,
+    "status": "confirmed",
+    "mutants": {
+      "lip-no-clearance": "Lip sized to the opening, 80 x 50, with no clearance."
+    }
+  },
+  {
+    "case": "phone-stand",
+    "ask": "A simple phone stand. The phone leans back at about 60 degrees, there's a lip at the front so it doesn't slide off, and it needs to fit a phone in a case, so around 80 mm wide.",
+    "questions": [
+      "Depth and height are not stated. Proposed 75 mm deep with an 80 mm support face. Simulated answer: yes."
+    ],
+    "measured_checks": 5,
+    "person_checks": 2,
+    "unknowns": 4,
+    "status": "confirmed",
+    "mutants": {
+      "lean-70": "Support face at 70 degrees, not 60."
+    }
+  },
+  {
+    "case": "tube",
+    "ask": "A 50 mm long tube, 25 mm outside diameter, 21 mm inside.",
+    "questions": [],
+    "measured_checks": 6,
+    "person_checks": 0,
+    "unknowns": 1,
+    "status": "confirmed",
+    "mutants": {
+      "thin-wall": "Inside diameter 22, not 21."
+    }
+  },
+  {
+    "case": "shaft-collar",
+    "ask": "Shaft collar for an 8 mm rod: 20 mm outside, 10 mm tall, with a hole in the side for an M3 set screw going into the bore.",
+    "questions": [
+      "Bore clearance? Simulated answer: 8.2 mm.",
+      "Tap the plastic, or use a heat-set insert? Simulated answer: tap a 2.5 mm hole."
+    ],
+    "measured_checks": 5,
+    "person_checks": 0,
+    "unknowns": 2,
+    "status": "confirmed",
+    "revision": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions. Revision: the set-screw hole opens into the bore, not to the outside at both ends.",
+    "mutants": {
+      "short-tap": "Set-screw hole stops short of the bore."
+    }
+  },
+  {
+    "case": "slotted-plate",
+    "ask": "Mounting plate 50 x 20 x 3 with an adjustment slot in the middle, 5 mm wide and 20 mm long, and a 4 mm hole 6 mm in from each end.",
+    "questions": [],
+    "measured_checks": 6,
+    "person_checks": 1,
+    "unknowns": 2,
+    "status": "confirmed",
+    "revision": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions. Revision: the slot walls are 15 mm of flat between the round ends (45 mm2 each), so they get a maximum area too. A longer slot now fails. Attempt 3: the round slot ends are measured as two half holes.",
+    "mutants": {
+      "long-slot": "Slot 25 mm long, not 20."
+    }
+  },
+  {
+    "case": "shelf-bracket",
+    "ask": "Shelf bracket: 60 mm down the wall, 60 mm under the shelf, 25 mm wide, 4 mm thick, with a triangle brace between the legs. Two 4 mm screw holes in each leg.",
+    "questions": [
+      "The brace fills the middle of both legs. Put the holes below and beyond it? Simulated answer: yes."
+    ],
+    "measured_checks": 8,
+    "person_checks": 1,
+    "unknowns": 3,
+    "status": "confirmed",
+    "mutants": {
+      "no-brace": "Brace left out of the profile.",
+      "shelf-holes-centred": "Shelf holes moved to the centre line."
+    }
+  },
+  {
+    "case": "sd-card-box",
+    "ask": "make me a little box for my SD cards",
+    "questions": [
+      "How many cards?",
+      "Full-size SD, microSD, or both?",
+      "Lid, hinge, or open tray?",
+      "Any size limit, for example a drawer?"
+    ],
+    "measured_checks": 2,
+    "person_checks": 1,
+    "unknowns": 5,
+    "status": "draft"
+  },
+  {
+    "case": "spur-gear",
+    "ask": "A 20 tooth spur gear, module 1, 6 mm thick, with a 5 mm D-shaft bore.",
+    "questions": [
+      "Pressure angle? Simulated answer: 20 degrees.",
+      "Width across the flat? Simulated answer: 4.5 mm."
+    ],
+    "measured_checks": 4,
+    "person_checks": 2,
+    "unknowns": 3,
+    "status": "confirmed",
+    "revision": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions. Revision: a D-bore is not a full cylinder, so it cannot be a measured hole. Moved to a note. Attempt 3: the D-bore is measured as a partial hole (286 degrees of a 5 mm circle) and the flat as a face 4.5 mm across from the far wall.",
+    "mutants": {
+      "round-bore": "Plain round bore, no flat for the D-shaft."
+    }
+  },
+  {
+    "case": "hollow-ball",
+    "ask": "A hollow ball, 40 mm across, with 2 mm walls.",
+    "questions": [],
+    "measured_checks": 3,
+    "person_checks": 1,
+    "unknowns": 2,
+    "status": "confirmed",
+    "revision": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions. Revision: a sealed cavity is not supported. User accepted a 3 mm drain hole at the bottom. Attempt 3: the drain trims the bottom, so the height is 39.94 mm. Attempt 4: the drain opens into the cavity, not to the outside at both ends."
+  },
+  {
+    "case": "bottle-cap",
+    "ask": "A cap that screws onto a standard 28 mm soda bottle.",
+    "questions": [
+      "Dot Forge has no thread or helix operation, and cannot measure a thread. Make a plain press-on cap instead, or stop?"
+    ],
+    "measured_checks": 2,
+    "person_checks": 1,
+    "unknowns": 3,
+    "status": "draft"
+  }
+]
