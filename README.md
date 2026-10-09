@@ -1,14 +1,32 @@
 # Dot Forge
 
-**Make a small 3D model with your dot. Keep the model, the source, and the check results together.**
+![Dot Forge overview sheet: three rendered models, labelled as candidates that are not print-ready.](docs/media/hero.png)
 
-Dot Forge gives your dot instructions and three reviewed model generators. A generator makes a fixed type of model from dimensions that you supply. Your dot runs the tools on its Linux cloud computer. You do not need to operate Blender or FreeCAD yourself.
+**Make a small 3D model with your Dot. Keep the model, the source, and the check results together.**
+
+Dot Forge gives your Dot instructions and three reviewed model generators. A generator makes a fixed type of model from dimensions that you supply. Your Dot runs the tools on its Linux cloud computer. You do not need to operate Blender or FreeCAD yourself.
 
 Use Dot Forge to make a calibration block, a flat robot mascot, or a stepped solid with a through-hole. Each result is a **3D-printing candidate**: a model that still needs printing and physical checks. A successful geometry check does not mean that the part is ready to print or safe to use.
 
 This repository contains source and instructions. It does not install applications. It cannot turn an arbitrary description into any type of model.
 
-[Start with your dot](#start-with-your-dot) · [See the examples](#supported-models) · [Run the commands](#run-from-a-source-checkout) · [Understand the checks](#what-the-checks-establish)
+[Start with your Dot](#start-with-your-dot) · [See the examples](#supported-models) · [Run the commands](#run-from-a-source-checkout) · [Understand the checks](#what-the-checks-establish)
+
+## See it in action
+
+![Animated walkthrough of check-request, run, inspect, bundle, and verify-bundle for the calibration block example.](docs/media/demo.gif)
+
+This walkthrough is an illustration of the documented workflow, condensed for length. It is not a live recording of a run. See the [MP4 version](docs/media/demo.mp4). Run the commands below on your Dot's computer to get real evidence.
+
+![Process sheet: six steps from request.json to verify-bundle. Printing checks stay open.](docs/media/workflow.png)
+
+![Verification sheet: four check layers. Failed, skipped, unavailable and inconclusive checks never count as a pass.](docs/media/checks.png)
+
+![Model families sheet: the three supported generators with example sizes.](docs/media/families.png)
+
+![Deliverables sheet: the files in a run directory and the delivery sequence.](docs/media/bundle.png)
+
+The sheets are illustrations. Only the model views come from real runs: they are the STL renders in `docs/images`. The source is in [docs/media/src](docs/media/src). To regenerate the media, run `node docs/media/render-media.mjs`. It needs Node, Playwright, ffmpeg, and network access to Google Fonts.
 
 ## Supported models
 
@@ -28,9 +46,9 @@ The default profile is `dot-native`. It supports these three model families. Eac
 
 Choose Blender for the block or flat mascot. Choose FreeCAD for the supported stepped solid. A different part, assembly, or organic character needs a separately reviewed generator. Keep changes within the [request contract](schemas/model-request.v1.json) and the selected generator's supported parameters.
 
-## Start with your dot
+## Start with your Dot
 
-Give your dot this repository URL: <https://github.com/joseph-robert-f/dot-forge>. Then copy this instruction:
+Give your Dot this repository URL: <https://github.com/joseph-robert-f/dot-forge>. Then copy this instruction:
 
 > Use Dot Forge on your Linux cloud computer. Read README.md and AGENTS.md. Check the installed applications. Run the capability doctor and all three bundled smoke examples. Do not download or install software without permission. Help me choose a supported model family. Ask for missing dimensions and intended-use details that affect the result. Keep unknown printer and material information unknown. Make a new candidate in a new run directory. Check the native model and the exported STL separately. Review the front, side, back, top, and oblique views of the exported STL. Show me the findings and the checks that remain. Give me the editable model, STL, previews, and evidence in a durable bundle. Verify the bundle after retrieval. Follow your normal permission rules for setup, sharing, and printer access. Do not call the model print-ready without evidence.
 
@@ -39,13 +57,13 @@ Add one request, for example:
 - “Make the supplied flat robot mascot, 40 mm wide, 12 mm deep, and 60 mm high.”
 - “Make the supplied stepped part, 30 mm wide, 24 mm deep, and 18 mm high. Ask what I intend to use it for.”
 
-Your dot must explain when a request is outside the supported scope. It must not substitute an unsupported generator. See the [assistant workflow](docs/assistant-workflow.md) for the full procedure.
+Your Dot must explain when a request is outside the supported scope. It must not substitute an unsupported generator. See the [assistant workflow](docs/assistant-workflow.md) for the full procedure.
 
 ## Prerequisites
 
 The documented native profile uses:
 
-- Linux x86_64 on the dot cloud computer
+- Linux x86_64 on the Dot cloud computer
 - Python 3.11 or later for the command-line workflow
 - Blender 4.3.2 for the two mesh generators and all STL preview renders
 - FreeCAD 1.0.0 with Open CASCADE 7.8.1 for the stepped solid
@@ -57,7 +75,7 @@ Follow [runtime setup](docs/runtime-setup.md) if an application is missing or ca
 
 ## Run from a source checkout
 
-These commands are for your dot or a contributor. Run them from the repository root. Use a new output directory for each attempt.
+These commands are for your Dot or a contributor. Run them from the repository root. Use a new output directory for each attempt.
 
 ### 1. Check the source and the computer
 
@@ -126,7 +144,7 @@ A native solid can pass while its exported mesh fails. A mesh can pass geometry 
 
 ### Release limits
 
-This regular release is **ready for the three supported Linux workflows**. It does not certify every parameter combination, printer, material, or physical use. Each dot must run fresh smoke acceptance on its own computer.
+This regular release is **ready for the three supported Linux workflows**. It does not certify every parameter combination, printer, material, or physical use. Each Dot must run fresh smoke acceptance on its own computer.
 
 The optional Lane A adapter requires Blender 4.5.12 LTS. Its exact-runtime acceptance remains blocked because official retrieval returned HTTP 403. Lane A is not required for the default `dot-native` profile. The original architecture MVP remains incomplete because its Lane A requirement is unchanged. See the [acceptance map](docs/acceptance.md).
 

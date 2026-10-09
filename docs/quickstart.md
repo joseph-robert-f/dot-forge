@@ -70,7 +70,7 @@ See [CLI reference](cli.md) for flags and exit codes.
 
 ## Dimensioned FreeCAD workflow
 
-For the reviewed stepped block with a through-hole, use the separate [FreeCAD workflow](freecad-workflow.md). On the dot’s Linux computer, first check actual capabilities:
+For the reviewed stepped block with a through-hole, use the separate [FreeCAD workflow](freecad-workflow.md). On the Dot’s Linux computer, first check actual capabilities:
 
 ```sh
 python -m printkit doctor --backend freecad --json
@@ -79,4 +79,4 @@ python -m printkit check-request examples/freecad-stepped-part/request.json
 python -m printkit run --request examples/freecad-stepped-part/request.json --output build/freecad-001
 ```
 
-The full workflow requires the documented FreeCAD native profile and Blender preview runtime. It supplies editable FCStd, STEP exchange and STL, with native/STEP round-trip checks and independent exported-mesh feature/volume gates. Exit 5 still means manual/printing review remains. Capability on one dot’s computer does not establish availability on another; no application is downloaded during these commands.
+The full workflow requires the documented FreeCAD native profile and Blender preview runtime. It supplies editable FCStd, STEP exchange and STL, with native/STEP round-trip checks and independent exported-mesh feature/volume gates. Exit 5 still means manual/printing review remains. Capability on one Dot’s computer does not establish availability on another; no application is downloaded during these commands.

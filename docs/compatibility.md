@@ -1,6 +1,6 @@
 # Linux compatibility
 
-Dot Forge is source and premade modeling instructions for a dot's **Linux x86_64 cloud computer**. It is not a desktop application, cross-platform installer or bundled modeling runtime. Each dot must verify its actual computer before use; applications available on one dot are not guaranteed on another.
+Dot Forge is source and premade modeling instructions for a Dot's **Linux x86_64 cloud computer**. It is not a desktop application, cross-platform installer or bundled modeling runtime. Each Dot must verify its actual computer before use; applications available on one Dot are not guaranteed on another.
 
 | Route | Required native runtime | Bounded scope | Acceptance status |
 | --- | --- | --- | --- |
@@ -13,7 +13,7 @@ Dot Forge is source and premade modeling instructions for a dot's **Linux x86_64
 
 The FreeCAD route uses the installed native FreeCAD Python modules through system Python. An installed graphical app or a `freecadcmd` version string alone does not prove those modules are usable. The complete preview workflow also needs the specified Blender runtime to render the exported STL. See [FreeCAD workflow](freecad-workflow.md).
 
-Run `doctor --json --all-smoke NEW_DIRECTORY` for per-dot acceptance of all three default families. Runtime discovery and a real generation/export/reopen/validation/render smoke run are different checks. Inspect the report for the exact source, request and runtime tested. Runtime hashes identify observed files; they do not establish vendor archive verification or compatibility with another installation.
+Run `doctor --json --all-smoke NEW_DIRECTORY` for per-Dot acceptance of all three default families. Runtime discovery and a real generation/export/reopen/validation/render smoke run are different checks. Inspect the report for the exact source, request and runtime tested. Runtime hashes identify observed files; they do not establish vendor archive verification or compatibility with another installation.
 
 No modeling command silently downloads or upgrades applications. Missing prerequisites should produce a clear blocker and an authorized setup step. Geometry validation, visual approval, named slicer evidence and physical results remain separate even when all native applications are present.
 

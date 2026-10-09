@@ -1,8 +1,8 @@
 # FreeCAD: a dimensioned stepped part
 
-Use this workflow on a dot's Linux cloud computer for the reviewed `freecad-stepped-block` family. The native profile is **FreeCAD 1.0.0 / Open CASCADE 7.8.1**, with **Blender 4.3.2** rendering the actual exported STL. Applications are separately installed prerequisites. The bounded workflow is verified on the documented profile; see [verification evidence](freecad-verification.md). Run fresh smoke acceptance on every other dot’s computer.
+Use this workflow on a Dot's Linux cloud computer for the reviewed `freecad-stepped-block` family. The native profile is **FreeCAD 1.0.0 / Open CASCADE 7.8.1**, with **Blender 4.3.2** rendering the actual exported STL. Applications are separately installed prerequisites. The bounded workflow is verified on the documented profile; see [verification evidence](freecad-verification.md). Run fresh smoke acceptance on every other Dot’s computer.
 
-## Copy this to your dot
+## Copy this to your Dot
 
 > Use Dot Forge's FreeCAD workflow on your Linux cloud computer to make the stepped part with its vertical through-hole. Read the repository instructions, inspect your installed applications, and run the FreeCAD doctor and a fresh smoke example. Do not silently download anything. Ask only for missing overall dimensions in millimeters and intended-use details that affect the result. Generate a fresh candidate, check the native solid and STEP round trip, independently validate the exported STL, and review front, side, back, top and oblique views. Explain all remaining printer, slicer and physical checks. Give me FCStd, STEP, STL, previews and evidence in a verified durable bundle.
 
@@ -17,7 +17,7 @@ Width, depth and overall height are each **5–100 mm**, inclusive. The request 
 
 The topology and proportions are fixed. This is a dimensioned CAD-solid family, not arbitrary mechanical design, general text-to-CAD or an assembly workflow. Use the Blender family for the supported flat robot mascot. A different functional part needs a separately reviewed generator and checks appropriate to its use.
 
-## Commands for the dot
+## Commands for the Dot
 
 From a reviewed repository checkout on the Linux computer:
 
