@@ -5,7 +5,7 @@
 - Add the v2 intent spec (`schemas/intent.v1.json`). It records the user's ask as measurable checks, notes for a person, and unknowns. A build needs a confirmed intent.
 - Add the v2 build plan (`schemas/plan.v1.json`). It is a declarative FreeCAD feature tree with 16 operations, bound to one intent by hash.
 - Add `printkit check-intent`, `check-plan`, `build` and `conform`.
-- Add a fixed FreeCAD plan interpreter and B-rep measurer. Its native tests passed on a Dot's exact FreeCAD 1.0.0 / OCC 7.8.1 profile at commit `f9aba35`, and pass in a matching Debian 13 container for later commits.
+- Add a fixed FreeCAD plan interpreter and B-rep measurer. Its native tests pass on a Dot's exact FreeCAD 1.0.0 / OCC 7.8.1 profile (last run at commit `09128ea`, including the knob example).
 - The STEP round trip compares counts, sizes and every cylinder, and allows 1e-4 relative error on integrated volume and area. The 1e-8 limit from v1 rejected a correct revolved part. OCC integration error on B-spline-trimmed faces is about 1e-5.
 - Add a third example: a knob with a blind shaft hole and grip notches.
 - A plan step that FreeCAD cannot build exits 4 with `plan_step_failed`. The report names the step and the FreeCAD error.
