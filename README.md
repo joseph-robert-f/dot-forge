@@ -14,7 +14,7 @@ This repository contains source and instructions. It does not install applicatio
 
 ![Animated walkthrough of check-request, run, inspect, bundle, and verify-bundle for the calibration block example.](docs/media/demo.gif)
 
-This walkthrough is an illustration of the documented workflow, condensed for length. It is not a live recording of a run. See the [MP4 version](docs/media/demo.mp4). Run the commands below on your dot's computer to get real evidence.
+This walkthrough is an illustration of the documented workflow, condensed for length. It is not a live recording of a run. See the [MP4 version](docs/media/demo.mp4). Run the commands below on your Dot's computer to get real evidence.
 
 | How it works | What the checks establish |
 | --- | --- |
