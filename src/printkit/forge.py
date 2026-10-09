@@ -28,9 +28,13 @@ def fresh_run(output):
     return supplied.resolve()
 
 
-def build(intent, plan, output, *, discover=None):
+def build(intent, plan, output, *, discover=None, approved_preview=None):
     check_intent(intent, require_confirmed=True)
     plan_summary = check_plan(plan, intent)
+    approved = None
+    if approved_preview is not None:
+        from .preview import approval
+        approved = approval(approved_preview, intent, plan)
     run = fresh_run(output)
     write_json(run / "intent.json", intent)
     write_json(run / "plan.json", plan)
@@ -51,9 +55,18 @@ def build(intent, plan, output, *, discover=None):
         "dimensions_mm": envelope["size_mm"], "units": "mm", "allowed_components": intent["solid_count"],
         "tolerance_mm": envelope["tolerance_mm"] + freecad_plan.LINEAR_DEFLECTION_MM})
     blocked = conformance["intent_state"] == "blocked" or mesh["geometry_state"] == "blocked"
+    views = ["five_view_review"]
+    if approved is not None:
+        from .preview import same_solid
+        matches = same_solid(approved["solid"], load_json(run / "native/measure.json"))
+        report["approved_preview"] = {"path": str(Path(approved_preview).resolve()), "matches": matches,
+                                      "preview_sha256": sha256(Path(approved_preview) / "preview.json"),
+                                      "files": approved["files"]}
+        # The person approved views of this same solid; a different solid needs a new review.
+        views = [] if matches else ["five_view_review"]
     report.update(intent_state=conformance["intent_state"], geometry_state=mesh["geometry_state"],
                   overall_state="blocked" if blocked else "needs_review",
-                  person_checks=conformance["person_checks"] + ["five_view_review", "print_settings", "physical_test"],
+                  person_checks=conformance["person_checks"] + views + ["print_settings", "physical_test"],
                   conformance=conformance, mesh_validation=mesh, generation=generation,
                   artifacts={name: sha256(run / name) for name in ARTIFACTS})
     write_json(run / "report.json", report)

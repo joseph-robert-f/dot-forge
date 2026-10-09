@@ -22,6 +22,8 @@
 - Add the `partial_hole` intent feature for channels, slot ends and D-bores: axis, diameter, position, an arc range in degrees and an optional length. The measurer takes the arc from an exact section at mid-length. The field test's cable channel, slot ends and D-bore are now measured, and three more wrong plans are caught.
 - Add `printkit printability` for any STL, such as a character or a figure. It reports a closed mesh, loose parts, bed size, flat base, stability, overhangs and sampled thin parts. It never judges likeness and never claims print readiness. See `docs/printability.md`.
 - The README leads with functional parts. The publishing guide covers characters and designs that belong to someone else.
+- Add `printkit preview`: a draft build with five exact line views (front, right, back, top, iso) from FreeCAD's hidden-line projection, measured overall sizes, labelled holes, and a plain summary of what will be measured, judged and not assumed. PNG through FreeCAD's Qt when present, SVG otherwise. Never a deliverable.
+- `build --approved-preview` binds the build to the preview the user approved. It refuses a different intent or plan or changed preview files, and records whether the final solid matches the preview.
 - v1 requests, generators and checks do not change. A report with `overall_state: blocked` now always exits 4.
 
 ## 1.02

@@ -12,7 +12,7 @@ This repository contains source and instructions. It does not install applicatio
 
 [See it in action](#see-it-in-action) · [How it works](#how-it-works) · [Start with your Dot](#start-with-your-dot) · [Run the commands](#run-the-commands) · [Read the report](#read-the-report)
 
-> **Status: preview.** The native tests passed on a Dot's FreeCAD 1.0.0 / Open CASCADE 7.8.1 profile at commit `09128ea`. The measurer changed after that, from a [field test](evals/v2/README.md) with thirteen new requests. Run the native tests again on your Dot. Five-view previews and evidence bundles are not connected to this workflow yet.
+> **Status: preview.** The native tests passed on a Dot's FreeCAD 1.0.0 / Open CASCADE 7.8.1 profile at commit `09128ea`. The measurer changed after that, from a [field test](evals/v2/README.md) with thirteen new requests. Run the native tests again on your Dot. Evidence bundles are not connected to this workflow yet.
 
 ## See it in action
 
@@ -62,7 +62,7 @@ A plan can be valid and still produce the wrong part. The [demo](#see-it-in-acti
 
 Give your Dot this repository URL and branch: <https://github.com/joseph-robert-f/dot-forge>, branch `dot-forge-v2`. Then copy this instruction:
 
-> Use Dot Forge on your Linux cloud computer. Read README.md, AGENTS.md and docs/v2-intent-and-plan.md. Check that FreeCAD 1.0.0 is installed, and run the native tests. Do not download or install software without permission. Write my request as a draft intent. Put each value that I did not state in unknowns, and ask me about the unknowns that change the part. Show me the intent and wait for my confirmation. Then write a plan, build it in a new run directory, and show me the report. If a check fails, change the plan and build a new attempt. Keep the failed attempt. Show me the checks that remain for a person. Do not call the part print-ready.
+> Use Dot Forge on your Linux cloud computer. Read README.md, AGENTS.md and docs/v2-intent-and-plan.md. Check that FreeCAD 1.0.0 is installed, and run the native tests. Do not download or install software without permission. Write my request as a draft intent. Put each value that I did not state in unknowns, and ask me about the unknowns that change the part. Write a plan and make a preview. Show me the views and the summary, and wait for my approval or changes. After I approve, build it with the approved preview in a new run directory, and show me the report. If a check fails, change the plan and build a new attempt. Keep the failed attempt. Show me the checks that remain for a person. Do not call the part print-ready.
 
 Then describe your part, for example:
 
@@ -168,7 +168,7 @@ For a figure with a functional part, such as a magnet pocket or a keychain loop,
 - One solid only. Assemblies and sealed cavities are not supported. A part with a cavity fails `native_solid`.
 - Measured today: envelope, volume, holes on the x, y or z axis, and flat faces on those axes. Fillet radius, wall thickness, angled faces, threads and text are notes for a person. They are never a pass. The [field test](evals/v2/README.md) lists the gaps it found.
 - A confirmed intent is a process record, not a signature. The tool cannot prove that you saw it.
-- Five-view previews and evidence ZIP bundles are not connected to this workflow yet. Compare the part with your request yourself before you use it.
+- Evidence ZIP bundles are not connected to this workflow yet. The preview views are line drawings of the solid, not photographs or renders of a print.
 - Printer and material settings, clearances, orientation, supports, slicing and a physical test remain open.
 
 ## More instructions

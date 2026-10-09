@@ -159,6 +159,35 @@ class FreeCADPlanNativeTests(unittest.TestCase):
         report, _ = self.build(intent, rebind(intent, load_json(FIELD / 'spur-gear/mutants/round-bore.json')))
         self.assertEqual(statuses(report)['feature:bore'], 'fail')
 
+    def test_preview_then_approved_build(self):
+        from printkit.preview import preview
+        intent, plan = example('mounting-plate')
+        draft = dict(intent, confirmation={'status': 'draft'})
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        shown = Path(tmp.name) / 'preview'
+        record = preview(draft, rebind(draft, plan), shown)
+        self.assertEqual(record['state'], 'conforms')
+        self.assertEqual(record['delivery'], 'not_for_delivery')
+        lines = load_json(shown / 'views/lines.json')['views']
+        self.assertEqual(set(lines), {'front', 'right', 'back', 'top', 'iso'})
+        # The top view looks down z: its outline spans the plate, 60 x 40.
+        top = [p for line in lines['top']['visible'] for p in line]
+        self.assertAlmostEqual(max(p[0] for p in top) - min(p[0] for p in top), 60, places=3)
+        self.assertAlmostEqual(max(p[1] for p in top) - min(p[1] for p in top), 40, places=3)
+        self.assertIn('screw-hole-1', (shown / 'views/sheet.svg').read_text())
+        self.assertIn('I will measure', (shown / 'preview.md').read_text())
+        # The person approves; the confirmed intent and rebound plan build with that preview.
+        report = build(intent, plan, Path(tmp.name) / 'final', approved_preview=shown)
+        self.assert_conforms(report)
+        self.assertTrue(report['approved_preview']['matches'])
+        self.assertNotIn('five_view_review', report['person_checks'])
+        changed = copy.deepcopy(plan)
+        changed['steps'][1]['radius_mm'] = 3
+        with self.assertRaises(ForgeError) as caught:
+            build(intent, changed, Path(tmp.name) / 'other', approved_preview=shown)
+        self.assertEqual(caught.exception.finding, 'preview_mismatch')
+
     def test_end_kinds_need_full_proof(self):
         # A void end must be clear across the whole aperture; a shoulder ring must be completely filled.
         script = '''

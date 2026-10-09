@@ -489,6 +489,59 @@ def reopen(run):
          'native': native, 'step': step, 'runtime': runtime()})
 
 
+# Each view: rows of a rotation that turn it into a plain top-down projection
+# (screen right, screen up, toward the viewer). Third-angle names.
+S2, S3, S6 = math.sqrt(2), math.sqrt(3), math.sqrt(6)
+VIEWS = {
+    'front': ((1, 0, 0), (0, 0, 1), (0, -1, 0)),
+    'right': ((0, 1, 0), (0, 0, 1), (1, 0, 0)),
+    'back': ((-1, 0, 0), (0, 0, 1), (0, 1, 0)),
+    'top': ((1, 0, 0), (0, 1, 0), (0, 0, 1)),
+    'iso': ((1 / S2, 1 / S2, 0), (-1 / S6, 1 / S6, 2 / S6), (1 / S3, -1 / S3, 1 / S3)),
+}
+VISIBLE, HIDDEN = (0, 1, 3), (5, 6, 8)  # projectEx: sharp, smooth and outline edges.
+
+
+def views(run):
+    """Exact hidden-line projections of the exported solid, as 2D polylines in mm."""
+    import TechDraw
+    shape = Part.Shape()
+    shape.read(str(run / 'exports/model.step'))
+    out = {}
+    for name, (r, u, t) in VIEWS.items():
+        turned = shape.copy()
+        turned.transformShape(App.Matrix(*r, 0, *u, 0, *t, 0, 0, 0, 0, 1))
+        groups = TechDraw.projectEx(turned, App.Vector(0, 0, 1))
+        lines = lambda indices: [[[round(p.x, 4), round(p.y, 4)] for p in edge.discretize(Deflection=0.01)]
+                                 for i in indices if not groups[i].isNull() for edge in groups[i].Edges]
+        out[name] = {'axes': [r, u, t], 'visible': lines(VISIBLE), 'hidden': lines(HIDDEN)}
+    dump(run / 'views/lines.json', {'status': 'pass', 'views': out, 'runtime': runtime()})
+
+
+def raster(run):
+    """PNG of the composed sheet through Qt, when FreeCAD ships it; otherwise say so."""
+    import os
+    os.environ['QT_QPA_PLATFORM'] = 'offscreen'
+    try:
+        from PySide import QtCore, QtGui, QtSvg
+    except Exception as exc:
+        dump(run / 'views/raster.json', {'status': 'unavailable', 'reason': f'{type(exc).__name__}: {exc}'[:300]})
+        return
+    app = QtGui.QGuiApplication.instance() or QtGui.QGuiApplication([])
+    renderer = QtSvg.QSvgRenderer(str(run / 'views/sheet.svg'))
+    size = renderer.defaultSize() * 2
+    image = QtGui.QImage(size, QtGui.QImage.Format_ARGB32)
+    image.fill(QtGui.QColor('#ffffff'))
+    painter = QtGui.QPainter(image)
+    painter.setRenderHint(QtGui.QPainter.Antialiasing)
+    renderer.render(painter)
+    painter.end()
+    if not image.save(str(run / 'views/sheet.png')):
+        raise ValueError('Could not write the preview PNG')
+    del app
+    dump(run / 'views/raster.json', {'status': 'pass', 'width_px': size.width(), 'height_px': size.height()})
+
+
 def main():
     mode, target = sys.argv[1:]
     run = Path(target)
@@ -502,6 +555,10 @@ def main():
             raise
     elif mode == 'reopen':
         reopen(run)
+    elif mode == 'views':
+        views(run)
+    elif mode == 'raster':
+        raster(run)
     else:
         raise ValueError('Unknown helper mode')
 

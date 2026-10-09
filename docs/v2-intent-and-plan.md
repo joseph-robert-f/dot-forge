@@ -2,7 +2,7 @@
 
 v2 lets you make an open-ended part in FreeCAD. It does not limit you to the three reviewed generators. Instead, it controls how a part is described and how the result is checked.
 
-> **Status: preview.** The intent and plan contracts, the conformance checks and the CLI are tested without FreeCAD. The FreeCAD interpreter and measurer (`src/printkit/adapters/freecad_plan_scene.py`) pass the native tests (`tests/test_v2_freecad_native.py`) with conda-forge FreeCAD 1.0.0 and OCC 7.8.1 in a Debian 13 container. They passed on a Dot's exact runtime profile at commit `09128ea`. The measurer changed after that (see the [field test](../evals/v2/README.md)), so run the native tests again on your Dot. After a change to the helper, run `PRINTKIT_FREECAD_INTEGRATION=1 PYTHONPATH=src python3 -m unittest tests.test_v2_freecad_native -v` on your Dot before you trust a v2 result. Five-view previews and evidence bundles are not connected to v2 yet.
+> **Status: preview.** The intent and plan contracts, the conformance checks and the CLI are tested without FreeCAD. The FreeCAD interpreter and measurer (`src/printkit/adapters/freecad_plan_scene.py`) pass the native tests (`tests/test_v2_freecad_native.py`) with conda-forge FreeCAD 1.0.0 and OCC 7.8.1 in a Debian 13 container. They passed on a Dot's exact runtime profile at commit `09128ea`. The measurer changed after that (see the [field test](../evals/v2/README.md)), so run the native tests again on your Dot. After a change to the helper, run `PRINTKIT_FREECAD_INTEGRATION=1 PYTHONPATH=src python3 -m unittest tests.test_v2_freecad_native -v` on your Dot before you trust a v2 result. Evidence bundles are not connected to v2 yet.
 
 ## The three files
 
@@ -25,18 +25,27 @@ The plan is judged against the intent, not against itself. A plan can build exac
    python -m printkit check-intent intent.json
    ```
    The result lists the measured checks, the person checks and the unknowns.
-3. Show the intent to the user. Ask about each unknown that changes the part.
-4. When the user agrees, set `"confirmation": {"status": "confirmed", "by": "user"}`. Do not confirm for the user.
-5. Write `plan.json`. Set `intent_sha256` to the `intent_sha256` value from step 2. Run `check-intent` again after any change to the intent, because the hash changes.
-6. Check the plan:
+3. Ask the user about each unknown that changes the part. Update the draft.
+4. Write `plan.json`. Set `intent_sha256` to the `intent_sha256` value from step 2. Check the plan:
    ```sh
    python -m printkit check-plan plan.json --intent intent.json
    ```
    A warning means that a step does not contribute to the result.
-7. Build into a new run directory:
+5. Make a preview into a new directory. The intent can still be a draft:
    ```sh
-   python -m printkit build --intent intent.json --plan plan.json --output build/plate-001
+   python -m printkit preview --intent intent.json --plan plan.json --output build/plate-preview-001
    ```
+   The preview builds the part and writes:
+   - `views/sheet.png` (or `views/sheet.svg` when FreeCAD has no Qt): front, right, back, top and iso views with the measured overall sizes and labelled holes
+   - `preview.md`: in plain words, what will be measured, what the user judges, and what was not stated, with the draft result of each check
+   Show both to the user. The preview is not for delivery.
+6. If the user asks for a change, change the intent or the plan and make a new preview. Keep the old previews.
+7. When the user approves the views and the checks, set `"confirmation": {"status": "confirmed", "by": "user"}`. Do not confirm for the user. Set the plan's `intent_sha256` again, because the hash changes. Then build into a new run directory with the approved preview:
+   ```sh
+   python -m printkit build --intent intent.json --plan plan.json --output build/plate-001 \
+     --approved-preview build/plate-preview-001
+   ```
+   The build refuses a preview of a different intent or plan, or a preview whose files changed. The report records the preview and whether the final solid is the same solid. When it is, the five-view review is no longer an open person check.
 8. Read `build/plate-001/report.json`:
    - `intent_state`: `conforms` or `blocked`. This answers "is it the part the user asked for?"
    - `geometry_state`: the independent STL checks. This answers "is the exported mesh sound?"

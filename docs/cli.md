@@ -18,7 +18,8 @@ printkit verify-bundle BUNDLE_ZIP
 # v2 preview
 printkit check-intent INTENT_JSON
 printkit check-plan PLAN_JSON [--intent INTENT_JSON]
-printkit build --intent INTENT_JSON --plan PLAN_JSON --output NEW_RUN
+printkit preview --intent INTENT_JSON --plan PLAN_JSON --output NEW_RUN
+printkit build --intent INTENT_JSON --plan PLAN_JSON --output NEW_RUN [--approved-preview PREVIEW_RUN]
 printkit conform --intent INTENT_JSON --measurement MEASURE_JSON
 printkit printability STL [--bed X Y Z] [--min-wall MM] [--overhang-deg DEG] [--samples N]
 ```
@@ -40,6 +41,8 @@ v2 preview commands (see [v2: intent, plan, proof](v2-intent-and-plan.md)):
 - `check-intent` checks an intent spec and lists its measured checks, person checks and unknowns. It also gives the `intent_sha256` that a plan must carry.
 - `check-plan` checks a build plan. With `--intent`, it also checks that the plan is bound to that intent.
 - `build` needs a confirmed intent and a new or empty run directory. It runs the plan in FreeCAD, measures the solid, checks it against the intent, and runs the independent STL checks. It writes `report.json` even when FreeCAD is unavailable. A conforming build exits 5, because person and print checks stay open.
+- `preview` builds a plan from a draft or confirmed intent and writes five views (`views/sheet.png` or `views/sheet.svg`), a plain summary (`preview.md`) and `preview.json`. It is not for delivery. It exits 5, or 4 when a draft check fails.
+- `build --approved-preview` refuses a preview of a different intent or plan, or one whose files changed. It records the preview and whether the final solid matches it.
 - `conform` checks an existing `native/measure.json` against an intent again. It exits 0 when the intent conforms and 4 when it is blocked.
 - `printability` reads any STL and reports whether it will print and survive: closed mesh, loose parts, bed size, flat base, stability, overhangs and thin parts. It never judges likeness. It exits 5 when no check failed and 4 when a check failed. See [printability.md](printability.md).
 
