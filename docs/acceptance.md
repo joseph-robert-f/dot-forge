@@ -1,10 +1,10 @@
 # Release acceptance map
 
-This source release supplies **bounded native modeling instructions for a dot's Linux cloud computer**. It is not completion of the proposed architecture MVP, a cross-platform application or a runtime installer. A capability is accepted only with evidence for the exact source, runtime and request; adapter code and a checked-in lock file alone are not execution evidence.
+This source release supplies **bounded native modeling instructions for a Dot's Linux cloud computer**. It is not completion of the proposed architecture MVP, a cross-platform application or a runtime installer. A capability is accepted only with evidence for the exact source, runtime and request; adapter code and a checked-in lock file alone are not execution evidence.
 
 ## Default dot-native acceptance
 
-Default acceptance covers the three installed-native families below: `calibration-block`, `geometric-mascot` and `freecad-stepped-block`. Use `doctor --json --all-smoke NEW_DIRECTORY` to execute every family on each dot. Capability discovery, optional-tool inventory and another computer's evidence are not substitutes for fresh per-dot smoke results. All required default workflows must pass their geometry scope; visual approval and printing checks remain separate. Optional Lane A is not a prerequisite for this profile.
+Default acceptance covers the three installed-native families below: `calibration-block`, `geometric-mascot` and `freecad-stepped-block`. Use `doctor --json --all-smoke NEW_DIRECTORY` to execute every family on each Dot. Capability discovery, optional-tool inventory and another computer's evidence are not substitutes for fresh per-Dot smoke results. All required default workflows must pass their geometry scope; visual approval and printing checks remain separate. Optional Lane A is not a prerequisite for this profile.
 
 ## Existing bounded Blender preview
 
@@ -17,7 +17,7 @@ Default acceptance covers the three installed-native families below: `calibratio
 - Reviewed-code native subprocess limits, with missing sandbox controls explicitly recorded.
 - Source licenses, runtime/upstream inventories and public operational documentation.
 
-[Release verification results](release-validation.md) record the existing tested examples, clean-source reinstall, resume and retrieved-bundle regeneration. These bullets describe bounded scope; the actual reports establish individual execution results. They do not certify every parameter combination or every negative fixture proposed by the architecture. Run fresh smoke acceptance on another dot's Linux computer before relying on it.
+[Release verification results](release-validation.md) record the existing tested examples, clean-source reinstall, resume and retrieved-bundle regeneration. These bullets describe bounded scope; the actual reports establish individual execution results. They do not certify every parameter combination or every negative fixture proposed by the architecture. Run fresh smoke acceptance on another Dot's Linux computer before relying on it.
 
 ## FreeCAD integration: bounded workflow verified
 

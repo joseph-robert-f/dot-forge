@@ -1,6 +1,6 @@
 # FreeCAD workflow verification: 2026-10-08
 
-This extends the Linux dot-computer starter with one reviewed dimensioned-solid family. It does not establish arbitrary text-to-CAD capability, resolve Lane A, or certify printing.
+This extends the Linux Dot computer starter with one reviewed dimensioned-solid family. It does not establish arbitrary text-to-CAD capability, resolve Lane A, or certify printing.
 
 ## Tested shape and native tools
 

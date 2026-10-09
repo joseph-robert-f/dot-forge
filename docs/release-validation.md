@@ -6,7 +6,7 @@ This evidence supports sharing the **bounded native preview**. It does not compl
 
 The historical results and source hashes below remain evidence for the exact implementation tested; they are not silently reassigned to later changes. The default `dot-native` profile now groups the two Blender families with the independently verified [FreeCAD stepped-part workflow](freecad-verification.md). Its observed installed stack is Blender 4.3.2, FreeCAD 1.0.0 / Open CASCADE 7.8.1, orchestration Python 3.12.14 and FreeCAD system Python 3.13.5. A Slicer 5.10.0 installation directory was found, but current startup/version probing failed without a usable Qt display/plugin; it remains optional observational inventory only.
 
-On each dot, use `doctor --json --all-smoke NEW_DIRECTORY` for fresh execution evidence across all three default generators. Merely adding the profile or listing installed tools does not establish acceptance. Lane A remains an optional blocked integration with the exact Blender 4.5.12 LTS requirement; it does not gate default-profile acceptance, and its historical architecture obligation is still incomplete. No runtime upgrades, solver changes or new print-readiness claims follow from this alignment.
+On each Dot, use `doctor --json --all-smoke NEW_DIRECTORY` for fresh execution evidence across all three default generators. Merely adding the profile or listing installed tools does not establish acceptance. Lane A remains an optional blocked integration with the exact Blender 4.5.12 LTS requirement; it does not gate default-profile acceptance, and its historical architecture obligation is still incomplete. No runtime upgrades, solver changes or new print-readiness claims follow from this alignment.
 
 ## Runtime-alignment verification: 2026-10-08
 
@@ -21,7 +21,7 @@ The alignment changes were tested against package Python-source identity `9c3002
 - Current native discovery confirms Blender 4.3.2 / Python 3.13.5 / Workbench / registered STL operators; FreeCAD 1.0.0 / Open CASCADE 7.8.1 / Python 3.13.5. Blender reports FAST and EXACT Boolean solvers, with no MANIFOLD; the native examples do not use Boolean solvers.
 - The full local test-log SHA-256 is `61e77f81e9e85c3cb6f7b5fc27cce27698f9813e7f37cf5feb9a85219fd8e6b6`. This records a local run; automated GitHub source CI is separate from manual native-runner acceptance.
 
-The checks above use already installed applications on this dot’s Linux computer. They do not certify every dot image, untested parameter combinations, Lane A, slicer/toolpath suitability or physical prints. Optional Slicer remains unverified in the current runtime scan.
+The checks above use already installed applications on this Dot’s Linux computer. They do not certify every Dot image, untested parameter combinations, Lane A, slicer/toolpath suitability or physical prints. Optional Slicer remains unverified in the current runtime scan.
 
 ## Tested implementation and environment
 
