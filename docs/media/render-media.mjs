@@ -39,8 +39,12 @@ async function open(name, width, height, scale, hash = '') {
 for (const [name, w, h] of stills) {
   if (!want(name)) continue;
   const page = await open(name, w, h, 2);
-  await page.screenshot({ path: path.join(media, `${name}.png`) });
+  const raw = path.join(media, `.${name}.raw.png`);
+  await page.screenshot({ path: raw });
   await page.close();
+  // Palette-reduce so the hero stays under GitHub's 1 MB social-preview limit.
+  execFileSync('ffmpeg', ['-y', '-i', raw, '-vf', 'split[a][b];[a]palettegen=max_colors=192:reserve_transparent=0[p];[b][p]paletteuse=dither=none', path.join(media, `${name}.png`)], { stdio: 'ignore' });
+  rmSync(raw);
 }
 
 if (want('demo')) {
