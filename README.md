@@ -2,7 +2,9 @@
 
 ![Dot Forge: a mounting plate built in FreeCAD, labelled with its measured size and holes, and a conforms status.](docs/media/hero.png)
 
-**Describe a part to your Dot. Dot Forge turns the description into measurable checks, builds the part in FreeCAD, and measures the result against those checks.**
+**Describe a functional part to your Dot. Dot Forge turns the description into measurable checks, builds the part in FreeCAD, and measures the result against those checks.**
+
+Dot Forge is for parts with sizes that matter: brackets, mounts, spacers, clips, lids and knobs. For a character or a figure, use the [printability check](#characters-and-figures). It checks whether any STL will print and survive. It does not judge the look.
 
 Your Dot runs the tools on its Linux cloud computer. You do not need to operate FreeCAD yourself. Each result is a **3D-printing candidate**: a model that still needs printing and physical checks. A conforming part is not approved for printing or for any use.
 
@@ -148,6 +150,18 @@ jq -r '.conformance.checks[] | "\(.status)\t\(.code)"' build/plate-001/report.js
 ```
 
 To check a measurement against an intent again, run `python -m printkit conform --intent intent.json --measurement build/plate-001/native/measure.json`.
+
+## Characters and figures
+
+A character or figure is right when it looks right, and only a person can decide that. Dot Forge does not judge likeness. It can check whether the mesh will print and survive, for any STL from any tool:
+
+```sh
+PYTHONPATH=src python3 -m printkit printability figure.stl --bed 220 220 250
+```
+
+The report covers a closed mesh, loose parts, bed size, a flat base, whether it stands up, overhangs and thin parts such as swords or ears. It never says "print-ready". See [printability.md](docs/printability.md).
+
+For a figure with a functional part, such as a magnet pocket or a keychain loop, use v2 for the measured part and write the look as a note.
 
 ## Limits
 

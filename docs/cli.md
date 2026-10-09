@@ -20,6 +20,7 @@ printkit check-intent INTENT_JSON
 printkit check-plan PLAN_JSON [--intent INTENT_JSON]
 printkit build --intent INTENT_JSON --plan PLAN_JSON --output NEW_RUN
 printkit conform --intent INTENT_JSON --measurement MEASURE_JSON
+printkit printability STL [--bed X Y Z] [--min-wall MM] [--overhang-deg DEG] [--samples N]
 ```
 
 - `doctor` discovers Python, platform, scratch, Blender and FreeCAD capabilities and reports the default `dot-native` profile. Optional-tool inventory is observational and does not imply workflow support. `--json` is accepted for clarity; output is JSON either way. `--smoke` performs a real selected-backend generation/export/reopen/validation/render into a new run. `--all-smoke` executes all three default generators into a new parent directory; inspect every result for default-profile acceptance. Neither mode downloads or upgrades applications. Optional Lane A remains separately blocked and is not required for default acceptance.
@@ -40,6 +41,7 @@ v2 preview commands (see [v2: intent, plan, proof](v2-intent-and-plan.md)):
 - `check-plan` checks a build plan. With `--intent`, it also checks that the plan is bound to that intent.
 - `build` needs a confirmed intent and a new or empty run directory. It runs the plan in FreeCAD, measures the solid, checks it against the intent, and runs the independent STL checks. It writes `report.json` even when FreeCAD is unavailable. A conforming build exits 5, because person and print checks stay open.
 - `conform` checks an existing `native/measure.json` against an intent again. It exits 0 when the intent conforms and 4 when it is blocked.
+- `printability` reads any STL and reports whether it will print and survive: closed mesh, loose parts, bed size, flat base, stability, overhangs and thin parts. It never judges likeness. It exits 5 when no check failed and 4 when a check failed. See [printability.md](printability.md).
 
 Completed attempts are immutable: standalone `validate` and `render` reject a completed run. Use a fresh attempt for changed work. After standalone stages, `resume` can revalidate and finalize the incomplete attempt.
 

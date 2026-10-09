@@ -14,13 +14,16 @@ class MeshError(ValueError):
         super().__init__(message)
 
 
-def parse_stl(data, budget_check=lambda: None):
+def parse_stl(data, budget_check=lambda: None, max_bytes=None, max_triangles=None):
+    # Defaults are read at call time, so the module budgets stay the single source.
+    max_bytes = MAX_BYTES if max_bytes is None else max_bytes
+    max_triangles = MAX_TRIANGLES if max_triangles is None else max_triangles
     budget_check()
-    if len(data) > MAX_BYTES: raise MeshError('export_budget', 'STL exceeds byte budget')
+    if len(data) > max_bytes: raise MeshError('export_budget', 'STL exceeds byte budget')
     triangles = []
     if len(data) >= 84 and len(data) == 84 + 50 * struct.unpack_from('<I', data, 80)[0]:
         count = struct.unpack_from('<I', data, 80)[0]
-        if count > MAX_TRIANGLES: raise MeshError('triangle_budget', 'STL exceeds triangle budget')
+        if count > max_triangles: raise MeshError('triangle_budget', 'STL exceeds triangle budget')
         for i in range(count):
             budget_check()
             values = struct.unpack_from('<12fH', data, 84+50*i)
@@ -36,7 +39,7 @@ def parse_stl(data, budget_check=lambda: None):
             raise MeshError('export_parse', 'Invalid or truncated STL envelope')
         body = lines[1:-1]
         if len(body) % 7: raise MeshError('export_parse', 'Incomplete ASCII facet or trailing data')
-        if len(body)//7 > MAX_TRIANGLES: raise MeshError('triangle_budget', 'STL exceeds triangle budget')
+        if len(body)//7 > max_triangles: raise MeshError('triangle_budget', 'STL exceeds triangle budget')
         for i in range(0, len(body), 7):
             budget_check()
             facet = body[i:i+7]
