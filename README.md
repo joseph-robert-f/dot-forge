@@ -149,6 +149,8 @@ To see each check:
 jq -r '.conformance.checks[] | "\(.status)\t\(.code)"' build/plate-001/report.json
 ```
 
+To check a part made by another tool (FreeCAD MCP, CadQuery, build123d or a CAD program) against a confirmed intent, export it as STEP and run `python -m printkit measure part.step --intent intent.json --output build/part-check-001`. See [Check a part from another tool](docs/v2-intent-and-plan.md#check-a-part-from-another-tool).
+
 To check a measurement against an intent again, run `python -m printkit conform --intent intent.json --measurement build/plate-001/native/measure.json`.
 
 ## Characters and figures

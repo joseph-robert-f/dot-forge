@@ -15,6 +15,7 @@ def parser():
     cmd=commands.add_parser("check-plan",help="v2: validate a build plan");cmd.add_argument("plan");cmd.add_argument("--intent")
     cmd=commands.add_parser("preview",help="v2: draft build with five views and a plain summary, before confirmation");cmd.add_argument("--intent",required=True);cmd.add_argument("--plan",required=True);cmd.add_argument("--output",required=True)
     cmd=commands.add_parser("build",help="v2: build a plan in FreeCAD and check it against its intent");cmd.add_argument("--intent",required=True);cmd.add_argument("--plan",required=True);cmd.add_argument("--output",required=True);cmd.add_argument("--approved-preview")
+    cmd=commands.add_parser("measure",help="v2: measure a STEP from any tool; with --intent, check it like a build");cmd.add_argument("step");cmd.add_argument("--output",required=True);cmd.add_argument("--intent")
     cmd=commands.add_parser("printability",help="any STL: will it print and survive? never judges likeness");cmd.add_argument("stl");cmd.add_argument("--bed",type=float,nargs=3,metavar=("X","Y","Z"));cmd.add_argument("--min-wall",type=float,default=0.8);cmd.add_argument("--overhang-deg",type=float,default=45.0);cmd.add_argument("--samples",type=int,default=600)
     cmd=commands.add_parser("conform",help="v2: recheck a measurement against an intent");cmd.add_argument("--intent",required=True);cmd.add_argument("--measurement",required=True)
     for name in ("run","generate"):
@@ -60,6 +61,10 @@ def main(argv=None):
         elif args.command=="preview":
             from .preview import preview
             result=preview(load_json(args.intent),load_json(args.plan),Path(args.output));code=4 if result["state"]=="blocked" else 5
+        elif args.command=="measure":
+            from .measure import measure_part
+            result=measure_part(args.step,Path(args.output),intent=load_json(args.intent) if args.intent else None)
+            code=report_exit(result)
         elif args.command=="printability":
             from .printability import assess
             if not (0<args.min_wall<=50 and 0<args.overhang_deg<90 and 1<=args.samples<=20000) or (args.bed and not all(0<b<=10000 for b in args.bed)):
