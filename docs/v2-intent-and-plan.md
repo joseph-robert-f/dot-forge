@@ -55,12 +55,14 @@ All positions are in mm from the **minimum corner of the part's bounding box**. 
 | --- | --- | --- |
 | `envelope` (top level) | Bounding box of the solid | `size_mm` [x, y, z], `tolerance_mm` |
 | `volume_mm3` (top level, optional) | Solid volume | `min`, `max` |
-| `hole` | A full cylindrical void on an axis. Probes beyond each end decide through or blind. | `axis`, `diameter_mm`, `position_mm`, `depth`, `tolerance_mm` |
+| `hole` | A full cylindrical void on an axis. Full-aperture B-rep checks decide through or blind. | `axis`, `diameter_mm`, `position_mm`, `depth`, `tolerance_mm` |
 | `planar_face` | Sum of flat face areas with this outward normal at this offset | `normal`, `offset` (`min`, `max` or mm), `min_area_mm2`, `tolerance_mm` |
 | `note` | Not measured. A person compares the views with the text. | `text` |
 
 Hole position: for axis `z`, use `[x, y]`. For axis `y`, use `[x, z]`. For axis `x`, use `[y, z]`.
 Hole depth: `"through"`, or `{"depth_mm": 8, "open_end": "max"}` for a blind hole that opens on the high side of the axis.
+
+Hole tolerance applies to the **diameter**, each position coordinate, and blind depth in mm. A through hole requires the whole measured cylindrical aperture to be clear, including its continuation to the outside of the part on both ends. A blind end requires a completely filled end cap. Partial obstruction (such as a wide counterbore above a narrower through-hole), interrupted apertures, or unsuccessful B-rep checks remain `unknown` and block conformance; they do not count as a blind floor. This is conservative and does not add support for counterbore or countersink intent features.
 
 Each measured hole can satisfy only one feature. A full hole that no feature asked for goes to `person_checks` as `unrequested_holes`. A partial cylinder (for example, a fillet) is never counted as a hole.
 

@@ -11,11 +11,11 @@
 - A plan step that FreeCAD cannot build exits 4 with `plan_step_failed`. The report names the step and the FreeCAD error.
 - Add conformance checks for envelope, volume, axis-aligned holes (through or blind) and flat faces. Unrequested holes go to a person.
 - Add two examples: the stepped block written as a plan, and an open-ended mounting plate.
-- Add a field test (`evals/v2`) with thirteen new requests and eleven wrong plans. It found five measurer faults, now fixed:
+- Add a field test (`evals/v2`) with thirteen new requests and eleven wrong plans. It found five measurer faults:
   - Envelopes and positions use the exact bounding box. The plain box included trim tolerance and failed the STEP round trip of a side hole.
   - Hole spans use the exact face extent, not the trim-curve parameter range.
   - A cylinder is a void when its face normal points toward its axis. Before, the outer wall of a tube was reported as a hole.
-  - End probes sit on a ring inside the wall. Before, a blind counterbore over a clearance hole read as through.
+  - A blind counterbore over a clearance hole read as through. The full-aperture end checks now make that end unknown.
   - `native_solid` requires one shell for each solid, so a sealed cavity blocks. The STEP round trip compares shell counts.
 - v1 requests, generators and checks do not change. A report with `overall_state: blocked` now always exits 4.
 

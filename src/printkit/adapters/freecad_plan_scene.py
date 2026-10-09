@@ -215,18 +215,38 @@ def faces_axis(face, surface, direction):
     return normal.dot(radial) < 0
 
 
-def end_open(inside, foot, direction, radius, at):
-    """Probe a ring just inside the wall, beyond one end; None when the probes disagree.
+def empty_volume(shape):
+    """Only a valid, exactly empty solid intersection establishes clearance."""
+    if not shape.isValid() or not math.isfinite(shape.Volume):
+        raise ValueError('Invalid aperture Boolean result')
+    return not shape.Solids and shape.Volume == 0
 
-    Off-axis probes keep a smaller coaxial hole (under a counterbore) from
-    reading as an open end.
+
+def aperture_ends(shape, foot, direction, radius, span, bounds):
+    """Prove clearance over the full aperture, not just its centerline.
+
+    A through end needs a clear full-radius sweep all the way outside the
+    solid's bounding box. A blind end needs a completely filled local cap.
+    Partial obstructions (including a counterbore shoulder), interrupted
+    bores and failed Booleans stay unknown rather than becoming blind holes.
     """
-    side = direction.cross(App.Vector(1, 0, 0) if abs(direction.x) < 0.9 else App.Vector(0, 1, 0)).normalize()
-    other = direction.cross(side)
-    ring = max(radius * 0.5, radius - 0.1)
-    outside = {not inside(foot + direction * at + (side * math.cos(a) + other * math.sin(a)) * ring)
-               for a in (0, math.pi / 2, math.pi, 3 * math.pi / 2)}
-    return outside.pop() if len(outside) == 1 else None
+    try:
+        s0, s1 = span
+        bore = Part.makeCylinder(radius, s1 - s0, foot + direction * s0, direction)
+        if not empty_volume(shape.common(bore)):
+            return [None, None]
+        ends = []
+        for end, outward, bound in ((s0, -direction, bounds[0]), (s1, direction, bounds[1])):
+            sweep = Part.makeCylinder(radius, abs(bound - end) + PROBE_MM,
+                                      foot + direction * end, outward)
+            if empty_volume(shape.common(sweep)):
+                ends.append(True)
+                continue
+            cap = Part.makeCylinder(radius, PROBE_MM, foot + direction * end, outward)
+            ends.append(False if empty_volume(cap.cut(shape)) else None)
+        return ends
+    except Exception:
+        return [None, None]
 
 
 def cylinders(shape, low):
@@ -265,7 +285,6 @@ def cylinders(shape, low):
                 break
         else:
             groups.append(dict(piece, span=list(piece['span'])))
-    inside = lambda point: shape.isInside(point, 1e-7, False)
     result = []
     for g in groups:
         d, foot, (s0, s1) = g['direction'], g['foot'], g['span']
@@ -277,8 +296,10 @@ def cylinders(shape, low):
             point = [foot.x, foot.y, foot.z]
             entry['position_mm'] = [point[i] - low[i] for i in plane]
             entry['span_mm'] = [s0 - low[index], s1 - low[index]]
-            entry['ends_open'] = [end_open(inside, foot, d, g['radius'], s0 - PROBE_MM),
-                                  end_open(inside, foot, d, g['radius'], s1 + PROBE_MM)]
+            if g['void']:
+                box = shape.BoundBox
+                bounds = [(box.XMin, box.XMax), (box.YMin, box.YMax), (box.ZMin, box.ZMax)][index]
+                entry['ends_open'] = aperture_ends(shape, foot, d, g['radius'], (s0, s1), bounds)
         result.append(entry)
     return result
 

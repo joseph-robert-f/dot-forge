@@ -51,12 +51,12 @@ def holes(m):
 
 def check_hole(feature, measured, claimed):
     axis, tol = feature["axis"], feature["tolerance_mm"]
-    want_r = feature["diameter_mm"] / 2
+    want_d = feature["diameter_mm"]
     code = f"feature:{feature['id']}"
     expected = {k: feature[k] for k in ("axis", "diameter_mm", "position_mm", "depth", "tolerance_mm")}
     same_axis = [(i, c) for i, c in enumerate(measured) if c["axis"] == axis and i not in claimed]
     distance = lambda c: math.dist(c["position_mm"], feature["position_mm"])
-    matches = [(i, c) for i, c in same_axis if abs(c["radius_mm"] - want_r) <= tol
+    matches = [(i, c) for i, c in same_axis if want_d - tol <= 2 * c["radius_mm"] <= want_d + tol
                and all(abs(a - b) <= tol for a, b in zip(c["position_mm"], feature["position_mm"]))]
     if not matches:
         nearest = min(same_axis, key=lambda ic: distance(ic[1]), default=(None, None))[1]
@@ -79,7 +79,7 @@ def check_hole(feature, measured, claimed):
         ok = ends[open_index] and not ends[1 - open_index] \
             and abs((span[1] - span[0]) - feature["depth"]["depth_mm"]) <= tol
     return record(code, "pass" if ok else "fail", actual, expected,
-                  "analytic cylinder radius/axis/position; probes beyond each end decide through or blind")
+                  "analytic cylinder diameter/axis/position; full-aperture B-rep checks decide through or blind")
 
 
 def check_planar(feature, m):

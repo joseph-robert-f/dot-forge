@@ -73,6 +73,22 @@ class ConformanceTests(unittest.TestCase):
         self.assertEqual(len(unknown), len(intent['unknowns']))
         self.assertTrue(all(c['status'] == 'unknown' for c in unknown))
 
+    def test_diameter_tolerance_is_not_radius_tolerance(self):
+        intent, _ = example('mounting-plate')
+        # Includes both inclusive boundaries, values just inside/outside, and
+        # the reviewed 4.075 mm regression for a requested 4 +/- 0.05 mm hole.
+        for diameter, expected in ((3.925, 'fail'), (3.949999, 'fail'),
+                                   (3.95, 'pass'), (3.950001, 'pass'),
+                                   (4.049999, 'pass'), (4.05, 'pass'),
+                                   (4.050001, 'fail'), (4.075, 'fail')):
+            with self.subTest(diameter=diameter):
+                m = plate_measurement()
+                m['cylinders'][4]['radius_mm'] = diameter / 2
+                report = conform(intent, m)
+                code = 'feature:' + intent['features'][0]['id']
+                self.assertEqual(statuses(report)[code], expected)
+                self.assertEqual(report['intent_state'], 'conforms' if expected == 'pass' else 'blocked')
+
     def test_wrong_geometry_blocks(self):
         intent, _ = example('stepped-block')
         cases = [
@@ -129,6 +145,19 @@ class ConformanceTests(unittest.TestCase):
         report = conform(intent, m)
         self.assertEqual(statuses(report)['feature:ledge-hole'], 'unknown')
         self.assertEqual(report['intent_state'], 'blocked')
+
+    def test_partly_obstructed_aperture_is_not_through_or_blind(self):
+        intent, _ = example('stepped-block')
+        for ends in ([None, True], [True, None], [None, None]):
+            for depth in ('through', {'depth_mm': 9, 'open_end': 'max'},
+                          {'depth_mm': 9, 'open_end': 'min'}):
+                with self.subTest(ends=ends, depth=depth):
+                    m = stepped_measurement()
+                    m['cylinders'][0]['ends_open'] = ends
+                    intent['features'][0]['depth'] = depth
+                    report = conform(intent, m)
+                    self.assertEqual(statuses(report)['feature:ledge-hole'], 'unknown')
+                    self.assertEqual(report['intent_state'], 'blocked')
 
     def test_one_hole_cannot_satisfy_two_features(self):
         intent, _ = example('stepped-block')
