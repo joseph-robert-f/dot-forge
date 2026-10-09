@@ -38,7 +38,7 @@ A request goes through three files. Each file has a strict schema.
 
 - Envelope (overall size) and volume
 - Holes on the x, y or z axis: diameter, position, depth, and what each end opens into (the outside, a floor, a void such as a bore, or a counterbore shoulder)
-- Flat faces: direction, position and minimum area
+- Flat faces: direction, position, and minimum and maximum area
 
 A requirement that cannot be measured yet, for example "rounded corners", becomes a note for a person. A value that your request does not state goes in `unknowns`. Your Dot does not invent it. You confirm the intent before any geometry is made.
 

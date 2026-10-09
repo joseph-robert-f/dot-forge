@@ -107,6 +107,7 @@
     "person_checks": 1,
     "unknowns": 2,
     "status": "confirmed",
+    "revision": "Evaluation fixture. The evaluator simulated this confirmation and the answers to the open questions. Revision: the slot walls are 15 mm of flat between the round ends (45 mm2 each), so they get a maximum area too. A longer slot now fails.",
     "mutants": {
       "long-slot": "Slot 25 mm long, not 20."
     }

@@ -56,10 +56,12 @@ All positions are in mm from the **minimum corner of the part's bounding box**. 
 | `envelope` (top level) | Bounding box of the solid | `size_mm` [x, y, z], `tolerance_mm` |
 | `volume_mm3` (top level, optional) | Solid volume | `min`, `max` |
 | `hole` | A full cylindrical void on an axis. Full-aperture B-rep checks decide what each end opens into. | `axis`, `diameter_mm`, `position_mm`, `depth`, `tolerance_mm` |
-| `planar_face` | Sum of flat face areas with this outward normal at this offset | `normal`, `offset` (`min`, `max` or mm), `min_area_mm2`, `tolerance_mm` |
+| `planar_face` | Sum of flat face areas with this outward normal at this offset | `normal`, `offset` (`min`, `max` or mm), `min_area_mm2`, optional `max_area_mm2`, `tolerance_mm` |
 | `note` | Not measured. A person compares the views with the text. | `text` |
 
 Hole position: for axis `z`, use `[x, y]`. For axis `y`, use `[x, z]`. For axis `x`, use `[y, z]`.
+Face area: the check adds up every flat face with the same outward normal at the same offset. `min_area_mm2` catches a face that is missing or too small. `max_area_mm2` catches a face that is too big, for example the wall of a slot that is too long. Set the maximum from all the faces at that offset, not from one face.
+
 Hole depth has three forms:
 
 - `"through"`: both ends open to the outside of the part.

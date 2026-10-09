@@ -276,6 +276,12 @@
                 "exclusiveMinimum": 0,
                 "maximum": 250000
               },
+              "max_area_mm2": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 250000,
+                "description": "Optional upper bound on the summed area. It must not be less than min_area_mm2."
+              },
               "tolerance_mm": {
                 "type": "number",
                 "minimum": 0.001,

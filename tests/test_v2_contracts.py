@@ -70,6 +70,8 @@ class IntentTests(unittest.TestCase):
             lambda i: i['features'][0].update(script='x'),
             lambda i: i['features'][1].update(normal='down'),
             lambda i: i['features'][1].update(offset=99),
+            lambda i: i['features'][1].update(max_area_mm2=i['features'][1]['min_area_mm2'] - 1),
+            lambda i: i['features'][1].update(max_area_mm2='600'),
             lambda i: i['features'].append(copy.deepcopy(i['features'][0])),
             lambda i: i['volume_mm3'].update(min=10, max=5),
         ]

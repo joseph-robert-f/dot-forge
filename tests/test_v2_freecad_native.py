@@ -136,6 +136,15 @@ class FreeCADPlanNativeTests(unittest.TestCase):
         report, _ = self.build(intent, shallow)
         self.assertEqual(statuses(report)['feature:counterbore'], 'fail')
 
+    def test_face_area_upper_bound_catches_long_slot(self):
+        intent, plan = field_case('slotted-plate', '002')
+        report, _ = self.build(intent, plan)
+        self.assert_conforms(report)
+        long_slot = rebind(intent, load_json(FIELD / 'slotted-plate/mutants/long-slot.json'))
+        report, _ = self.build(intent, long_slot)
+        self.assertEqual(statuses(report)['feature:slot-wall-low'], 'fail')
+        self.assertEqual(statuses(report)['feature:slot-wall-high'], 'fail')
+
     def test_end_kinds_need_full_proof(self):
         # A void end must be clear across the whole aperture; a shoulder ring must be completely filled.
         script = '''

@@ -63,12 +63,13 @@ Three correct parts block on their first attempt: the spacer, the collar and the
 | hollow-ball | 004 | `drain` ends: `outside` and `void` | conforms |
 | counterbored-spacer | 002 | `counterbore` ends: `shoulder` and `outside`, 5 mm deep | conforms |
 | shaft-collar | 002 | `set-screw` ends: `outside` and `void` | conforms |
+| slotted-plate | 002 | Slot walls get `max_area_mm2: 46` (45 mm² each) | conforms |
 
 Attempt 002 of the hollow ball was the evaluator's own mistake. The checker caught it.
 
 ### Wrong plans
 
-A wrong plan is caught only if the correct plan passes. Each mutant is judged against the case's last intent. Eight of the eleven wrong plans are caught.
+A wrong plan is caught only if the correct plan passes. Each mutant is judged against the case's last intent. Nine of the eleven wrong plans are caught.
 
 | Mutant | Result |
 | --- | --- |
@@ -82,9 +83,9 @@ A wrong plan is caught only if the correct plan passes. Each mutant is judged ag
 | shaft-collar: set-screw hole stops short of the bore | caught by `set-screw` (end measured `floor`, not `void`) |
 | cable-clip: no cable channel | **not caught** |
 | shelf-bracket: no brace | **not caught** |
-| slotted-plate: slot 25 mm long, not 20 mm | **not caught** |
+| slotted-plate: slot 25 mm long, not 20 mm | caught by `slot-wall-low` and `slot-wall-high` (60 mm², maximum 46) |
 
-Each miss is a requirement that only a person check covers, or that a minimum face area cannot limit. The report still sends the note to a person, so a careful person can find the mistake in the views. The phone-stand angle was caught only because the Dot's proposed envelope came from the 60 degree shape.
+Each remaining miss is a requirement that only a person check covers. The report still sends the note to a person, so a careful person can find the mistake in the views. The phone-stand angle was caught only because the Dot's proposed envelope came from the 60 degree shape.
 
 ## Checker bugs found and fixed
 
@@ -98,12 +99,11 @@ The native tests now include the tube, the collar, the hollow ball, the three `e
 
 ## Gaps found, not fixed
 
-These change the intent contract, so they need a decision first. The gap for holes that open into a void is closed by the `ends` hole depth.
+These change the intent contract, so they need a decision first. The gap for holes that open into a void is closed by the `ends` hole depth. The gap for a face that is too big is closed by `max_area_mm2`.
 
 | Gap | Seen in | Possible change |
 | --- | --- | --- |
 | A partial cylinder cannot be a measured feature | cable channel, slot ends, D-bore | A feature for a partial cylindrical void: axis, diameter, position and minimum arc |
-| A face check has a minimum area but no maximum | slot length | Optional `max_area_mm2` on `planar_face` |
 | No angled faces | phone-stand angle | A `planar_face` with a normal vector |
 | A draft intent must have an envelope, so the Dot uses a placeholder such as `[1, 1, 1]` | sd-card-box, bottle-cap | Allow a draft without an envelope |
 | Every feature needs a `source` from the ask | cable-clip size, lid clearance, collar fit | Record the user's answers in the intent, and let a feature cite an answer |

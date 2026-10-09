@@ -24,7 +24,7 @@ FIELDS = {"schema_version", "ask", "units", "envelope", "solid_count", "features
 OPTIONAL = {"volume_mm3"}
 FEATURE_FIELDS = {
     "hole": ({"id", "kind", "axis", "diameter_mm", "position_mm", "depth", "tolerance_mm"}, {"source"}),
-    "planar_face": ({"id", "kind", "normal", "offset", "min_area_mm2", "tolerance_mm"}, {"source"}),
+    "planar_face": ({"id", "kind", "normal", "offset", "min_area_mm2", "tolerance_mm"}, {"source", "max_area_mm2"}),
     "note": ({"id", "kind", "text"}, {"source"}),
 }
 
@@ -104,6 +104,9 @@ def check_feature(feature, envelope, index):
         if offset not in ("min", "max"):
             number(offset, f"{name}.offset", 0, size[axis])
         number(feature["min_area_mm2"], f"{name}.min_area_mm2", 0, 250000, low_open=True)
+        if "max_area_mm2" in feature:
+            # An upper bound catches a face that is too big, such as an overlong slot wall.
+            number(feature["max_area_mm2"], f"{name}.max_area_mm2", feature["min_area_mm2"], 250000)
 
 
 def check_intent(intent, *, require_confirmed=False):

@@ -146,6 +146,17 @@ class ConformanceTests(unittest.TestCase):
         self.assertEqual(statuses(report)['feature:ledge-hole'], 'unknown')
         self.assertEqual(report['intent_state'], 'blocked')
 
+    def test_face_area_has_optional_upper_bound(self):
+        intent, _ = example('stepped-block')
+        face = next(f for f in intent['features'] if f['kind'] == 'planar_face')
+        area = next(p['area_mm2'] for p in stepped_measurement()['planes'] if p['normal'] == face['normal'])
+        for bound, expected in ((None, 'pass'), (area, 'pass'), (area + 1, 'pass'), (area - 1, 'fail')):
+            with self.subTest(bound=bound):
+                face.pop('max_area_mm2', None)
+                if bound is not None:
+                    face['max_area_mm2'] = bound
+                self.assertEqual(statuses(conform(intent, stepped_measurement()))['feature:' + face['id']], expected)
+
     def test_hole_ends_must_match_exactly(self):
         intent, _ = example('stepped-block')
         intent['features'][0]['depth'] = {'ends': {'min': 'shoulder', 'max': 'outside'}, 'depth_mm': 9}

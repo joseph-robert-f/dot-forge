@@ -107,8 +107,10 @@ def check_planar(feature, m):
     tol = feature["tolerance_mm"]
     area = sum(p["area_mm2"] for p in m["planes"] if p.get("normal") == feature["normal"]
                and finite(p.get("offset_mm")) and abs(p["offset_mm"] - want) <= tol)
-    return record(f"feature:{feature['id']}", "pass" if area >= feature["min_area_mm2"] else "fail",
-                  {"area_mm2": area}, {k: feature[k] for k in ("normal", "offset", "min_area_mm2", "tolerance_mm")},
+    ok = feature["min_area_mm2"] <= area <= feature.get("max_area_mm2", math.inf)
+    return record(f"feature:{feature['id']}", "pass" if ok else "fail",
+                  {"area_mm2": area}, {k: feature[k] for k in ("normal", "offset", "min_area_mm2", "max_area_mm2",
+                                                               "tolerance_mm") if k in feature},
                   "sum of planar face areas with this outward normal at this offset")
 
 

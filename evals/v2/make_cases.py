@@ -329,6 +329,10 @@ ATTEMPTS = {
     "counterbored-spacer": [lambda spec: (
         revise(spec, "the counterbore floor is a shoulder around the clearance hole, not a solid floor.",
                set_depth("counterbore", {"ends": {"min": "shoulder", "max": "outside"}, "depth_mm": 5})), None)],
+    "slotted-plate": [lambda spec: (
+        revise(spec, "the slot walls are 15 mm of flat between the round ends (45 mm2 each), so they get a "
+                     "maximum area too. A longer slot now fails.",
+               lambda fs: [dict(f, max_area_mm2=46) if f["id"].startswith("slot-wall") else f for f in fs]), None)],
     "shaft-collar": [lambda spec: (
         revise(spec, "the set-screw hole opens into the bore, not to the outside at both ends.",
                set_depth("set-screw", {"ends": {"min": "outside", "max": "void"}})), None)],
