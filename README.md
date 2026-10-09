@@ -46,7 +46,7 @@ A requirement that cannot be measured yet, for example "rounded corners", become
 
 **Proof.** `printkit build` runs the plan in FreeCAD and reopens the result in a fresh process. It measures the solid exactly, from its geometry, not from the mesh. Then it compares each measurement with the intent:
 
-- A hole must have the correct axis, diameter and position. Probes beyond each end show whether it is through or blind.
+- A hole must have the correct axis, diameter and position. Full-aperture B-rep checks establish whether it is through or blind. Partial obstructions, including a counterbore shoulder, stay unknown.
 - Each measured hole can satisfy only one check. A hole that nobody asked for goes to a person.
 - A rounded corner is a partial cylinder. It is never counted as a hole.
 - A missing or unreadable measurement is `unknown`, never a pass.
@@ -89,7 +89,7 @@ python -m unittest discover -s tests
 PRINTKIT_FREECAD_INTEGRATION=1 python3 -m unittest tests.test_v2_freecad_native -v
 ```
 
-The first command runs the source tests. The second builds the examples and several fault cases in the installed FreeCAD. All 7 native tests must pass. A skipped test is not a pass.
+The first command runs the source tests. The second builds the examples and several fault cases in the installed FreeCAD. All native tests must pass. A skipped test is not a pass.
 
 ### 2. Check the intent and the plan
 

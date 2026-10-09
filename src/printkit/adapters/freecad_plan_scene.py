@@ -205,6 +205,40 @@ def named_axis(direction):
     return None
 
 
+def empty_volume(shape):
+    """Only a valid, exactly empty solid intersection establishes clearance."""
+    if not shape.isValid() or not math.isfinite(shape.Volume):
+        raise ValueError('Invalid aperture Boolean result')
+    return not shape.Solids and shape.Volume == 0
+
+
+def aperture_ends(shape, foot, direction, radius, span, bounds):
+    """Prove clearance over the full aperture, not just its centerline.
+
+    A through end needs a clear full-radius sweep all the way outside the
+    solid's bounding box. A blind end needs a completely filled local cap.
+    Partial obstructions (including a counterbore shoulder), interrupted
+    bores and failed Booleans stay unknown rather than becoming blind holes.
+    """
+    try:
+        s0, s1 = span
+        bore = Part.makeCylinder(radius, s1 - s0, foot + direction * s0, direction)
+        if not empty_volume(shape.common(bore)):
+            return [None, None]
+        ends = []
+        for end, outward, bound in ((s0, -direction, bounds[0]), (s1, direction, bounds[1])):
+            sweep = Part.makeCylinder(radius, abs(bound - end) + PROBE_MM,
+                                      foot + direction * end, outward)
+            if empty_volume(shape.common(sweep)):
+                ends.append(True)
+                continue
+            cap = Part.makeCylinder(radius, PROBE_MM, foot + direction * end, outward)
+            ends.append(False if empty_volume(cap.cut(shape)) else None)
+        return ends
+    except Exception:
+        return [None, None]
+
+
 def cylinders(shape, low):
     """Group analytic cylinder faces into whole cylinders and probe each one."""
     pieces = []
@@ -247,7 +281,10 @@ def cylinders(shape, low):
             point = [foot.x, foot.y, foot.z]
             entry['position_mm'] = [point[i] - low[i] for i in plane]
             entry['span_mm'] = [s0 - low[index], s1 - low[index]]
-            entry['ends_open'] = [not inside(foot + d * (s0 - PROBE_MM)), not inside(foot + d * (s1 + PROBE_MM))]
+            if void:
+                box = shape.BoundBox
+                bounds = [(box.XMin, box.XMax), (box.YMin, box.YMax), (box.ZMin, box.ZMax)][index]
+                entry['ends_open'] = aperture_ends(shape, foot, d, g['radius'], (s0, s1), bounds)
         result.append(entry)
     return result
 

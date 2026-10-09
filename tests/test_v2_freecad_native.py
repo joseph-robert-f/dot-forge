@@ -11,6 +11,8 @@ import tempfile
 import unittest
 from printkit.common import ForgeError, canonical_hash, load_json
 from printkit.forge import build
+from printkit.conformance import conform
+from printkit.adapters import freecad, freecad_plan
 
 EXAMPLES = Path(__file__).parents[1] / 'examples/v2'
 
@@ -141,6 +143,80 @@ class FreeCADPlanNativeTests(unittest.TestCase):
         intent, plan = every_op()
         report, _ = self.build(intent, plan)
         self.assert_conforms(report)
+
+    def test_counterbore_requires_full_width_clearance_on_every_axis(self):
+        for axis in 'xyz':
+            for open_end in ('min', 'max'):
+                with self.subTest(axis=axis, open_end=open_end):
+                    index = 'xyz'.index(axis)
+                    size = [20, 20, 20]
+                    size[index] = 10
+                    through_at, recess_at = [10, 10, 10], [10, 10, 10]
+                    through_at[index] = -1
+                    recess_at[index] = 5 if open_end == 'max' else -1
+                    intent = {
+                        'schema_version': 'intent.v1', 'ask': 'Counterbore regression fixture.', 'units': 'mm',
+                        'envelope': {'size_mm': size, 'tolerance_mm': 0.01}, 'solid_count': 1,
+                        'features': [{'id': 'hole', 'kind': 'hole', 'axis': axis, 'diameter_mm': 8,
+                                      'position_mm': [10, 10], 'depth': 'through', 'tolerance_mm': 0.05}],
+                        'unknowns': [], 'confirmation': {'status': 'confirmed', 'by': 'user'}}
+                    plan = {'schema_version': 'plan.v1', 'units': 'mm', 'intent_sha256': canonical_hash(intent),
+                            'steps': [
+                                {'id': 'body', 'op': 'box', 'size_mm': size},
+                                {'id': 'drill', 'op': 'cylinder', 'axis': axis, 'radius_mm': 2,
+                                 'height_mm': 12, 'at_mm': through_at},
+                                {'id': 'recess', 'op': 'cylinder', 'axis': axis, 'radius_mm': 4,
+                                 'height_mm': 6, 'at_mm': recess_at},
+                                {'id': 'part', 'op': 'cut', 'from': 'body', 'tools': ['drill', 'recess']}],
+                            'result': 'part'}
+                    report, run = self.build(intent, plan)
+                    self.assertEqual(report['intent_state'], 'blocked')
+                    self.assertEqual(statuses(report)['feature:hole'], 'unknown')
+                    m = load_json(run / 'native/measure.json')
+                    wide = next(c for c in m['cylinders'] if abs(c['radius_mm'] - 4) < 1e-6)
+                    self.assertEqual(wide['ends_open'], [None, True] if open_end == 'max' else [True, None])
+                    # A shoulder around a narrower through opening is not a
+                    # solid blind floor, even when the recess depth matches.
+                    intent['features'][0]['depth'] = {'depth_mm': 5, 'open_end': open_end}
+                    self.assertEqual(conform(intent, m)['intent_state'], 'blocked')
+                    # The narrower aperture really is clear through the part.
+                    intent['features'][0].update(diameter_mm=4, depth='through')
+                    self.assertEqual(conform(intent, m)['intent_state'], 'conforms')
+
+    def test_aperture_obstructions_and_boolean_failures_fail_closed(self):
+        # Execute the actual helper in its exact native Python, independently
+        # of tessellation. A remote obstruction must not be missed by a local
+        # end probe, nor an off-center intrusion by the old centerline probe.
+        script = '''
+import importlib.util
+import sys
+from unittest.mock import patch
+spec = importlib.util.spec_from_file_location('scene', sys.argv[1])
+scene = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(scene)
+A, P = scene.App, scene.Part
+foot, axis = A.Vector(10, 10, 0), A.Vector(0, 0, 1)
+box = P.makeBox(20, 20, 10)
+clear = box.cut(P.makeCylinder(4, 12, A.Vector(10, 10, -1)))
+check = lambda shape: scene.aperture_ends(shape, foot, axis, 4, (0, 5), (0, 10))
+assert check(clear) == [True, True]
+# A cap remote from the measured end, with a narrow hole through its center.
+remote = clear.fuse(P.makeBox(20, 20, 1, A.Vector(0, 0, 8))).cut(
+    P.makeCylinder(2, 12, A.Vector(10, 10, -1))).removeSplitter()
+assert remote.isValid() and len(remote.Solids) == 1
+assert check(remote) == [True, None]
+# A thin off-center rib inside the measured span leaves its centerline clear.
+rib = clear.fuse(P.makeBox(2, 8, 0.1, A.Vector(12, 6, 2))).removeSplitter()
+assert rib.isValid() and len(rib.Solids) == 1
+assert check(rib) == [None, None]
+with patch.object(scene.Part, 'makeCylinder', side_effect=RuntimeError('failed Boolean')):
+    assert check(clear) == [None, None]
+with patch.object(scene, 'empty_volume', side_effect=ValueError('invalid result')):
+    assert check(clear) == [None, None]
+'''
+        with tempfile.TemporaryDirectory() as tmp:
+            freecad.run_process([freecad.PYTHON, '-I', '-B', '-c', script, freecad_plan.SCRIPT],
+                                tmp, Path(tmp) / 'aperture-fixtures.log', timeout=30)
 
     def test_invalid_operation_fails_closed_and_keeps_run(self):
         intent, plan = example('mounting-plate')
