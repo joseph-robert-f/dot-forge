@@ -66,6 +66,37 @@ def generate(run_dir, discover=None):
                            'script_sha256': sha256(SCRIPT)}}
 
 
+def measure_step(run_dir, discover=None):
+    """Measure input/part.step, a STEP made by any tool, with the same measurer as a build."""
+    run = Path(run_dir).resolve()
+    for name in ('native', 'exports', 'logs'):
+        if safe_file(run, name).exists():
+            raise AdapterError('Refusing to overwrite existing FreeCAD artifacts, logs or evidence')
+    capability = (discover or freecad.discover)()
+    if capability.get('status') != 'unverified':
+        raise RuntimeUnavailable(capability.get('reason', 'FreeCAD runtime unavailable'))
+    for folder in ('native', 'exports', 'logs'):
+        safe_file(run, folder).mkdir()
+    try:
+        metrics = {'measure': _run('measure', run)}
+    except ForgeError as exc:
+        if exc.finding == 'runtime_failed':
+            raise ForgeError('FreeCAD could not read or measure the STEP file. See logs/freecad-plan-measure.log.',
+                             4, 'step_unreadable') from exc
+        raise
+    source = load_json(run / 'native/source.json')
+    if source.get('status') != 'pass' or not (run / 'native/measure.json').is_file():
+        raise AdapterError('FreeCAD measurement evidence is incomplete or failed')
+    return {'status': 'pass', 'metrics': metrics, 'source': source,
+            'provenance': {'measurer': 'dot-forge-plan-v1', 'runtime_kind': capability['runtime_kind'],
+                           'freecad_version': capability['version'], 'occ_version': capability['occ_version'],
+                           'python_version': capability['python_version'],
+                           'binary_sha256': capability['binary_sha256'],
+                           'native_module_sha256': capability['native_module_sha256'],
+                           'native_library_sha256': capability['native_library_sha256'],
+                           'script_sha256': sha256(SCRIPT)}}
+
+
 def views(run_dir):
     """Five exact projections of the exported solid; the run must already hold a build."""
     run = Path(run_dir).resolve()

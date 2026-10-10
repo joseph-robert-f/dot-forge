@@ -21,6 +21,7 @@ printkit check-plan PLAN_JSON [--intent INTENT_JSON]
 printkit preview --intent INTENT_JSON --plan PLAN_JSON --output NEW_RUN
 printkit build --intent INTENT_JSON --plan PLAN_JSON --output NEW_RUN [--approved-preview PREVIEW_RUN]
 printkit conform --intent INTENT_JSON --measurement MEASURE_JSON
+printkit measure STEP --output NEW_RUN [--intent INTENT_JSON]
 printkit printability STL [--bed X Y Z] [--min-wall MM] [--overhang-deg DEG] [--samples N]
 ```
 
@@ -44,6 +45,7 @@ v2 preview commands (see [v2: intent, plan, proof](v2-intent-and-plan.md)):
 - `preview` builds a plan from a draft or confirmed intent and writes five views (`views/sheet.png` or `views/sheet.svg`), a plain summary (`preview.md`) and `preview.json`. It is not for delivery. It exits 5, or 4 when a draft check fails.
 - `build --approved-preview` refuses a preview of a different intent or plan, or one whose files changed. It records the preview and whether the final solid matches it.
 - `conform` checks an existing `native/measure.json` against an intent again. It exits 0 when the intent conforms and 4 when it is blocked.
+- `measure` reads a STEP file from any tool, such as FreeCAD MCP, CadQuery, build123d or another CAD program. It measures the part with the same measurer as `build`, and runs the independent STL checks on a mesh made from the STEP. With a confirmed `--intent`, it checks the part like a build. It exits 4 when blocked and 5 when person checks stay open. Without `--intent`, it only measures, and exits 0 when the mesh agrees with the solid. See [v2-intent-and-plan.md](v2-intent-and-plan.md#check-a-part-from-another-tool).
 - `printability` reads any STL and reports whether it will print and survive: closed mesh, loose parts, bed size, flat base, stability, overhangs and thin parts. It never judges likeness. It exits 5 when no check failed and 4 when a check failed. See [printability.md](printability.md).
 
 Completed attempts are immutable: standalone `validate` and `render` reject a completed run. Use a fresh attempt for changed work. After standalone stages, `resume` can revalidate and finalize the incomplete attempt.

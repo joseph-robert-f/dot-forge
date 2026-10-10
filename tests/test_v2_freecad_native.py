@@ -5,12 +5,17 @@ interpreter builds each op, that the measurer reports what conformance
 expects, and that a wrong plan is caught by the intent.
 """
 import copy
+import io
+import json
 import os
 from pathlib import Path
 import tempfile
 import unittest
+from contextlib import redirect_stdout
+from printkit.cli import main
 from printkit.common import ForgeError, canonical_hash, load_json
 from printkit.forge import build
+from printkit.measure import measure_part
 from printkit.conformance import conform
 from printkit.adapters import freecad, freecad_plan
 
@@ -217,6 +222,80 @@ assert ends(notched, 4) == [None, 'outside'], ends(notched, 4)
         with tempfile.TemporaryDirectory() as tmp:
             freecad.run_process([freecad.PYTHON, '-I', '-B', '-c', script, freecad_plan.SCRIPT],
                                 tmp, Path(tmp) / 'end-kind-fixtures.log', timeout=60)
+
+    def test_cold_measure_of_a_built_step_matches_the_build(self):
+        """`measure` on a build's own STEP gives the build's intent checks, check by check."""
+        for name, attempt in (('l-bracket', '001'), ('shaft-collar', '002'), ('cable-clip', '002'),
+                              ('hollow-ball', '004'), ('slotted-plate', '003'), ('counterbored-spacer', '001')):
+            with self.subTest(case=f'{name}-{attempt}'):
+                intent, plan = field_case(name, attempt)
+                built, run = self.build(intent, plan)
+                measured = measure_part(run / 'exports/model.step', run.parent / 'cold', intent=intent)
+                self.assertEqual(statuses(measured), statuses(built))
+                self.assertEqual(measured['intent_state'], built['intent_state'])
+                self.assertEqual(measured['geometry_state'], 'geometry_validated')
+                self.assertEqual(load_json(run.parent / 'cold/native/measure.json')['face_count'],
+                                 load_json(run / 'native/measure.json')['face_count'])
+
+    def test_measure_takes_a_step_made_outside_the_plan_interpreter(self):
+        """A plate made directly in FreeCAD: moved off the origin, with a split bottom face."""
+        script = '''
+import sys
+sys.path.insert(0, '/usr/lib/freecad/lib')
+import FreeCAD as A, Part as P
+at = A.Vector(100, -50, 20)
+# Two halves fused without refine: the top and bottom are each two faces.
+plate = P.makeBox(30, 40, 5, at).fuse(P.makeBox(30, 40, 5, at + A.Vector(30, 0, 0)))
+holes = [P.makeCylinder(2, 7, at + A.Vector(x, y, -1)) for x, y in ((6, 6), (54, 6), (6, 34), (54, 34))]
+plate = plate.cut(holes)
+plate.exportStep(sys.argv[1] + '/plate.step')
+turned = plate.copy()
+turned.rotate(at, A.Vector(0, 0, 1), 90)
+turned.exportStep(sys.argv[1] + '/plate-turned.step')
+'''
+        intent, _ = example('mounting-plate')
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            freecad.run_process([freecad.PYTHON, '-I', '-B', '-c', script, tmp], tmp, tmp / 'make.log', timeout=60)
+            report = measure_part(tmp / 'plate.step', tmp / 'run', intent=intent)
+            self.assertEqual(report['intent_state'], 'conforms', statuses(report))
+            self.assertEqual(report['geometry_state'], 'geometry_validated')
+            self.assertEqual(report['measurement']['holes'], 4)
+            self.assertGreater(report['measurement']['faces']['plane'], 6)
+            # The part is measured as found: turned 90 degrees, it no longer fits the intent.
+            turned = measure_part(tmp / 'plate-turned.step', tmp / 'turned', intent=intent)
+            self.assertEqual(turned['intent_state'], 'blocked')
+            self.assertEqual(statuses(turned)['envelope'], 'fail')
+            # A file that is not STEP inside is refused by FreeCAD and keeps a blocked report.
+            (tmp / 'broken.step').write_text('ISO-10303-21;\nnot a model\n')
+            with self.assertRaises(ForgeError):
+                measure_part(tmp / 'broken.step', tmp / 'broken')
+            self.assertEqual(load_json(tmp / 'broken/report.json')['overall_state'], 'blocked')
+
+    def test_measure_sphere_over_mesh_budget_without_intent_blocks(self):
+        """A fresh curved STEP cannot pass when its independent mesh check cannot run."""
+        script = '''
+import sys
+sys.path.insert(0, '/usr/lib/freecad/lib')
+import FreeCAD
+import Part
+Part.makeSphere(1000).exportStep(sys.argv[1] + '/sphere.step')
+'''
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            freecad.run_process([freecad.PYTHON, '-I', '-B', '-c', script, tmp], tmp,
+                                tmp / 'make.log', timeout=60)
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                code = main(['measure', str(tmp / 'sphere.step'), '--output', str(tmp / 'run')])
+            self.assertEqual(code, 4)
+            report = json.loads(stdout.getvalue())
+            self.assertEqual(report['geometry_state'], 'unknown')
+            self.assertEqual(report['mesh_validation']['status'], 'not_run')
+            self.assertEqual(report['intent_state'], 'not_checked')
+            self.assertEqual(report['overall_state'], 'blocked')
+            self.assertEqual(load_json(tmp / 'run/report.json'), report)
+            self.assertEqual(load_json(tmp / 'run/native/source.json')['mesh']['status'], 'over_budget')
 
     def test_sealed_cavity_blocks(self):
         report, run = self.build(*field_case('hollow-ball'))

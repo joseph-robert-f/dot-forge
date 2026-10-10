@@ -93,6 +93,28 @@ Hole tolerance applies to the **diameter**, each position coordinate, and blind 
 
 Each measured hole can satisfy only one feature. A full hole that no feature asked for goes to `person_checks` as `unrequested_holes`. A partial cylinder (for example, a fillet) is never counted as a hole.
 
+## Check a part from another tool
+
+The intent checks do not need our plan. A part from any tool can be checked against a confirmed intent:
+
+```sh
+PYTHONPATH=src python3 -m printkit measure part.step --intent intent.json --output build/part-check-001
+```
+
+`measure` copies the STEP file into the run, reads it in a fresh FreeCAD process and measures it with the same measurer as `build`. Then it makes its own STL from the STEP and runs the independent STL checks. The source tool, its code and its own checks are not used.
+
+| Rule | Why |
+| --- | --- |
+| The intent must be confirmed | The same rule as `build` |
+| The part is measured as found. It is not moved or turned. | The intent's axes must be the file's axes. A part that is turned 90 degrees fails `envelope`. Positions are from the lowest corner of the bounding box, so the part can be anywhere in space. |
+| Only plane and cylinder faces are measured as features | A hole made of B-spline faces or mesh triangles is not found, so its check fails. The report warns when a part has such faces. |
+| The check mesh can be coarser | When the part needs more than 10,000 triangles at 0.05 mm, the mesh is made at 0.1 or 0.2 mm, and the STL tolerance grows to match. Over the budget at 0.2 mm, the mesh check is not run and the report is blocked. |
+| STEP files up to 64 MB | Larger files are refused |
+
+Without `--intent`, `measure` reports the size, volume, solids, holes and face types, and checks that the mesh agrees with the solid.
+
+In the field test, `measure` on each build's own STEP gave the same result as the build for every check, in all 34 runs (`evals/v2/run_cases.py --cold-measure`).
+
 ## Plan operations
 
 Each step has an `id` and an `op`. A step can refer only to earlier steps.

@@ -489,6 +489,41 @@ def reopen(run):
          'native': native, 'step': step, 'runtime': runtime()})
 
 
+SOURCE_DEFLECTIONS = (0.05, 0.1, 0.2)  # Coarser only when a finer mesh is over the triangle budget.
+
+
+def surface_kinds(shape):
+    """Plane and cylinder faces can be measured as features; other surfaces cannot."""
+    kinds = {'plane': 0, 'cylinder': 0, 'other': 0}
+    for face in shape.Faces:
+        surface = face.Surface
+        kinds['plane' if isinstance(surface, Part.Plane) else 'cylinder' if isinstance(surface, Part.Cylinder)
+              else 'other'] += 1
+    return kinds
+
+
+def measure_step(run):
+    """Measure a STEP file made by any tool, and tessellate it for the independent mesh check."""
+    shape = Part.Shape()
+    shape.read(str(run / 'input/part.step'))
+    if shape.isNull() or not shape.Faces:
+        raise ValueError('The STEP file holds no faces')
+    measured = measure(shape)
+    mesh = {'status': 'over_budget', 'triangle_budget': MAX_TRIANGLES, 'tried_deflections_mm': []}
+    for deflection in SOURCE_DEFLECTIONS:
+        result = MeshPart.meshFromShape(Shape=shape, LinearDeflection=deflection,
+                                        AngularDeflection=ANGULAR_DEFLECTION, Relative=False)
+        mesh['tried_deflections_mm'].append(deflection)
+        if result.CountFacets <= MAX_TRIANGLES:
+            result.write(str(run / 'exports/model.stl'))
+            mesh.update(status='pass', linear_deflection_mm=deflection, triangles=result.CountFacets)
+            break
+    dump(run / 'native/measure.json', measured)
+    dump(run / 'native/source.json', {'status': 'pass', 'surfaces': surface_kinds(shape), 'mesh': mesh,
+         'method': 'STEP BREP import in a fresh FreeCAD process, measured as found (not moved or turned)',
+         'runtime': runtime()})
+
+
 # Each view: rows of a rotation that turn it into a plain top-down projection
 # (screen right, screen up, toward the viewer). Third-angle names.
 S2, S3, S6 = math.sqrt(2), math.sqrt(3), math.sqrt(6)
@@ -565,6 +600,8 @@ def main():
             raise
     elif mode == 'reopen':
         reopen(run)
+    elif mode == 'measure':
+        measure_step(run)
     elif mode == 'views':
         views(run)
     elif mode == 'raster':
