@@ -277,6 +277,7 @@ turned.exportStep(sys.argv[1] + '/plate-turned.step')
         script = '''
 import sys
 sys.path.insert(0, '/usr/lib/freecad/lib')
+import FreeCAD
 import Part
 Part.makeSphere(1000).exportStep(sys.argv[1] + '/sphere.step')
 '''
