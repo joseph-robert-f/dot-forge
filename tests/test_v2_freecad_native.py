@@ -5,10 +5,14 @@ interpreter builds each op, that the measurer reports what conformance
 expects, and that a wrong plan is caught by the intent.
 """
 import copy
+import io
+import json
 import os
 from pathlib import Path
 import tempfile
 import unittest
+from contextlib import redirect_stdout
+from printkit.cli import main
 from printkit.common import ForgeError, canonical_hash, load_json
 from printkit.forge import build
 from printkit.measure import measure_part
@@ -267,6 +271,30 @@ turned.exportStep(sys.argv[1] + '/plate-turned.step')
             with self.assertRaises(ForgeError):
                 measure_part(tmp / 'broken.step', tmp / 'broken')
             self.assertEqual(load_json(tmp / 'broken/report.json')['overall_state'], 'blocked')
+
+    def test_measure_sphere_over_mesh_budget_without_intent_blocks(self):
+        """A fresh curved STEP cannot pass when its independent mesh check cannot run."""
+        script = '''
+import sys
+sys.path.insert(0, '/usr/lib/freecad/lib')
+import Part
+Part.makeSphere(1000).exportStep(sys.argv[1] + '/sphere.step')
+'''
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            freecad.run_process([freecad.PYTHON, '-I', '-B', '-c', script, tmp], tmp,
+                                tmp / 'make.log', timeout=60)
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                code = main(['measure', str(tmp / 'sphere.step'), '--output', str(tmp / 'run')])
+            self.assertEqual(code, 4)
+            report = json.loads(stdout.getvalue())
+            self.assertEqual(report['geometry_state'], 'unknown')
+            self.assertEqual(report['mesh_validation']['status'], 'not_run')
+            self.assertEqual(report['intent_state'], 'not_checked')
+            self.assertEqual(report['overall_state'], 'blocked')
+            self.assertEqual(load_json(tmp / 'run/report.json'), report)
+            self.assertEqual(load_json(tmp / 'run/native/source.json')['mesh']['status'], 'over_budget')
 
     def test_sealed_cavity_blocks(self):
         report, run = self.build(*field_case('hollow-ball'))

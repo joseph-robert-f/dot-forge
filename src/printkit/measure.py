@@ -97,8 +97,7 @@ def measure_part(step, output, *, intent=None, discover=None):
     report.update(geometry_state=geometry, mesh_validation=mesh)
     if intent is None:
         report.update(intent_state="not_checked",
-                      overall_state="blocked" if geometry == "blocked" else "measured" if geometry == "geometry_validated"
-                      else "needs_review")
+                      overall_state="measured" if geometry == "geometry_validated" else "blocked")
     else:
         conformance = conform(intent, measurement)
         blocked = conformance["intent_state"] == "blocked" or geometry != "geometry_validated"

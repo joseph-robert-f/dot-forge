@@ -1,5 +1,7 @@
 """`printkit measure` input rules and report states, without FreeCAD."""
 import copy
+import io
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -118,6 +120,27 @@ class MeasureTests(unittest.TestCase):
         self.assertEqual(report['mesh_validation']['status'], 'not_run')
         self.assertEqual(report['intent_state'], 'conforms')
         self.assertEqual(report['overall_state'], 'blocked')
+
+    def test_mesh_over_budget_without_intent_is_unknown_and_blocks(self):
+        report = self.measure(fake_measurer(mesh='over_budget'))
+        self.assertEqual(report['geometry_state'], 'unknown')
+        self.assertEqual(report['mesh_validation']['status'], 'not_run')
+        self.assertEqual(report['intent_state'], 'not_checked')
+        self.assertEqual(report['overall_state'], 'blocked')
+        self.assertEqual(report['print_state'], 'needs_review')
+        self.assertEqual(load_json(self.root / 'run/report.json'), report)
+
+    def test_cli_mesh_over_budget_without_intent_exits_blocked(self):
+        output = self.root / 'cli-over-budget'
+        with mock.patch.object(ms.freecad_plan, 'measure_step', fake_measurer(mesh='over_budget')), \
+             mock.patch('sys.stdout', new_callable=io.StringIO) as stdout:
+            code = main(['measure', str(self.step), '--output', str(output)])
+        self.assertEqual(code, 4)
+        report = json.loads(stdout.getvalue())
+        self.assertEqual(report['overall_state'], 'blocked')
+        self.assertEqual(report['geometry_state'], 'unknown')
+        self.assertEqual(report['mesh_validation']['status'], 'not_run')
+        self.assertEqual(load_json(output / 'report.json'), report)
 
     def test_warns_about_unmeasurable_surfaces_and_coarse_mesh(self):
         report = self.measure(fake_measurer(other=4, deflection=0.2))
